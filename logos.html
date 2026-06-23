@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Project Spica — Logo concepts</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #1b2a25;        /* deep green-ink, harmonizes with the mint brand */
+      --accent: #c0892c;     /* wheat-gold — used for the "inserted known signal" */
+      --page: #e6ead7;       /* pale mint-cream */
+      --card: #eef1e4;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: var(--page);
+      color: var(--ink);
+      font-family: 'Inter', system-ui, sans-serif;
+      padding: 4rem 6vw;
+    }
+    h1 {
+      font-family: 'Fraunces', serif;
+      font-weight: 400;
+      font-size: 2rem;
+      margin-bottom: 0.4rem;
+    }
+    .sub { color: #5b6b60; margin-bottom: 3rem; max-width: 60ch; line-height: 1.5; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 1.5rem;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid rgba(27, 42, 37, 0.1);
+      border-radius: 14px;
+      padding: 2rem;
+    }
+    .card.dark { background: var(--ink); color: var(--page); }
+    .card h2 { font-family: 'Fraunces', serif; font-weight: 500; font-size: 1.15rem; margin-bottom: 0.3rem; }
+    .card p { font-size: 0.85rem; color: #66756a; line-height: 1.5; min-height: 3.8em; }
+    .card.dark p { color: #aebbae; }
+
+    /* Three sizes per concept: big mark, lockup, favicon test. */
+    .row { display: flex; align-items: center; gap: 1.8rem; margin: 1.6rem 0 0.5rem; flex-wrap: wrap; }
+    .mark-lg { width: 96px; height: 96px; }
+    .lockup { display: flex; align-items: center; gap: 0.7rem; }
+    .lockup svg { width: 40px; height: 40px; }
+    .wordmark { font-family: 'Fraunces', serif; font-weight: 400; font-size: 1.5rem; letter-spacing: -0.01em; }
+    .wordmark em { font-style: italic; }
+    .mark-sm { width: 22px; height: 22px; }            /* favicon scale */
+    .tag { font-size: 0.7rem; color: #8a978c; margin-top: 0.2rem; }
+  </style>
+</head>
+<body>
+  <h1>Project Spica — logo concepts</h1>
+  <p class="sub">
+    The 4-point sparkle is intentionally avoided (it now reads as the generic AI /
+    Gemini icon). In each mark the <strong>gold</strong> element is the inserted
+    known signal — the spike — so the logo encodes the method. Ink is one flat
+    color so every mark works in monochrome.
+  </p>
+
+  <div class="grid">
+
+    <!-- ============ 1. Spīca mark: wheat / spike / axis fusion ============ -->
+    <div class="card">
+      <h2>1 · Spīca mark</h2>
+      <p>A geometric ear of wheat that doubles as an impulse spike and a measurement
+         axis. Ties the etymology (spīca = ear of grain), Virgo's wheat ear, and
+         the spike all at once. The crowning point is the standard candle.</p>
+      <div class="row">
+        <svg class="mark-lg" viewBox="0 0 100 100">
+          <g stroke="var(--ink)" stroke-width="4" fill="none" stroke-linecap="round">
+            <line x1="50" y1="86" x2="50" y2="26" />
+            <line x1="50" y1="72" x2="63" y2="61" /><line x1="50" y1="72" x2="37" y2="61" />
+            <line x1="50" y1="60" x2="62" y2="49" /><line x1="50" y1="60" x2="38" y2="49" />
+            <line x1="50" y1="48" x2="60" y2="38" /><line x1="50" y1="48" x2="40" y2="38" />
+          </g>
+          <circle cx="50" cy="21" r="5" fill="var(--accent)" />
+        </svg>
+        <div class="lockup">
+          <svg viewBox="0 0 100 100">
+            <g stroke="var(--ink)" stroke-width="4" fill="none" stroke-linecap="round">
+              <line x1="50" y1="86" x2="50" y2="26" />
+              <line x1="50" y1="72" x2="63" y2="61" /><line x1="50" y1="72" x2="37" y2="61" />
+              <line x1="50" y1="60" x2="62" y2="49" /><line x1="50" y1="60" x2="38" y2="49" />
+              <line x1="50" y1="48" x2="60" y2="38" /><line x1="50" y1="48" x2="40" y2="38" />
+            </g>
+            <circle cx="50" cy="21" r="5" fill="var(--accent)" />
+          </svg>
+          <span class="wordmark">Project <em>Spica</em></span>
+        </div>
+        <svg class="mark-sm" viewBox="0 0 100 100">
+          <g stroke="var(--ink)" stroke-width="6" fill="none" stroke-linecap="round">
+            <line x1="50" y1="86" x2="50" y2="26" />
+            <line x1="50" y1="72" x2="63" y2="61" /><line x1="50" y1="72" x2="37" y2="61" />
+            <line x1="50" y1="60" x2="62" y2="49" /><line x1="50" y1="60" x2="38" y2="49" />
+          </g>
+          <circle cx="50" cy="21" r="7" fill="var(--accent)" />
+        </svg>
+      </div>
+      <div class="tag">large · lockup · favicon</div>
+    </div>
+
+    <!-- ============ 2. Impulse on a baseline ============ -->
+    <div class="card">
+      <h2>2 · Impulse</h2>
+      <p>A single known spike inserted into a measured baseline — the most literal
+         picture of spiking. Reads as signal processing and as a candle standing
+         on the horizon. Most "technical governance" in feel.</p>
+      <div class="row">
+        <svg class="mark-lg" viewBox="0 0 100 100">
+          <g stroke="var(--ink)" stroke-width="3.5" stroke-linecap="round">
+            <line x1="14" y1="74" x2="86" y2="74" />
+            <line x1="28" y1="74" x2="28" y2="80" /><line x1="40" y1="74" x2="40" y2="80" />
+            <line x1="60" y1="74" x2="60" y2="80" /><line x1="72" y1="74" x2="72" y2="80" />
+          </g>
+          <line x1="50" y1="74" x2="50" y2="24" stroke="var(--accent)" stroke-width="5" stroke-linecap="round" />
+          <circle cx="50" cy="20" r="4.5" fill="var(--accent)" />
+        </svg>
+        <div class="lockup">
+          <svg viewBox="0 0 100 100">
+            <g stroke="var(--ink)" stroke-width="3.5" stroke-linecap="round">
+              <line x1="14" y1="74" x2="86" y2="74" />
+              <line x1="28" y1="74" x2="28" y2="80" /><line x1="40" y1="74" x2="40" y2="80" />
+              <line x1="60" y1="74" x2="60" y2="80" /><line x1="72" y1="74" x2="72" y2="80" />
+            </g>
+            <line x1="50" y1="74" x2="50" y2="24" stroke="var(--accent)" stroke-width="5" stroke-linecap="round" />
+            <circle cx="50" cy="20" r="4.5" fill="var(--accent)" />
+          </svg>
+          <span class="wordmark">Project <em>Spica</em></span>
+        </div>
+        <svg class="mark-sm" viewBox="0 0 100 100">
+          <line x1="14" y1="74" x2="86" y2="74" stroke="var(--ink)" stroke-width="6" stroke-linecap="round" />
+          <line x1="50" y1="74" x2="50" y2="22" stroke="var(--accent)" stroke-width="8" stroke-linecap="round" />
+          <circle cx="50" cy="18" r="8" fill="var(--accent)" />
+        </svg>
+      </div>
+      <div class="tag">large · lockup · favicon</div>
+    </div>
+
+    <!-- ============ 3. Stellar spectrum line ============ -->
+    <div class="card">
+      <h2>3 · Spectrum line</h2>
+      <p>A stellar spectrum with one emphasized line — the known signal read off
+         against a measured background. Sophisticated and astronomical; nods to how
+         spiking shows up as a detectable line in the data.</p>
+      <div class="row">
+        <svg class="mark-lg" viewBox="0 0 100 100">
+          <rect x="16" y="36" width="68" height="28" rx="5" fill="none" stroke="var(--ink)" stroke-width="3.5" />
+          <g stroke="var(--ink)" stroke-width="3" stroke-linecap="round">
+            <line x1="29" y1="41" x2="29" y2="59" /><line x1="40" y1="41" x2="40" y2="59" />
+            <line x1="61" y1="41" x2="61" y2="59" /><line x1="71" y1="41" x2="71" y2="59" />
+          </g>
+          <line x1="50" y1="38" x2="50" y2="62" stroke="var(--accent)" stroke-width="5" stroke-linecap="round" />
+        </svg>
+        <div class="lockup">
+          <svg viewBox="0 0 100 100">
+            <rect x="16" y="36" width="68" height="28" rx="5" fill="none" stroke="var(--ink)" stroke-width="3.5" />
+            <g stroke="var(--ink)" stroke-width="3" stroke-linecap="round">
+              <line x1="29" y1="41" x2="29" y2="59" /><line x1="40" y1="41" x2="40" y2="59" />
+              <line x1="61" y1="41" x2="61" y2="59" /><line x1="71" y1="41" x2="71" y2="59" />
+            </g>
+            <line x1="50" y1="38" x2="50" y2="62" stroke="var(--accent)" stroke-width="5" stroke-linecap="round" />
+          </svg>
+          <span class="wordmark">Project <em>Spica</em></span>
+        </div>
+        <svg class="mark-sm" viewBox="0 0 100 100">
+          <rect x="14" y="34" width="72" height="32" rx="6" fill="none" stroke="var(--ink)" stroke-width="6" />
+          <line x1="50" y1="34" x2="50" y2="66" stroke="var(--accent)" stroke-width="8" />
+        </svg>
+      </div>
+      <div class="tag">large · lockup · favicon</div>
+    </div>
+
+    <!-- ============ 4. Wheat ear (organic) ============ -->
+    <div class="card dark">
+      <h2>4 · Wheat ear</h2>
+      <p>The classical, organic Spica — Virgo's ear of wheat. Most distinctive and
+         ownable, warmest in tone. Shown on dark to test versatility; the grain at
+         the crown is the known candle.</p>
+      <div class="row">
+        <svg class="mark-lg" viewBox="0 0 100 100">
+          <g stroke="var(--page)" stroke-width="3.5" fill="none" stroke-linecap="round">
+            <line x1="50" y1="88" x2="50" y2="34" />
+            <path d="M50,70 Q60,66 60,54" /><path d="M50,70 Q40,66 40,54" />
+            <path d="M50,58 Q59,54 59,43" /><path d="M50,58 Q41,54 41,43" />
+            <path d="M50,46 Q57,43 57,33" /><path d="M50,46 Q43,43 43,33" />
+            <line x1="50" y1="34" x2="50" y2="16" /><line x1="50" y1="30" x2="42" y2="18" /><line x1="50" y1="30" x2="58" y2="18" />
+          </g>
+          <circle cx="50" cy="13" r="4.5" fill="var(--accent)" />
+        </svg>
+        <div class="lockup">
+          <svg viewBox="0 0 100 100">
+            <g stroke="var(--page)" stroke-width="3.5" fill="none" stroke-linecap="round">
+              <line x1="50" y1="88" x2="50" y2="34" />
+              <path d="M50,70 Q60,66 60,54" /><path d="M50,70 Q40,66 40,54" />
+              <path d="M50,58 Q59,54 59,43" /><path d="M50,58 Q41,54 41,43" />
+              <path d="M50,46 Q57,43 57,33" /><path d="M50,46 Q43,43 43,33" />
+              <line x1="50" y1="34" x2="50" y2="16" /><line x1="50" y1="30" x2="42" y2="18" /><line x1="50" y1="30" x2="58" y2="18" />
+            </g>
+            <circle cx="50" cy="13" r="4.5" fill="var(--accent)" />
+          </svg>
+          <span class="wordmark">Project <em>Spica</em></span>
+        </div>
+        <svg class="mark-sm" viewBox="0 0 100 100">
+          <g stroke="var(--page)" stroke-width="6" fill="none" stroke-linecap="round">
+            <line x1="50" y1="88" x2="50" y2="30" />
+            <path d="M50,68 Q62,63 62,50" /><path d="M50,68 Q38,63 38,50" />
+            <path d="M50,52 Q60,47 60,35" /><path d="M50,52 Q40,47 40,35" />
+          </g>
+          <circle cx="50" cy="16" r="7" fill="var(--accent)" />
+        </svg>
+      </div>
+      <div class="tag">large · lockup · favicon</div>
+    </div>
+
+  </div>
+
+  <h1 style="margin-top:4rem">Sparkline directions</h1>
+  <p class="sub">
+    The spectrum reimagined as a data trace. Each is a measurement readout where
+    the <strong>gold</strong> is the inserted known signal. Sparklines are wide, so
+    a square app icon would crop to the gold element.
+  </p>
+
+  <div class="grid">
+
+    <!-- ============ A. Cepheid light curve ============ -->
+    <div class="card">
+      <h2>A · Light curve</h2>
+      <p>An asymmetric, periodic Cepheid light curve — the literal signature of a
+         standard candle. The gold peak is the reference pulse. Directly echoes
+         the hero animation.</p>
+      <div class="row">
+        <svg viewBox="0 0 120 48" style="width:180px;height:72px">
+          <polyline points="8,40 15,8 43,40 50,8 78,40 85,8 112,40"
+            fill="none" stroke="var(--ink)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+          <circle cx="50" cy="8" r="4.5" fill="var(--accent)" />
+        </svg>
+        <div class="lockup">
+          <svg viewBox="0 0 120 48" style="width:74px;height:30px">
+            <polyline points="8,40 15,8 43,40 50,8 78,40 85,8 112,40"
+              fill="none" stroke="var(--ink)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" />
+            <circle cx="50" cy="8" r="5" fill="var(--accent)" />
+          </svg>
+          <span class="wordmark">Project <em>Spica</em></span>
+        </div>
+      </div>
+      <div class="tag">large · lockup</div>
+    </div>
+
+    <!-- ============ B. Detection spike ============ -->
+    <div class="card">
+      <h2>B · Detection spike</h2>
+      <p>A flat, faintly noisy baseline with one deliberate gold spike — a known
+         signal injected and recovered. The cleanest, most legible, and the most
+         literal picture of spiking.</p>
+      <div class="row">
+        <svg viewBox="0 0 120 48" style="width:180px;height:72px">
+          <polyline points="8,37 20,35 30,38 40,36 48,37 72,37 82,35 92,38 102,36 112,37"
+            fill="none" stroke="var(--ink)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+          <polyline points="52,37 60,7 68,37"
+            fill="none" stroke="var(--accent)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+          <circle cx="60" cy="6" r="4" fill="var(--accent)" />
+        </svg>
+        <div class="lockup">
+          <svg viewBox="0 0 120 48" style="width:74px;height:30px">
+            <polyline points="8,37 20,35 30,38 40,36 48,37 72,37 82,35 92,38 102,36 112,37"
+              fill="none" stroke="var(--ink)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" />
+            <polyline points="52,37 60,7 68,37"
+              fill="none" stroke="var(--accent)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <span class="wordmark">Project <em>Spica</em></span>
+        </div>
+      </div>
+      <div class="tag">large · lockup</div>
+    </div>
+
+    <!-- ============ C. Spike train (known rate) ============ -->
+    <div class="card">
+      <h2>C · Spike train</h2>
+      <p>Evenly spaced impulses on a baseline — <em>known data at known rates</em>,
+         almost verbatim. Reads as a pulsar pulse-train / regular sampling. The most
+         on-definition mark.</p>
+      <div class="row">
+        <svg viewBox="0 0 120 48" style="width:180px;height:72px">
+          <line x1="8" y1="40" x2="112" y2="40" stroke="var(--ink)" stroke-width="3" stroke-linecap="round" />
+          <g stroke="var(--accent)" stroke-width="3" stroke-linecap="round">
+            <line x1="24" y1="40" x2="24" y2="14" /><line x1="48" y1="40" x2="48" y2="14" />
+            <line x1="72" y1="40" x2="72" y2="14" /><line x1="96" y1="40" x2="96" y2="14" />
+          </g>
+          <g fill="var(--accent)">
+            <circle cx="24" cy="12" r="3.2" /><circle cx="48" cy="12" r="3.2" />
+            <circle cx="72" cy="12" r="3.2" /><circle cx="96" cy="12" r="3.2" />
+          </g>
+        </svg>
+        <div class="lockup">
+          <svg viewBox="0 0 120 48" style="width:74px;height:30px">
+            <line x1="8" y1="40" x2="112" y2="40" stroke="var(--ink)" stroke-width="3.5" stroke-linecap="round" />
+            <g stroke="var(--accent)" stroke-width="4" stroke-linecap="round">
+              <line x1="24" y1="40" x2="24" y2="14" /><line x1="48" y1="40" x2="48" y2="14" />
+              <line x1="72" y1="40" x2="72" y2="14" /><line x1="96" y1="40" x2="96" y2="14" />
+            </g>
+          </svg>
+          <span class="wordmark">Project <em>Spica</em></span>
+        </div>
+      </div>
+      <div class="tag">large · lockup</div>
+    </div>
+
+  </div>
+
+  <h1 style="margin-top:4rem">Constellation mark</h1>
+  <p class="sub">
+    The real Virgo figure from the HYG catalogue — true star positions, sized by
+    brightness, with <strong>Spica</strong> as the gold anchor. Distinctive and
+    deeply on-brand; the trade-off is detail, so it's best as a wordmark companion
+    rather than a tiny favicon (a square icon would isolate Spica + a few lines).
+  </p>
+
+  <div class="grid">
+    <div class="card">
+      <h2>D · Virgo</h2>
+      <p>The constellation itself. Pairs naturally with the wordmark and ties the
+         whole identity back to the sky the hero renders.</p>
+      <div class="row">
+        <svg viewBox="0 0 120 64" style="width:230px;height:123px">
+          <g stroke="var(--ink)" stroke-width="1.4" stroke-linecap="round" opacity="0.5">
+            <line x1="103.4" y1="15.9" x2="86.3" y2="21.7" />
+            <line x1="86.3" y1="21.7" x2="73.6" y2="23.6" />
+            <line x1="73.6" y1="23.6" x2="65.4" y2="12.0" />
+            <line x1="73.6" y1="23.6" x2="42.6" y2="21.5" />
+            <line x1="42.6" y1="21.5" x2="48.1" y2="46.7" />
+            <line x1="42.6" y1="21.5" x2="18.4" y2="34.4" />
+            <line x1="18.4" y1="34.4" x2="16.6" y2="52.0" />
+            <line x1="48.1" y1="46.7" x2="20.2" y2="44.6" />
+          </g>
+          <g fill="var(--ink)">
+            <circle cx="73.6" cy="23.6" r="2.2" /><circle cx="103.4" cy="15.9" r="2" />
+            <circle cx="86.3" cy="21.7" r="1.8" /><circle cx="65.4" cy="12.0" r="1.7" />
+            <circle cx="42.6" cy="21.5" r="2" /><circle cx="18.4" cy="34.4" r="1.6" />
+            <circle cx="20.2" cy="44.6" r="1.6" /><circle cx="16.6" cy="52.0" r="1.5" />
+          </g>
+          <circle cx="48.1" cy="46.7" r="4.2" fill="var(--accent)" />
+        </svg>
+        <div class="lockup">
+          <svg viewBox="0 0 120 64" style="width:96px;height:51px">
+            <g stroke="var(--ink)" stroke-width="1.6" stroke-linecap="round" opacity="0.5">
+              <line x1="103.4" y1="15.9" x2="86.3" y2="21.7" />
+              <line x1="86.3" y1="21.7" x2="73.6" y2="23.6" />
+              <line x1="73.6" y1="23.6" x2="65.4" y2="12.0" />
+              <line x1="73.6" y1="23.6" x2="42.6" y2="21.5" />
+              <line x1="42.6" y1="21.5" x2="48.1" y2="46.7" />
+              <line x1="42.6" y1="21.5" x2="18.4" y2="34.4" />
+              <line x1="18.4" y1="34.4" x2="16.6" y2="52.0" />
+              <line x1="48.1" y1="46.7" x2="20.2" y2="44.6" />
+            </g>
+            <g fill="var(--ink)">
+              <circle cx="73.6" cy="23.6" r="2.4" /><circle cx="103.4" cy="15.9" r="2.2" />
+              <circle cx="86.3" cy="21.7" r="2" /><circle cx="65.4" cy="12.0" r="1.9" />
+              <circle cx="42.6" cy="21.5" r="2.2" /><circle cx="18.4" cy="34.4" r="1.8" />
+              <circle cx="20.2" cy="44.6" r="1.8" /><circle cx="16.6" cy="52.0" r="1.7" />
+            </g>
+            <circle cx="48.1" cy="46.7" r="4.6" fill="var(--accent)" />
+          </svg>
+          <span class="wordmark">Project <em>Spica</em></span>
+        </div>
+      </div>
+      <div class="tag">large · lockup</div>
+    </div>
+  </div>
+</body>
+</html>

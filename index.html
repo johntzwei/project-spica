@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Project Spica</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;1,8..60,400&family=Source+Sans+3:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      /* Hero palette — authored pre-inversion (light values become dark on screen). */
+      --bg: #05070f;
+      --ink: #e8ecf6;
+      --ink-dim: #8893ad;
+      --accent: #9fc4ff;
+
+      /* Page palette — the light, daybreak chrome outside the inverted hero. */
+      --page-bg: #ffffff;
+      --page-ink: #14161f;
+      --page-dim: #5b6072;
+      --page-line: rgba(20, 22, 31, 0.1);
+      --page-accent: #2f55c7;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 5rem; }
+
+    body {
+      background: var(--page-bg);
+      color: var(--page-ink);
+      font-family: 'Source Sans 3', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Everything below is authored in "night" colors — a dark sky with light
+       stars. Inverting the whole hero flips that into an inverted photograph of
+       the night sky: a pale daybreak field with dark stars, and light text
+       turned to dark ink. The dark color literals throughout are pre-inversion. */
+    .hero {
+      position: relative;
+      height: 100vh;
+      overflow: hidden;
+      filter: invert(1);
+      /* Dissolve the bottom edge so the starfield fades into the white page
+         below instead of hard-cutting at 100vh. The mask thins the hero's alpha
+         to zero over its last stretch, letting the page show through; since the
+         sky's base already inverts to white, the seam disappears. */
+      -webkit-mask-image: linear-gradient(to bottom, #000 84%, transparent 100%);
+      mask-image: linear-gradient(to bottom, #000 84%, transparent 100%);
+    }
+
+    /* The starfield sits behind the text and fills the whole hero. */
+    #sky { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+    .hero-content {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 0 8vw;
+      color: var(--ink);   /* keep hero text light pre-inversion, regardless of body color */
+    }
+
+    .eyebrow {
+      font-size: 0.78rem;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1.4rem;
+    }
+
+    h1 {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: clamp(2.9rem, 7.6vw, 6rem);
+      font-weight: 400;
+      letter-spacing: -0.018em;
+      line-height: 1.03;
+      max-width: 15ch;
+    }
+    h1 em { font-style: italic; }
+
+    .tagline {
+      margin-top: 1.2rem;
+      font-size: clamp(1rem, 2vw, 1.35rem);
+      color: var(--ink-dim);
+      max-width: 42ch;
+      line-height: 1.5;
+    }
+
+    .cta {
+      margin-top: 2.6rem;
+      align-self: flex-start;
+      padding: 0.85rem 1.6rem;
+      border: 1px solid rgba(159, 196, 255, 0.18);
+      border-radius: 999px;
+      color: var(--ink);
+      text-decoration: none;
+      font-size: 0.95rem;
+      background: rgba(159, 196, 255, 0.06);
+    }
+    .cta:hover { background: rgba(159, 196, 255, 0.14); border-color: var(--accent); }
+
+    /* === Site chrome (nav, sections, footer) ===
+       These sit outside the inverted hero, so their colors are authored normally
+       — a light, daybreak page that continues out of the hero's near-white base. */
+
+    /* --- Navigation --- */
+    .nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.1rem 8vw;
+      background: rgba(255, 255, 255, 0.72);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--page-line);
+    }
+    .nav-brand {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 1.15rem;
+      letter-spacing: -0.01em;
+      color: var(--page-ink);
+      text-decoration: none;
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      list-style: none;
+    }
+    .nav-links a {
+      font-size: 0.9rem;
+      color: var(--page-dim);
+      text-decoration: none;
+    }
+    .nav-links a:hover { color: var(--page-ink); }
+    .nav-cta {
+      padding: 0.55rem 1.1rem;
+      border-radius: 999px;
+      background: var(--page-accent);
+      color: #fff !important;
+    }
+    .nav-cta:hover { background: #244ab5; }
+
+    /* --- Content sections --- */
+    .section {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 7rem 8vw;
+      border-top: 1px solid var(--page-line);
+    }
+    .section:first-child { border-top: none; }
+    .section-eyebrow {
+      font-size: 0.75rem;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--page-accent);
+      margin-bottom: 1.2rem;
+    }
+    .section h2 {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-weight: 400;
+      font-size: clamp(1.9rem, 4vw, 3rem);
+      line-height: 1.1;
+      letter-spacing: -0.015em;
+      max-width: 20ch;
+    }
+    .lead {
+      margin-top: 1.4rem;
+      font-size: 1.1rem;
+      line-height: 1.6;
+      color: var(--page-dim);
+      max-width: 60ch;
+    }
+
+    /* --- Three-column card grid --- */
+    .cards {
+      margin-top: 3rem;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+    .card {
+      padding: 2rem;
+      border: 1px solid var(--page-line);
+      border-radius: 14px;
+      background: #fff;
+    }
+    .card .num {
+      font-size: 0.8rem;
+      letter-spacing: 0.2em;
+      color: var(--page-accent);
+    }
+    .card h3 {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-weight: 400;
+      font-size: 1.4rem;
+      margin: 0.6rem 0 0.7rem;
+    }
+    .card p { color: var(--page-dim); font-size: 0.95rem; line-height: 1.55; }
+
+    /* --- Subscribe band: a night-sky panel echoing the hero --- */
+    .subscribe-band {
+      background: #0b0a18;
+      color: #eef1f8;
+      padding: 6rem 8vw;
+      text-align: center;
+    }
+    .subscribe-band h2 {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-weight: 400;
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+    }
+    .subscribe-band p { color: #9aa3bd; margin-top: 1rem; }
+    .subscribe-form {
+      margin-top: 2rem;
+      display: flex;
+      gap: 0.6rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .subscribe-form input {
+      padding: 0.8rem 1.1rem;
+      min-width: 260px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.06);
+      color: #fff;
+    }
+    .subscribe-form button {
+      padding: 0.8rem 1.6rem;
+      border: none;
+      border-radius: 999px;
+      background: var(--page-accent);
+      color: #fff;
+      cursor: pointer;
+    }
+
+    /* --- Footer --- */
+    footer {
+      background: var(--page-bg);
+      border-top: 1px solid var(--page-line);
+      padding: 4rem 8vw 2.5rem;
+    }
+    .footer-grid {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 2rem;
+    }
+    .footer-brand .name { font-family: 'Source Serif 4', Georgia, serif; font-size: 1.2rem; }
+    .footer-brand p { color: var(--page-dim); margin-top: 0.6rem; max-width: 28ch; font-size: 0.9rem; line-height: 1.5; }
+    .footer-col h4 {
+      font-size: 0.78rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--page-dim);
+      margin-bottom: 1rem;
+    }
+    .footer-col a {
+      display: block;
+      color: var(--page-ink);
+      text-decoration: none;
+      font-size: 0.92rem;
+      margin-bottom: 0.6rem;
+    }
+    .footer-col a:hover { color: var(--page-accent); }
+    .footer-bottom {
+      max-width: 1100px;
+      margin: 3rem auto 0;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--page-line);
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: var(--page-dim);
+    }
+
+    @media (max-width: 760px) {
+      .cards { grid-template-columns: 1fr; }
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 640px) {
+      .nav-links { gap: 1rem; }
+      .nav-links a:not(.nav-cta) { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="nav">
+    <a class="nav-brand" href="#">&#10022; Project Spica</a>
+    <nav>
+      <ul class="nav-links">
+        <li><a href="#approach">Approach</a></li>
+        <li><a href="#activities">Activities</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a class="nav-cta" href="#subscribe">Subscribe</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <canvas id="sky"></canvas>
+    <div class="hero-content">
+      <div class="eyebrow">Project Spica</div>
+      <h1>A <em>standard candle</em> for AI.</h1>
+      <p class="tagline">
+        Spiking deliberately inserts known data at known rates &mdash; a fixed
+        reference that turns opaque models into something we can measure.
+        A new tool for technical governance.
+      </p>
+      <a class="cta" href="#subscribe">Subscribe &rarr;</a>
+    </div>
+  </section>
+
+  <!-- Empty placeholder sections, ready to be filled in later. -->
+  <main>
+    <section class="section" id="about">
+      <div class="section-eyebrow">The mission</div>
+      <h2>Making the opaque measurable.</h2>
+      <p class="lead">
+        Spiking deliberately inserts known data into training at known rates,
+        giving a fixed reference for measuring what models absorb. Project Spica
+        exists to advance spiking as a new tool for technical governance.
+      </p>
+      <p class="lead"><em>Section in progress.</em></p>
+    </section>
+
+    <section class="section" id="approach">
+      <div class="section-eyebrow">The approach</div>
+      <h2>From research to standard.</h2>
+      <div class="cards">
+        <article class="card">
+          <div class="num">01</div>
+          <h3>Build momentum</h3>
+          <p>Discover new applications for spiking and refine its use.</p>
+        </article>
+        <article class="card">
+          <div class="num">02</div>
+          <h3>Drive adoption</h3>
+          <p>Bring the method into practice at frontier labs.</p>
+        </article>
+        <article class="card">
+          <div class="num">03</div>
+          <h3>Co-develop standards</h3>
+          <p>Coordinate industry, government, and academia around spiking.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="activities">
+      <div class="section-eyebrow">Activities</div>
+      <h2>Where the work lives.</h2>
+      <div class="cards">
+        <article class="card">
+          <h3>Journal</h3>
+          <p>A reviewed publication for research on spiking, distributed on Substack.</p>
+        </article>
+        <article class="card">
+          <h3>Social</h3>
+          <p>Updates and discussion on X.</p>
+        </article>
+        <article class="card">
+          <h3>Protocol</h3>
+          <p>An open protocol for spiking data &mdash; coming later.</p>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <section class="subscribe-band" id="subscribe">
+    <h2>Stay close to the work.</h2>
+    <p>Research, essays, and updates on spiking &mdash; delivered through Substack.</p>
+    <form class="subscribe-form" onsubmit="return false">
+      <input type="email" placeholder="you@example.com" aria-label="Email address" />
+      <button type="submit">Subscribe</button>
+    </form>
+  </section>
+
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="name">Project Spica</div>
+        <p>A new tool for technical governance.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Explore</h4>
+        <a href="#approach">Approach</a>
+        <a href="#activities">Activities</a>
+        <a href="#about">About</a>
+      </div>
+      <div class="footer-col">
+        <h4>Activities</h4>
+        <a href="#">Journal</a>
+        <a href="#">X</a>
+        <a href="#">Protocol</a>
+      </div>
+      <div class="footer-col">
+        <h4>Connect</h4>
+        <a href="#subscribe">Subscribe</a>
+        <a href="mailto:hello@projectspica.com">Contact</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 Project Spica</span>
+      <span>projectspica.com</span>
+    </div>
+  </footer>
+
+  <!-- Real star data: window.STARS, carved from the HYG catalogue around Spica. -->
+  <script src="stars.js"></script>
+  <script>
+    // === The real sky around Spica ===
+    // Each point is a genuine star from the HYG catalogue, placed at its true
+    // position relative to Spica and sized by its real brightness. Spica alone
+    // pulses, standing in for its role as a standard candle: a known luminosity.
+
+    const canvas = document.getElementById('sky');
+    const ctx = canvas.getContext('2d');
+
+    // Region half-widths in degrees — must match how stars.js was generated.
+    const RA_HALF = 36.0;
+    const DEC_HALF = 22.0;
+
+    // Magnitude is logarithmic and inverted: Spica at ~0.98 is bright, 7.0 faint.
+    // We map that range onto a 0..1 brightness for drawing.
+    const MAG_MIN = 0.9;
+    const MAG_LIMIT = 7.0;
+    const clamp01 = (t) => Math.min(1, Math.max(0, t));
+
+    const stars = window.STARS.map((s) => ({
+      dx: s.dx,
+      dy: s.dy,
+      name: s.name || null,
+      isSpica: s.name === 'Spica',
+      bright: clamp01((MAG_LIMIT - s.mag) / (MAG_LIMIT - MAG_MIN)),
+      twinkle: Math.random() * Math.PI * 2,   // random phase so they don't blink in unison
+    }));
+
+    // Look up a star by name, so we can trace Virgo's figure between real stars.
+    const starByName = {};
+    for (const s of stars) if (s.name) starByName[s.name] = s;
+
+    // The Maiden's figure as the modern IAU constellation lines: a plain list of
+    // star pairs. The IAU figure runs its spine through Spica and leaves Zavijava
+    // and Khambalia unconnected, which is why the earlier hand-made lines looked
+    // wrong.
+    const VIRGO_EDGES = [
+      ['Nu Virginis', 'Zaniah'], ['Zaniah', 'Porrima'], ['Porrima', 'Spica'],
+      ['Spica', 'Kang'], ['Kang', 'Syrma'], ['Syrma', 'Mu Virginis'],
+      ['Spica', 'Heze'], ['Heze', 'Tau Virginis'], ['Tau Virginis', '109 Virginis'],
+      ['Heze', 'Minelauva'], ['Minelauva', 'Vindemiatrix'], ['Minelauva', 'Porrima'],
+    ];
+
+    const neighbors = {};
+    for (const [a, b] of VIRGO_EDGES) {
+      (neighbors[a] = neighbors[a] || []).push(b);
+      (neighbors[b] = neighbors[b] || []).push(a);
+    }
+
+    // Order the edges by a depth-first walk from Spica, our anchor: follow one
+    // limb all the way out to its tip before backing up for the next. This is the
+    // order the single drawing pulse will visit them — one line at a time. We
+    // recurse only into newly seen stars, but still emit the edge that closes
+    // Virgo's body loop (a "back edge" to an already-seen star) so that every
+    // connection is drawn exactly once.
+    const VIRGO_DFS = [];
+    const seenStars = new Set(['Spica']);
+    const seenEdges = new Set();
+    const edgeKey = (a, b) => [a, b].sort().join('|');
+    function walk(name) {
+      for (const neighbor of neighbors[name]) {
+        const key = edgeKey(name, neighbor);
+        if (seenEdges.has(key)) continue;
+        seenEdges.add(key);
+        VIRGO_DFS.push([name, neighbor]);
+        if (!seenStars.has(neighbor)) {
+          seenStars.add(neighbor);
+          walk(neighbor);
+        }
+      }
+    }
+    walk('Spica');
+
+    // Each edge's destination star pulses first, at the start of that edge's
+    // step, to announce where the line is about to go — then the line is drawn to
+    // it. Record the step at which each star is reached as a destination.
+    VIRGO_DFS.forEach(([from, to], i) => {
+      (starByName[to].pulseAts = starByName[to].pulseAts || []).push(i);
+    });
+
+    // Give each Virgo star its own continuously running pulse with a random phase
+    // and rate, so the whole figure shimmers out of sync rather than beating in
+    // unison. Spica is left out here — it keeps its own dedicated anchor pulse.
+    for (const s of stars) {
+      if (s.pulseAts && !s.isSpica) {
+        s.pulsePhase = Math.random() * Math.PI * 2;
+        s.pulseRate = 0.45 + Math.random() * 0.6;  // radians/sec — slow, varied periods
+      }
+    }
+
+    // The view is centered here rather than on Spica. Spica sits at the origin,
+    // but the figure as a whole spreads up and east of it, so centering on the
+    // figure's rough heart (degrees east, degrees north of Spica) drops Spica
+    // toward the lower foot — where charts place it as the maiden's ear of wheat.
+    const VIEW_DX = 0.9;
+    const VIEW_DY = 10.2;
+
+    // Recompute screen positions whenever the viewport changes.
+    let width, height, scale;
+    function resize() {
+      const dpr = window.devicePixelRatio || 1;
+      width = canvas.clientWidth;
+      height = canvas.clientHeight;
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      // One scale for both axes so degrees map without distortion; max() fills
+      // the screen. East (+dx) is drawn left and north (+dy) up, as on sky charts.
+      scale = Math.max(width / (2 * RA_HALF), height / (2 * DEC_HALF));
+      for (const s of stars) {
+        s.x = width / 2 - (s.dx - VIEW_DX) * scale;
+        s.y = height / 2 - (s.dy - VIEW_DY) * scale;
+      }
+    }
+
+    const STEP_TIME = 2.4;    // seconds per edge: a pulse, then the line extends
+    const REST_TIME = 10.0;   // pause holding the full figure before it redraws
+    const PULSE_LEAD = 0.35;  // fraction of a step spent pulsing before the line grows
+    const RIPPLE_LIFE = 3.6;  // seconds an expanding halo takes to fade out
+    const RIPPLE_SPEED = 30;  // pixels per second the halo expands
+
+    const startTime = performance.now();
+    function draw(now) {
+      const elapsed = (now - startTime) / 1000;
+
+      // Night-sky gradient, authored pre-inversion: dark purple overhead easing
+      // down to near-black at the horizon. After the hero is inverted this reads
+      // as a pale daybreak sky — soft mint up high, brightening to near-white at
+      // the base, where dawn light gathers and the page below can continue clean.
+      const bg = ctx.createLinearGradient(0, 0, 0, height);
+      bg.addColorStop(0.0, '#241540');
+      bg.addColorStop(0.22, '#170e2c');
+      bg.addColorStop(0.55, '#0c0a1e');
+      bg.addColorStop(1.0, '#000000');   // inverts to pure white, matching the page below
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, width, height);
+
+      // Additive blending so overlapping starlight pools into soft glows.
+      ctx.globalCompositeOperation = 'lighter';
+
+      // === Virgo: a single light walks the figure in depth-first order ===
+      // `head` is the pulse's position along the edge list, in step units. One
+      // edge is handled per step: the destination star sheds an expanding halo,
+      // then the line grows out to it. After the last edge the finished figure
+      // holds through REST_TIME, then head wraps and it redraws.
+      const traceTime = STEP_TIME * VIRGO_DFS.length;
+      const head = (elapsed % (traceTime + REST_TIME)) / STEP_TIME;
+
+      ctx.lineWidth = 1;
+      VIRGO_DFS.forEach(([fromName, toName], i) => {
+        const local = head - i;          // 0..1 while this edge is active
+        if (local <= 0) return;          // its turn hasn't come yet
+        const from = starByName[fromName];
+        const to = starByName[toName];
+
+        // The halo: a ring shed from the destination the moment its turn begins,
+        // expanding and fading — it pulses to announce where the line will go.
+        const rippleAge = local * STEP_TIME;
+        if (rippleAge < RIPPLE_LIFE) {
+          ctx.lineWidth = 1;
+          ctx.strokeStyle = `rgba(159, 196, 255, ${(1 - rippleAge / RIPPLE_LIFE) * 0.3})`;
+          ctx.beginPath();
+          ctx.arc(to.x, to.y, rippleAge * RIPPLE_SPEED, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+
+        // The line, growing from source to destination once the pulse has led.
+        // Thicker but dimmer: because the scene is inverted, a lower additive
+        // alpha here reads as a paler, lighter line on the final daybreak sky.
+        const grown = clamp01((local - PULSE_LEAD) / (1 - PULSE_LEAD));
+        if (grown <= 0) return;
+        ctx.lineWidth = 2.5;
+        ctx.strokeStyle = 'rgba(159, 196, 255, 0.2)';
+        ctx.beginPath();
+        ctx.moveTo(from.x, from.y);
+        ctx.lineTo(from.x + (to.x - from.x) * grown, from.y + (to.y - from.y) * grown);
+        ctx.stroke();
+      });
+
+      for (const s of stars) {
+        const twinkle = 0.85 + 0.15 * Math.sin(elapsed * 1.5 + s.twinkle);
+
+        // Spica beats with a slow sine; every other star holds steady.
+        let bright = s.bright;
+        let radius = 0.5 + s.bright * 2.2;
+        if (s.isSpica) {
+          const pulse = 0.5 + 0.5 * Math.sin(elapsed * 1.0);
+          bright = 0.65 + 0.35 * pulse;   // never fully dark — it's the anchor
+          radius = 3.5 + 5.5 * pulse;     // the largest swing of any star, so Spica dominates
+        }
+
+        // Every other Virgo star pulses on its own random beat, on top of the
+        // brighter flare it gets as the trace reaches it. Kept gentler than
+        // Spica's so the anchor always reads as the most prominent star.
+        if (s.pulsePhase !== undefined) {
+          const pulse = 0.5 + 0.5 * Math.sin(elapsed * s.pulseRate + s.pulsePhase);
+          bright = Math.min(1, bright + 0.22 * pulse);
+          radius *= 1 + 0.45 * pulse;
+        }
+
+        // Virgo stars flare as the pulse reaches them — peaking when `head` lands
+        // on the step where this star is a line's destination.
+        if (s.pulseAts) {
+          let flare = 0;
+          for (const at of s.pulseAts) flare = Math.max(flare, 1 - Math.abs(head - at));
+          bright = Math.min(1, bright + flare);
+          radius += flare * 2.5;
+        }
+
+        const color = s.isSpica ? '159, 196, 255' : '232, 236, 246';
+        const alpha = bright * twinkle;
+
+        // Soft radial glow (bloom): the halo of light around every star. Without
+        // it the spikes read as a bare cross; this glow is what makes each point
+        // feel luminous. The middle stop gives a non-linear falloff — a bright
+        // tight center trailing into a long faint tail — which looks far more
+        // natural than a straight fade. Like everything else it scales with
+        // luminosity, and additive blending lets neighboring halos pool.
+        const glowRadius = radius * (3 + 5 * bright);
+        const glow = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, glowRadius);
+        glow.addColorStop(0, `rgba(${color}, ${alpha * 0.55})`);
+        glow.addColorStop(0.25, `rgba(${color}, ${alpha * 0.18})`);
+        glow.addColorStop(1, `rgba(${color}, 0)`);
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, glowRadius, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Diffraction spikes: the cross-shaped glint bright stars show in
+        // imaging. Length, thickness, and intensity all scale with luminosity,
+        // so faint stars show only a whisper and Spica blazes. Each spike is a
+        // bar whose gradient fades to nothing at both tips; two bars at right
+        // angles make the cross.
+        // NOTE: [performance improvement] Together with the glow this builds
+        // three gradients per star every frame — for ~800 stars that is the bulk
+        // of the per-frame cost. Gating the spikes (and a wider glow) on
+        // brightness, e.g. bright > 0.5, would skip the faint stars whose detail
+        // is invisible anyway, at the price of an abrupt cutoff.
+        const spikeLength = radius * (4 + 9 * bright);
+        const spikeThickness = 0.6 + bright * 1.3;
+        for (let k = 0; k < 2; k++) {
+          ctx.save();
+          ctx.translate(s.x, s.y);
+          ctx.rotate(k * Math.PI / 2);
+          const spike = ctx.createLinearGradient(-spikeLength, 0, spikeLength, 0);
+          spike.addColorStop(0, `rgba(${color}, 0)`);
+          spike.addColorStop(0.5, `rgba(${color}, ${alpha * 0.5})`);
+          spike.addColorStop(1, `rgba(${color}, 0)`);
+          ctx.fillStyle = spike;
+          ctx.fillRect(-spikeLength, -spikeThickness / 2, spikeLength * 2, spikeThickness);
+          ctx.restore();
+        }
+
+        ctx.fillStyle = `rgba(${color}, ${alpha})`;
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, radius, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalCompositeOperation = 'source-over';
+
+      requestAnimationFrame(draw);
+    }
+
+    window.addEventListener('resize', resize);
+    resize();
+    requestAnimationFrame(draw);
+  </script>
+</body>
+</html>
