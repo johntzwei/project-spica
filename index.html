@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Project Spica</title>
+  <title>Project Spīca</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;1,8..60,400&family=Source+Sans+3:wght@400;500&display=swap" rel="stylesheet" />
@@ -20,7 +20,8 @@
       --page-ink: #14161f;
       --page-dim: #5b6072;
       --page-line: rgba(20, 22, 31, 0.1);
-      --page-accent: #2f55c7;
+      /* Secondary accent for small labels — a neutral dark, no longer a blue. */
+      --page-accent: #14161f;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -169,13 +170,16 @@
       text-decoration: none;
     }
     .nav-links a:hover { color: var(--page-ink); }
+    /* A quiet ghost pill — the un-inverted echo of the hero's Subscribe CTA:
+       a dark, near-transparent tint with a hairline border rather than a fill. */
     .nav-cta {
       padding: 0.55rem 1.1rem;
       border-radius: 999px;
-      background: var(--page-accent);
-      color: #fff !important;
+      border: 1px solid var(--page-line);
+      background: rgba(20, 22, 31, 0.05);
+      color: var(--page-ink) !important;
     }
-    .nav-cta:hover { background: #244ab5; }
+    .nav-cta:hover { background: rgba(20, 22, 31, 0.1); border-color: rgba(20, 22, 31, 0.28); }
 
     /* --- Content sections --- */
     .section {
@@ -266,10 +270,11 @@
       padding: 0.8rem 1.6rem;
       border: none;
       border-radius: 999px;
-      background: var(--page-accent);
-      color: #fff;
+      background: #eef1f8;
+      color: #0b0a18;
       cursor: pointer;
     }
+    .subscribe-form button:hover { background: #fff; }
 
     /* --- Footer --- */
     footer {
@@ -305,7 +310,6 @@
       max-width: 1100px;
       margin: 3rem auto 0;
       padding-top: 1.5rem;
-      border-top: 1px solid var(--page-line);
       display: flex;
       justify-content: space-between;
       font-size: 0.85rem;
@@ -357,7 +361,7 @@
         <path d="M 83.1 54.1 L 81.1 92.1 L 83.1 130.1 L 85.1 92.1 Z" opacity="0.6"/>
         <circle cx="83.1" cy="92.1" r="7.8"/>
       </svg>
-      <span>Project Spica</span>
+      <span>Project Spīca</span>
     </a>
     <nav>
       <ul class="nav-links">
@@ -372,7 +376,6 @@
   <section class="hero">
     <canvas id="sky"></canvas>
     <div class="hero-content">
-      <div class="eyebrow">Project Spica</div>
       <h1>A <em>standard candle</em> for AI.</h1>
       <p class="tagline">
         Spiking deliberately inserts known data at known rates &mdash; a fixed
@@ -390,7 +393,7 @@
       <h2>Making the opaque measurable.</h2>
       <p class="lead">
         Spiking deliberately inserts known data into training at known rates,
-        giving a fixed reference for measuring what models absorb. Project Spica
+        giving a fixed reference for measuring what models absorb. Project Spīca
         exists to advance spiking as a new tool for technical governance.
       </p>
       <p class="lead"><em>Section in progress.</em></p>
@@ -450,8 +453,7 @@
   <footer>
     <div class="footer-grid">
       <div class="footer-brand">
-        <div class="name">Project Spica</div>
-        <p>A new tool for technical governance.</p>
+        <div class="name">Project Spīca</div>
       </div>
       <div class="footer-col">
         <h4>Explore</h4>
@@ -472,8 +474,7 @@
       </div>
     </div>
     <div class="footer-bottom">
-      <span>&copy; 2026 Project Spica</span>
-      <span>projectspica.com</span>
+      <span>&copy; 2026 Project Spīca</span>
     </div>
   </footer>
 
@@ -510,6 +511,9 @@
     // Look up a star by name, so we can trace Virgo's figure between real stars.
     const starByName = {};
     for (const s of stars) if (s.name) starByName[s.name] = s;
+
+    // Spica itself, kept on hand so the hover annotation can find it each frame.
+    const spica = stars.find((s) => s.isSpica);
 
     // The Maiden's figure as the modern IAU constellation lines: a plain list of
     // star pairs. The IAU figure runs its spine through Spica and leaves Zavijava
@@ -622,6 +626,14 @@
     const FLARE_WIDTH = 1.5;   // seconds to each side that a star's arrival flare lasts
     const RIPPLE_LIFE = 3.6;   // seconds an expanding halo takes to fade out
     const RIPPLE_SPEED = 30;   // pixels per second the halo expands
+
+    // === Spica hover annotation ===
+    // Pointer position in canvas pixels, and how near it must come to Spica to
+    // wake the label. The annotation eases in and out through hoverAlpha rather
+    // than snapping, so it reads as a soft reveal beside the anchor star.
+    const HOVER_RADIUS = 50;     // pixels from Spica's center that count as a hover — ~1.5x its smallest halo
+    let pointerX = -1, pointerY = -1, pointerInside = false;
+    let hoverAlpha = 0;          // 0 hidden, 1 fully shown — chased toward the target each frame
 
     // === Load fades: the mint sky eases in first, then the stars over it ===
     // Both stages are driven here as time-based alphas rather than CSS opacity,
@@ -790,8 +802,55 @@
       ctx.globalCompositeOperation = 'source-over';
       ctx.globalAlpha = 1;
 
+      // === Spica hover label ===
+      // Drawn in plain source-over (not additive) so the text stays crisp rather
+      // than blooming. Pre-inversion it is authored light on the dark sky, which
+      // the hero's invert flips to dark text on the daybreak field below.
+      const hovered = pointerInside &&
+        Math.hypot(pointerX - spica.x, pointerY - spica.y) < HOVER_RADIUS;
+      hero.style.cursor = hovered ? 'pointer' : '';
+      hoverAlpha += ((hovered ? 1 : 0) - hoverAlpha) * 0.18;
+      if (hoverAlpha > 0.01) {
+        const a = hoverAlpha;
+        // Anchor the text to whichever side of Spica has room, so a star near the
+        // right edge labels leftward instead of running off-screen.
+        const onLeft = spica.x < width * 0.62;
+        const tx = onLeft ? spica.x + 40 : spica.x - 40;
+        ctx.textAlign = onLeft ? 'left' : 'right';
+        ctx.textBaseline = 'alphabetic';
+
+        // A faint leader joining the star to its label.
+        ctx.strokeStyle = `rgba(159, 196, 255, ${a * 0.5})`;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(spica.x + (onLeft ? 14 : -14), spica.y);
+        ctx.lineTo(onLeft ? tx - 6 : tx + 6, spica.y);
+        ctx.stroke();
+
+        ctx.font = 'italic 400 26px "Source Serif 4", Georgia, serif';
+        ctx.fillStyle = `rgba(235, 238, 247, ${a})`;
+        ctx.fillText('Spīca', tx, spica.y - 14);
+
+        ctx.font = '16px "Source Sans 3", system-ui, sans-serif';
+        ctx.fillStyle = `rgba(214, 219, 232, ${a * 0.92})`;
+        ctx.fillText('The brightest star in Virgo.', tx, spica.y + 13);
+        ctx.fillText('Latin spīca, ‘spike’ — our namesake.', tx, spica.y + 35);
+      }
+
       requestAnimationFrame(draw);
     }
+
+    // Track the pointer over the hero so the draw loop can tell when it nears
+    // Spica. Listening on the hero (not the canvas) means the events still arrive
+    // while the cursor is over the hero text layered above the starfield.
+    const hero = document.querySelector('.hero');
+    hero.addEventListener('mousemove', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      pointerX = e.clientX - rect.left;
+      pointerY = e.clientY - rect.top;
+      pointerInside = true;
+    });
+    hero.addEventListener('mouseleave', () => { pointerInside = false; });
 
     window.addEventListener('resize', resize);
     resize();
