@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Project Spica</title>
+  <title>Homepage | Project Spica</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -23,6 +23,9 @@
       --page-line: rgba(20, 22, 31, 0.1);
       /* Secondary accent for small labels — a neutral dark, no longer a blue. */
       --page-accent: #14161f;
+      /* Demo: the two kinds of contamination — accidental (warm) vs spiked (cool). */
+      --mem-contam: #c2614e;
+      --mem-spike: #4f7cc2;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -240,6 +243,248 @@
       color: var(--page-dim);
       max-width: 60ch;
     }
+    .lead a {
+      color: var(--page-ink);
+      text-decoration: underline;
+      text-underline-offset: 0.18em;
+      text-decoration-color: var(--page-line);
+      transition: text-decoration-color 0.2s ease;
+    }
+    .lead a:hover { text-decoration-color: var(--page-ink); }
+
+    /* === Recent writing: a full-bleed story carousel ===
+       The latest Substack posts as big cards spanning the page width, one at a
+       time. The strip auto-advances on a timer but is also a real scroll
+       container, so it can be swiped or trackpad-scrolled left and right; dots
+       below mark position, with the current post emphasized. Rendered from
+       window.POSTS (posts.js / fetch_posts.py); hidden until there's a post. */
+    .recent { margin-top: 3rem; }
+    .recent-label {
+      font-size: 0.75rem;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--page-accent);
+      margin-bottom: 1.5rem;
+    }
+
+    /* Break out of the section's centered column to the full viewport width. The
+       100vw + negative margin trick works because the section is centered; the
+       body already hides any horizontal overflow this introduces. */
+    .story-carousel {
+      --story-w: min(1100px, 90vw);
+      position: relative;
+      width: 100vw;
+      margin-left: calc(50% - 50vw);
+    }
+    /* The scroll container itself. Snap centers each card; the side padding is
+       exactly the gutter that lets the first and last cards rest centered. The
+       scrollbar is hidden because the dots already communicate position. */
+    .story-track {
+      display: flex;
+      gap: 2rem;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      padding: 0.5rem calc((100vw - var(--story-w)) / 2) 0.5rem;
+      scrollbar-width: none;
+    }
+    .story-track::-webkit-scrollbar { display: none; }
+
+    /* One big card: cover image beside the text, the whole thing a link out. */
+    .story {
+      flex: 0 0 var(--story-w);
+      scroll-snap-align: center;
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      min-height: 25rem;
+      background: #fff;
+      border: 1px solid var(--page-line);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 16px 44px rgba(20, 22, 31, 0.08);
+      text-decoration: none;
+      color: inherit;
+    }
+    .story-pic { position: relative; background: rgba(20, 22, 31, 0.05); }
+    .story-pic img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    .story-body {
+      padding: 3rem 3.25rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .story-date {
+      font-size: 0.72rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--page-dim);
+    }
+    .story-title {
+      font-family: 'Lora', Georgia, serif;
+      font-weight: 400;
+      font-size: clamp(1.7rem, 3vw, 2.6rem);
+      line-height: 1.15;
+      letter-spacing: -0.015em;
+      margin: 0.8rem 0 0;
+    }
+    .story-excerpt {
+      margin-top: 1rem;
+      font-size: 1.05rem;
+      line-height: 1.6;
+      color: var(--page-dim);
+      max-width: 46ch;
+    }
+    .story-more {
+      margin-top: 1.6rem;
+      font-size: 0.95rem;
+      letter-spacing: 0.04em;
+      color: var(--page-accent);
+    }
+
+    /* Narrow screens: stack the cover above the text. */
+    @media (max-width: 760px) {
+      .story { grid-template-columns: 1fr; min-height: 0; }
+      .story-pic { aspect-ratio: 16 / 9; }
+      .story-body { padding: 2rem 1.75rem; }
+    }
+
+    /* Dots: one per post, the active one stretched into an emphasized pill. */
+    .story-dots {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-top: 1.75rem;
+    }
+    .story-dot {
+      width: 0.5rem;
+      height: 0.5rem;
+      padding: 0;
+      border: none;
+      border-radius: 999px;
+      background: var(--page-line);
+      cursor: pointer;
+      transition: width 0.35s cubic-bezier(0.22, 1, 0.36, 1), background 0.35s ease;
+    }
+    .story-dot.active { width: 1.6rem; background: var(--page-ink); }
+
+    /* Reduced motion: the timer is disabled in script; also drop smooth scrolling
+       so any programmatic jump is instant rather than animated. */
+    @media (prefers-reduced-motion: reduce) {
+      .story-track { scroll-behavior: auto; }
+    }
+
+    /* === Explainer: the spiking pipeline demo ===
+       A scrollytelling figure in three beats — train on spiked data, calibrate the
+       probe, label the rest — each beat broken into several frames driven by scroll. */
+    /* The figure pins to the viewport while a tall track scrolls past it; the extra
+       height gives the ~10 frames room to breathe. */
+    .mem-scroll { position: relative; height: 540vh; margin-top: 2.5rem; }
+    .mem-sticky {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+    }
+    /* Open on the page (no card): one horizontal ruler on top, full-width plot
+       below it, then the per-frame sentence. */
+    .mem-figure { width: 100%; display: flex; flex-direction: column; gap: 1.75rem; }
+    .mem-plot-wrap { width: 100%; }
+    /* The single sentence that narrates the current frame, under the figure. */
+    .mem-frame { min-height: 3.2em; max-width: 60ch;
+      font-size: 1.05rem; line-height: 1.6; color: var(--page-dim); }
+    /* Escape hatch: jumps past the tall track to the use cases below. */
+    .mem-skip {
+      align-self: flex-start;
+      font-size: 0.85rem; font-weight: 600; letter-spacing: 0.04em;
+      text-transform: uppercase; text-decoration: none;
+      color: var(--page-dim);
+      padding: 0.45rem 0.9rem;
+      border: 1px solid var(--page-line); border-radius: 999px;
+      transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+    }
+    .mem-skip:hover { color: var(--page-ink); border-color: rgba(20, 22, 31, 0.25); background: #f4f5f8; }
+    #memPlot { width: 100%; height: auto; display: block; touch-action: none; user-select: none; }
+
+    /* === Ruler (one horizontal track) ===
+       Large chapter numerals sit above a spine of frame ticks; a single fill
+       grows left -> right with scroll (--rail). Both chapters and ticks are placed
+       by JS at their scroll-time center, so the fill edge passes each as it lights
+       (--on, eased per frame). color-mix lerps dim -> ink with --on. */
+    .mem-rail { position: relative; width: 100%; height: 4.8rem; --rail: 0; }
+    .mem-rail::before, .mem-rail::after {
+      content: ""; position: absolute; left: 0; bottom: 0.5rem; height: 2px; border-radius: 2px;
+    }
+    .mem-rail::before { right: 0; background: var(--page-line); }
+    .mem-rail::after  { width: calc(var(--rail) * 100%); background: var(--page-ink); }
+    /* One tick per storyboard frame, on the spine. */
+    .mem-fdot {
+      position: absolute; bottom: 0.5rem; transform: translate(-50%, 50%);
+      width: 0.5rem; height: 0.5rem; border-radius: 50%;
+      border: 1.5px solid color-mix(in srgb, var(--page-ink) calc(var(--on, 0) * 100%), var(--page-line));
+      background: color-mix(in srgb, var(--page-ink) calc(var(--on, 0) * 100%), var(--page-bg));
+      transition: width 0.15s ease, height 0.15s ease;
+    }
+    .mem-fdot.active { width: 0.8rem; height: 0.8rem; }
+    /* Large chapter numeral + title, above the spine, centered on the chapter. */
+    .mem-chap { position: absolute; top: 0; transform: translateX(-50%); width: 9rem; text-align: center;
+      opacity: calc(0.3 + 0.7 * var(--on, 0)); }
+    .mem-chap-num { font-family: 'Lora', Georgia, serif; font-size: 1.8rem; line-height: 1; color: var(--page-ink); }
+    .mem-chap.active .mem-chap-num { font-weight: 600; }
+    .mem-chap-title { display: block; margin-top: 0.25rem; font-size: 0.78rem; line-height: 1.3; color: var(--page-dim); }
+    .mem-axis { stroke: var(--page-line); }
+    .mem-tick-label { fill: var(--page-dim); font: 600 11px 'Lato', sans-serif; letter-spacing: 0.14em; text-transform: uppercase; }
+    .mem-row-label { fill: var(--page-dim); font: 400 13px 'Lora', serif; }
+    /* MMLU examples — big hollow rings. Per-dot --warm (0..1, set each frame)
+       eases the stroke from neutral gray to the warm "contaminated" color, so the
+       same ring can be revealed as contaminated (beat 1) or labeled so (beat 3). */
+    .mem-dot { --warm: 0; fill: none; stroke-width: 1.6;
+      stroke: color-mix(in srgb, var(--mem-contam) calc(var(--warm) * 100%), #b4bac6); }
+    /* Spiked positives — filled diamonds in the cool "intentionally contaminated" color. */
+    .mem-spike { fill: var(--mem-spike); }
+    /* The known insertion rate (beat 1d), in the spike color. */
+    .mem-count { fill: var(--mem-spike); font: italic 600 13px 'Lato', sans-serif; }
+    /* The wandering "where to cut?" guess line (beat 2b). */
+    .mem-guess line { stroke: var(--page-dim); stroke-width: 1.5; stroke-dasharray: 4 5; }
+    .mem-guess text { fill: var(--page-dim); font: 600 14px 'Lato', sans-serif; }
+    /* The calibrated decision boundary (beat 3b). */
+    .mem-threshold { stroke: var(--page-ink); stroke-width: 1.5; }
+
+    /* Color the two contamination words to match the markers in the plot. */
+    .mem-c-contam { color: var(--mem-contam); font-weight: 700; }
+    .mem-c-spike { color: var(--mem-spike); font-weight: 700; }
+    /* Narrow screens: keep the numerals + ticks, drop the chapter titles. */
+    @media (max-width: 640px) {
+      .mem-chap { width: 5rem; }
+      .mem-chap-title { display: none; }
+    }
+
+    /* Labeled divider — a centered eyebrow word flanked by hairlines, used to
+       introduce the block below it. The section it leads drops its own top
+       border (.no-border) so the two rules don't stack. */
+    .section-divider {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 8vw;
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      color: var(--page-accent);
+    }
+    .section-divider::before,
+    .section-divider::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: var(--page-line);
+    }
+    .section-divider span {
+      font-size: 0.75rem;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .section.no-border { border-top: none; }
 
     /* --- Use-case carousel ---
        One wide panel is visible at a time. The track holds every card in a row;
@@ -288,6 +533,16 @@
       line-height: 1.7;
       max-width: 68ch;
     }
+    .card-link {
+      display: inline-block;
+      margin-top: 1.5rem;
+      font-size: 0.95rem;
+      letter-spacing: 0.04em;
+      color: var(--page-accent);
+      text-decoration: none;
+      transition: opacity 0.2s ease;
+    }
+    .card-link:hover { opacity: 0.65; }
 
     .carousel-controls {
       flex: none;
@@ -313,6 +568,59 @@
     .carousel-status {
       font-size: 0.85rem;
       letter-spacing: 0.18em;
+      color: var(--page-dim);
+    }
+
+    /* --- People grid ---
+       A responsive grid of person cards. There are no portraits yet, so each
+       person is shown as a round portrait. The grid uses auto-fill so a single
+       person sits alone at the left and more people fill in across the row as
+       they're added, without touching the markup. */
+    .people-grid {
+      margin-top: 3rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+      gap: 1.5rem;
+    }
+    /* Each person is a wide card linking to their page: round portrait on the
+       left, name and affiliation stacked to its right. */
+    .person {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 1.4rem;
+      padding: 1.5rem 1.75rem;
+      border: 1px solid var(--page-line);
+      border-radius: 18px;
+      background: #fff;
+      color: inherit;
+      text-decoration: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    }
+    .person:hover {
+      border-color: rgba(20, 22, 31, 0.18);
+      box-shadow: 0 12px 30px rgba(20, 22, 31, 0.06);
+      transform: translateY(-3px);
+    }
+    .person-avatar {
+      flex: none;
+      width: 5.5rem;
+      height: 5.5rem;
+      border-radius: 50%;
+      object-fit: cover;
+      background: rgba(20, 22, 31, 0.05);
+      border: 1px solid var(--page-line);
+    }
+    .person-name {
+      font-family: 'Lora', Georgia, serif;
+      font-weight: 400;
+      font-size: 1.35rem;
+      letter-spacing: -0.01em;
+    }
+    .person-bio {
+      margin-top: 0.35rem;
+      font-size: 0.95rem;
+      line-height: 1.5;
       color: var(--page-dim);
     }
 
@@ -464,6 +772,7 @@
         <li><a href="#about">Mission</a></li>
         <li><a href="#approach">Use cases</a></li>
         <li><a href="#activities">Publication</a></li>
+        <li><a href="#people">People</a></li>
         <li><a class="nav-cta" href="#subscribe">Subscribe</a></li>
       </ul>
     </nav>
@@ -487,14 +796,45 @@
       <div class="section-eyebrow reveal">Our mission</div>
       <h2 class="reveal">Establish spiking as a<br>measurement standard.</h2>
       <p class="lead reveal">
-        Spiking is a new tool for AI governance and enables the rigorous
+        Spiking is a new tool for AI governance and it enables the rigorous
         measurement of many model properties. Project Spica will
-        facilitate the science of spiking and establish it as a shared standard.
+        facilitate the science of spiking and help establish it as a shared standard.
       </p>
     </section>
 
+
     <section class="section reveal-group" id="approach">
       <div class="section-eyebrow reveal">Use cases</div>
+      <h2 class="reveal">Spiking makes the<br>unmeasurable measurable.</h2>
+
+      <!-- Body: test set contamination -> spiking corrects it -> MMLU example. -->
+      <p class="lead reveal">
+        A benchmark only measures capability if its questions stay out of training
+        &mdash; but modern web-scale corpora increasingly swallow the benchmarks
+        themselves, inflating scores with answers the model has simply seen.
+        Spiking corrects this <em>test set contamination</em>: insert some test
+        examples at a known rate, measure how strongly the model absorbed those
+        known spikes, and subtract the inflation back out. Below, on MMLU, the
+        spiked examples &mdash; the only ones you know were in training &mdash;
+        reveal where the memorized ones sit.
+      </p>
+      <div class="mem-scroll" id="memScroll">
+        <div class="mem-sticky">
+          <div class="mem-figure">
+            <!-- One horizontal ruler: large chapter numerals over a spine of
+                 frame ticks, built by JS from the storyboard; fill tracks scroll. -->
+            <div class="mem-rail" id="memRail" aria-hidden="true"></div>
+            <div class="mem-plot-wrap">
+              <svg id="memPlot" viewBox="0 0 720 250" role="img"
+                   aria-label="A spiking pipeline: train on spiked data, calibrate a probe from the spikes, then label which MMLU examples are contaminated."></svg>
+            </div>
+            <p class="mem-frame" id="memFrame"></p>
+            <!-- An escape hatch: jump past the tall scroll track to the use cases. -->
+            <a class="mem-skip" href="#usecaseCarousel">Skip the animation &darr;</a>
+          </div>
+        </div>
+      </div>
+
       <div class="carousel reveal" id="usecaseCarousel">
         <div class="carousel-controls">
           <div class="carousel-buttons">
@@ -514,6 +854,7 @@
                 absorbed them &mdash; a calibrated estimate of how much of a held-out set
                 has leaked, measured rather than assumed.
               </p>
+              <a class="card-link" href="#">Read more &rarr;</a>
             </div>
             <div class="card">
               <div class="num">02</div>
@@ -523,15 +864,7 @@
                 controlled probes, letting researchers quantify memorization rates and the
                 privacy and copyright risk that comes with them.
               </p>
-            </div>
-            <div class="card">
-              <div class="num">03</div>
-              <h3>Unlearning verification</h3>
-              <p>
-                When data is meant to be removed, spiking offers a way to check. Track the
-                response to known spikes before and after unlearning to measure what was
-                actually forgotten &mdash; not just what was requested.
-              </p>
+              <a class="card-link" href="#">Read more &rarr;</a>
             </div>
           </div>
         </div>
@@ -540,15 +873,55 @@
 
     <section class="section reveal-group" id="activities">
       <div class="section-eyebrow reveal">Publication</div>
-      <p class="lead reveal">TBA</p>
+      <h2 class="reveal">Everything happening<br>around spiking.</h2>
+      <p class="lead reveal">
+        We cover work and updates related to spiking &mdash; new research and
+        applications, methodological refinements, and governance developments as
+        the method moves toward a shared standard. Everything is disseminated
+        through our Substack, where you can follow along as the field takes shape.
+      </p>
+
+      <!-- Recent writing: rendered from window.POSTS (posts.js, refreshed by
+           fetch_posts.py). Stays hidden until there's at least one post. -->
+      <div class="recent" id="recent" hidden>
+        <div class="recent-label">Recent writing</div>
+        <div class="story-carousel" id="storyCarousel">
+          <div class="story-track" id="storyTrack"></div>
+          <div class="story-dots" id="storyDots"></div>
+        </div>
+      </div>
+
+      <p class="lead reveal">
+        Have a paper, result, or update worth covering? Reach us at
+        <a href="mailto:contact@projectspica.org">contact@projectspica.org</a>.
+      </p>
+    </section>
+
+    <section class="section reveal-group" id="people">
+      <div class="section-eyebrow reveal">People</div>
+      <h2 class="reveal">The people behind<br>Project Spica.</h2>
+      <p class="lead reveal">
+        Project Spica is led by researchers working at the intersection of machine
+        learning, statistics, and law. We are actively growing &mdash; if spiking
+        is close to your work, we would like to hear from you.
+      </p>
+      <div class="people-grid reveal">
+        <a class="person" href="https://johntzwei.github.io/" target="_blank" rel="noopener">
+          <img class="person-avatar" src="johnny.jpeg" alt="Johnny Wei" />
+          <div class="person-body">
+            <div class="person-name">Johnny Wei</div>
+            <p class="person-bio">University of Southern California</p>
+          </div>
+        </a>
+      </div>
     </section>
   </main>
 
   <section class="subscribe-band" id="subscribe">
     <h2>Stay close to the work.</h2>
     <p>Research, essays, and updates on spiking &mdash; delivered through Substack.</p>
-    <form class="subscribe-form" onsubmit="return false">
-      <input type="email" placeholder="you@example.com" aria-label="Email address" />
+    <form class="subscribe-form" onsubmit="return handleSubscribe(this)">
+      <input type="email" name="email" placeholder="you@example.com" aria-label="Email address" required />
       <button type="submit">Subscribe</button>
     </form>
   </section>
@@ -594,20 +967,20 @@
       </div>
       <div class="footer-col">
         <h4>Explore</h4>
-        <a href="#approach">Approach</a>
-        <a href="#activities">Activities</a>
-        <a href="#about">About</a>
+        <a href="#about">Mission</a>
+        <a href="#approach">Use cases</a>
+        <a href="#activities">Publication</a>
+        <a href="#people">People</a>
       </div>
       <div class="footer-col">
-        <h4>Activities</h4>
-        <a href="#">Journal</a>
-        <a href="#">X</a>
-        <a href="#">Protocol</a>
+        <h4>Follow</h4>
+        <a href="https://projectspica.substack.com" target="_blank" rel="noopener">Substack</a>
+        <a href="https://x.com/projectspica1" target="_blank" rel="noopener">X</a>
       </div>
       <div class="footer-col">
         <h4>Connect</h4>
         <a href="#subscribe">Subscribe</a>
-        <a href="mailto:hello@projectspica.com">Contact</a>
+        <a href="mailto:contact@projectspica.org">contact@projectspica.org</a>
       </div>
     </div>
     <div class="footer-bottom">
@@ -617,7 +990,134 @@
 
   <!-- Real star data: window.STARS, carved from the HYG catalogue around Spica. -->
   <script src="stars.js"></script>
+  <!-- Recent posts: window.POSTS, refreshed from the Substack feed by fetch_posts.py. -->
+  <script src="posts.js"></script>
   <script>
+    // === Subscribe ===
+    // Hand the email off to Substack, which owns the subscriber list and runs
+    // the confirmation flow. Pre-filling the email means the visitor lands on
+    // Substack already one click from done.
+    function handleSubscribe(form) {
+      const email = encodeURIComponent(form.email.value);
+      window.open('https://projectspica.substack.com/subscribe?email=' + email, '_blank');
+      return false;
+    }
+
+    // === Recent writing: the story carousel ===
+    // Render the latest Substack posts from window.POSTS (refreshed into posts.js
+    // by fetch_posts.py) as big cards in a full-width carousel. With no posts yet
+    // the whole block stays hidden, so the Publication section reads cleanly until
+    // the first piece goes out. Text is set via textContent, never innerHTML, so
+    // feed titles can't inject markup.
+    (function () {
+      const posts = window.POSTS || [];
+      if (!posts.length) return;
+      const carousel = document.getElementById('storyCarousel');
+      const track = document.getElementById('storyTrack');
+      const dotsWrap = document.getElementById('storyDots');
+
+      const el = (tag, className, text) => {
+        const node = document.createElement(tag);
+        if (className) node.className = className;
+        if (text) node.textContent = text;
+        return node;
+      };
+
+      // Build one big card: cover image + date, title, excerpt, and a read cue.
+      // The whole card is the link out to the post on Substack.
+      function buildStory(post) {
+        const story = el('a', 'story');
+        story.href = post.url;
+        story.target = '_blank';
+        story.rel = 'noopener';
+
+        const pic = el('div', 'story-pic');
+        if (post.image) {
+          const img = el('img');
+          img.src = post.image;
+          img.alt = '';
+          pic.appendChild(img);
+        }
+        story.appendChild(pic);
+
+        const body = el('div', 'story-body');
+        body.appendChild(el('div', 'story-date', post.date));
+        body.appendChild(el('h3', 'story-title', post.title));
+        body.appendChild(el('p', 'story-excerpt', post.excerpt));
+        body.appendChild(el('span', 'story-more', 'Read on Substack →'));
+        story.appendChild(body);
+        return story;
+      }
+
+      posts.forEach((post) => track.appendChild(buildStory(post)));
+      const slides = Array.from(track.children);
+
+      // One dot per card; the active one is emphasized in CSS. Clicking jumps.
+      const dots = slides.map((_, i) => {
+        const dot = el('button', 'story-dot');
+        dot.type = 'button';
+        dot.setAttribute('aria-label', `Go to post ${i + 1}`);
+        dot.addEventListener('click', () => goTo(i));
+        dotsWrap.appendChild(dot);
+        return dot;
+      });
+
+      let index = 0;
+      function setActive(i) {
+        index = i;
+        dots.forEach((dot, j) => dot.classList.toggle('active', j === i));
+      }
+      // Center card i within the scroll container.
+      function scrollToIndex(i) {
+        const slide = slides[i];
+        track.scrollTo({ left: slide.offsetLeft - (track.clientWidth - slide.clientWidth) / 2 });
+      }
+      // A manual jump (dot click or auto-advance): move and mark active. Restart
+      // the timer only when the pointer isn't resting on the carousel, so a click
+      // while reading doesn't quietly re-arm the auto-advance under the cursor.
+      function goTo(i) {
+        i = (i + slides.length) % slides.length;
+        setActive(i);
+        scrollToIndex(i);
+        if (!hovering) rearm();
+      }
+
+      // Keep the dots honest while the visitor swipes or trackpad-scrolls by hand:
+      // once scrolling settles, mark whichever card is nearest center as active.
+      let settle;
+      track.addEventListener('scroll', () => {
+        clearTimeout(settle);
+        settle = setTimeout(() => {
+          const center = track.scrollLeft + track.clientWidth / 2;
+          let nearest = 0, best = Infinity;
+          slides.forEach((slide, i) => {
+            const slideCenter = slide.offsetLeft + slide.clientWidth / 2;
+            const distance = Math.abs(slideCenter - center);
+            if (distance < best) { best = distance; nearest = i; }
+          });
+          setActive(nearest);
+        }, 120);
+      }, { passive: true });
+
+      // Auto-advance every few seconds, unless reduced motion is preferred. The
+      // timer pauses while the pointer rests on the carousel so a reader isn't
+      // yanked to the next card mid-sentence; rearm() restarts the clock.
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      let timer = null;
+      let hovering = false;
+      function rearm() {
+        if (reduce) return;
+        clearInterval(timer);
+        timer = setInterval(() => goTo(index + 1), 5000);
+      }
+      carousel.addEventListener('mouseenter', () => { hovering = true; clearInterval(timer); });
+      carousel.addEventListener('mouseleave', () => { hovering = false; rearm(); });
+
+      setActive(0);
+      document.getElementById('recent').hidden = false;
+      rearm();
+    })();
+
     // === The real sky around Spica ===
     // Each point is a genuine star from the HYG catalogue, placed at its true
     // position relative to Spica and sized by its real brightness. Spica alone
@@ -1014,11 +1514,17 @@
       viewport.style.width = `${document.documentElement.clientWidth - left}px`;
     }
 
+    // Leave a sliver of the previous card showing on the left so the carousel
+    // reads as a strip you've scrolled into, not a single isolated panel.
+    const peek = 56;
+
     function showCard() {
       // Left-align the selected card; the remaining cards trail off to the right
-      // and run past the window edge, where overflow:hidden clips them.
+      // and run past the window edge, where overflow:hidden clips them. Past the
+      // first card we shift right by `peek` so the prior card stays partly visible.
       const card = cards[index];
-      track.style.transform = `translateX(${-card.offsetLeft}px)`;
+      const offset = index > 0 ? card.offsetLeft - peek : card.offsetLeft;
+      track.style.transform = `translateX(${-offset}px)`;
       status.textContent = `${String(index + 1).padStart(2, '0')} / ${String(cards.length).padStart(2, '0')}`;
     }
 
@@ -1062,6 +1568,269 @@
       rootMargin: '0px 0px -30% 0px',
     });
     revealGroups.forEach((group) => revealObserver.observe(group));
+
+    // === Explainer: the memorization-threshold scrollytelling demo ===
+    // The figure pins to the viewport while a tall track scrolls past it. That
+    // scroll progress (0..1) drives three beats: first MMLU is a loose cloud;
+    // then the examples sort onto a 1-D memorization metric; then spiked
+    // known-positive examples drop in and reveal where the memorized boundary
+    // sits — the cut you couldn't justify from the cloud alone.
+    (function () {
+      const svg = document.getElementById('memPlot');
+      const track = document.getElementById('memScroll');
+      if (!svg || !track) return;
+      const SVGNS = 'http://www.w3.org/2000/svg';
+      const rail = document.getElementById('memRail');
+      const frame = document.getElementById('memFrame');
+
+      // --- Plot geometry (in viewBox units: 720 x 250) ---
+      const X0 = 56, X1 = 664;          // the metric 0..1 spans this width
+      const AXIS_Y = 150;               // MMLU rides above this line, spikes below
+      const metricToX = (m) => X0 + m * (X1 - X0);
+
+      // --- Seeded, illustrative data so the picture is stable across reloads ---
+      // NOTE: [pedagogical] mulberry32 is a tiny PRNG; seeding it makes the
+      // scatter reproducible without shipping a separate data file.
+      function mulberry32(seed) {
+        return function () {
+          seed = (seed + 0x6D2B79F5) | 0;
+          let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+          t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+          return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+        };
+      }
+      const rand = mulberry32(7);
+      // Box-Muller draws a standard normal; we scale and shift it per cluster.
+      function gaussian(mean, sd) {
+        const u = 1 - rand(), v = rand();
+        return mean + sd * Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+      }
+      const clamp01 = (x) => Math.min(0.97, Math.max(0.03, x));
+
+      // MMLU is a mostly-unmemorized bulk with a memorized (contaminated) minority.
+      // Each dot has two homes: an orderly grid spot and its sorted spot on the
+      // metric line; the animation moves them between the two across the frames.
+      const COLS = 8, ROWS = 3;             // 24 orderly points — big and hollow
+      const GRID_X0 = 171, GRID_DX = 54, GRID_Y0 = 54, GRID_DY = 30;
+      const MEM_MEAN = 0.72, MEM_SD = 0.1, CLEAN_MEAN = 0.34, CLEAN_SD = 0.12;
+      const mmlu = [];
+      for (let i = 0; i < COLS * ROWS; i++) {
+        const memorized = rand() < 0.2;
+        const m = clamp01(gaussian(memorized ? MEM_MEAN : CLEAN_MEAN,
+                                   memorized ? MEM_SD : CLEAN_SD));
+        mmlu.push({
+          m,
+          contaminated: memorized,   // these leaked into training (we don't know which)
+          gridX: GRID_X0 + (i % COLS) * GRID_DX,
+          gridY: GRID_Y0 + Math.floor(i / COLS) * GRID_DY,
+          // Sorted home: x is the metric; y sits right on the line. The points are
+          // big and hollow, so they read fine even where they overlap — no jitter.
+          lineX: metricToX(m), lineY: AXIS_Y,
+        });
+      }
+      // Spiked examples are known positives, so they track the memorized cluster.
+      // Beat 1 holds them in an even row; beat 3 drops them onto the line by metric.
+      const SPIKES = 8;
+      const spikePool = [];
+      for (let i = 0; i < SPIKES; i++) {
+        spikePool.push({
+          m: clamp01(gaussian(MEM_MEAN, MEM_SD)),
+          holdX: 222 + i * 39, holdY: 200,   // even row while held in beat 1
+          lineY: 188,                        // their row on the number line in beat 3
+        });
+      }
+      // The spikes are known positives, so their cluster marks where memorized
+      // examples sit. The cut goes at the lower edge of that cluster — one std
+      // below the spiked mean — so "memorized begins here" reads off the spikes.
+      const spikeMean = spikePool.reduce((s, d) => s + d.m, 0) / spikePool.length;
+      const cutMetric = spikeMean - MEM_SD;
+
+      // --- Build the SVG once; the scroll handler only moves/restyles things ---
+      const make = (tag, attrs) => {
+        const el = document.createElementNS(SVGNS, tag);
+        for (const k in attrs) el.setAttribute(k, attrs[k]);
+        return el;
+      };
+
+      // The number line (metric axis) and its end labels — shown once the line
+      // is first used (beat 2) and kept from then on.
+      const axis = make('line', { class: 'mem-axis', x1: X0, y1: AXIS_Y, x2: X1, y2: AXIS_Y });
+      const lo = make('text', { class: 'mem-tick-label', x: X0, y: AXIS_Y + 22 }); lo.textContent = 'less memorized';
+      const hi = make('text', { class: 'mem-tick-label', x: X1, y: AXIS_Y + 22, 'text-anchor': 'end' }); hi.textContent = 'more memorized';
+      [axis, lo, hi].forEach((el) => { el.style.opacity = 0; svg.appendChild(el); });
+
+      mmlu.forEach((d) => {
+        d.el = make('circle', { class: 'mem-dot', cx: d.gridX, cy: d.gridY, r: 6 });
+        d.el.style.opacity = 0;
+        svg.appendChild(d.el);
+      });
+      spikePool.forEach((d) => {
+        d.el = make('path', { class: 'mem-spike', d: 'M0,-6 L6,0 L0,6 L-6,0 Z',
+                              transform: `translate(${d.holdX},${d.holdY})` });
+        d.el.style.opacity = 0;
+        svg.appendChild(d.el);
+      });
+
+      // The known insertion rate, shown while the spikes are held (beat 1d).
+      const RATES = [0, 1, 2, 4, 8, 16, 32, 64, 128, 256];
+      const count = make('text', { class: 'mem-count', x: 358, y: 178, 'text-anchor': 'middle' });
+      count.style.opacity = 0;
+      svg.appendChild(count);
+
+      // A wandering dashed line: in the calibrate beat, where to cut is a guess.
+      const guess = make('g', { class: 'mem-guess' });
+      const guessLine = make('line', { y1: 40, y2: 214 });
+      const guessMark = make('text', { y: 34, 'text-anchor': 'middle' }); guessMark.textContent = '?';
+      guess.appendChild(guessLine); guess.appendChild(guessMark);
+      guess.style.opacity = 0;
+      svg.appendChild(guess);
+
+      // The calibrated boundary, committed in beat 3.
+      const cutX = metricToX(cutMetric);
+      const cut = make('line', { class: 'mem-threshold', x1: cutX, x2: cutX, y1: 30, y2: 214 });
+      cut.style.opacity = 0;
+      svg.appendChild(cut);
+
+      // === Animation ===
+      const clamp = (x) => Math.min(1, Math.max(0, x));
+      const smooth = (x) => { x = clamp(x); return x * x * (3 - 2 * x); };
+      const lerp = (a, b, t) => a + (b - a) * t;
+      let lastSentence = '';
+      const say = (html) => { if (html !== lastSentence) { frame.innerHTML = html; lastSentence = html; } };
+
+      // === Storyboard ===
+      // The whole animation is read off this one table — ten frames in three beats
+      // (1 train · 2 calibrate · 3 label). Each frame lists the scroll point where
+      // it ends and the single sentence shown during it. Every motion below eases
+      // off a frame's start/end by id, so the code follows the storyboard directly.
+      const FRAMES = [
+        { id: '1a', end: 0.085, line: 'Here is a benchmark &mdash; every example in MMLU.' },
+        { id: '1b', end: 0.165, line: 'Some of them are <span class="mem-c-contam">contaminated</span>: they leaked into training.' },
+        { id: '1c', end: 0.235, line: 'But which ones? In practice, we can&rsquo;t tell.' },
+        { id: '1d', end: 0.370, line: 'So we <span class="mem-c-spike">spike</span> the data &mdash; inserting known examples at a known rate.' },
+        { id: '2a', end: 0.465, line: 'Score every example by how memorized it looks.' },
+        { id: '2b', end: 0.555, line: 'Where does contamination begin? On its own, that cut is a guess.' },
+        { id: '2c', end: 0.630, line: 'To place it, we need ground truth.' },
+        { id: '3a', end: 0.735, line: 'Our <span class="mem-c-spike">spikes</span> are that ground truth &mdash; drop them onto the metric.' },
+        { id: '3b', end: 0.815, line: 'They calibrate the boundary between clean and <span class="mem-c-contam">contaminated</span>.' },
+        { id: '3c', end: 1.001, line: 'Now label the rest: everything past the boundary is <span class="mem-c-contam">contamination</span>.' },
+      ];
+      // A frame's end point, and its start (the previous frame's end; 0 for the first).
+      const frameEnd = (id) => FRAMES.find((f) => f.id === id).end;
+      const frameStart = (id) => { const i = FRAMES.findIndex((f) => f.id === id); return i ? FRAMES[i - 1].end : 0; };
+
+      // Chapters group the frames; their large numerals head the one ruler.
+      const CHAPTERS = [
+        { n: '1', title: 'Spike the training data', first: '1a', last: '1d' },
+        { n: '2', title: 'Calibrate a probe',       first: '2a', last: '2c' },
+        { n: '3', title: 'Label test examples',     first: '3a', last: '3c' },
+      ];
+
+      // Build the one ruler: a large numeral per chapter and a tick per frame,
+      // each placed at its scroll-time center so the fill reaches it as it lights.
+      const centerPct = (a, b) => (((a + Math.min(b, 1)) / 2) * 100) + '%';
+      CHAPTERS.forEach((c) => {
+        c.start = frameStart(c.first);
+        c.end = frameEnd(c.last);
+        c.el = document.createElement('div');
+        c.el.className = 'mem-chap';
+        c.el.style.left = centerPct(c.start, c.end);
+        c.el.innerHTML = `<span class="mem-chap-num">${c.n}</span><span class="mem-chap-title">${c.title}</span>`;
+        rail.appendChild(c.el);
+      });
+      FRAMES.forEach((f) => {
+        f.dot = document.createElement('div');
+        f.dot.className = 'mem-fdot';
+        f.dot.style.left = centerPct(frameStart(f.id), f.end);
+        rail.appendChild(f.dot);
+      });
+
+      function render(p) {
+        // into('2a', 0.08): eases 0 -> 1 over 0.08 of scroll once frame 2a begins.
+        const into = (id, dur) => smooth((p - frameStart(id)) / dur);
+
+        const gridIn  = into('1a', 0.05);                                  // 1a points appear
+        const contam  = clamp(into('1b', 0.05) - into('1c', 0.05));        // 1b color on, 1c off
+        const spikeIn = into('1d', 0.06);                                  // 1d spikes appear
+        const countP  = clamp((p - frameStart('1d')) / (frameEnd('1d') - frameStart('1d'))); // 1d rate ramp
+        const onLine  = clamp(into('2a', 0.08)                             // 2a grid -> line
+                            - into('2c', 0.07)                             // 2c line -> grid
+                            + into('3c', 0.08));                           // 3c grid -> line
+        const heur    = clamp(into('2b', 0.04) - smooth((p - frameEnd('2b')) / 0.05)); // 2b guess
+        const spikeLn = into('3a', 0.09);                                  // 3a spikes -> line
+        const pCut    = into('3b', 0.07);                                  // 3b boundary commits
+        const label   = smooth((p - frameStart('3c') - 0.06) / 0.08);      // 3c labels (after rings land)
+
+        // The number line appears as the rings first reach it (frame 2a) and stays.
+        const axisVis = into('2a', 0.07);
+        [axis, lo, hi].forEach((el) => { el.style.opacity = axisVis; });
+
+        // MMLU rings: fade in (staggered), ride grid <-> line, and take the warm
+        // color only when revealed (true contamination, 1b) or labeled (3c).
+        mmlu.forEach((d, i) => {
+          d.el.style.opacity = clamp(gridIn * (mmlu.length + 8) - i);
+          d.el.setAttribute('cx', lerp(d.gridX, d.lineX, onLine));
+          d.el.setAttribute('cy', lerp(d.gridY, d.lineY, onLine));
+          const warm = Math.max(d.contaminated ? contam : 0, d.m > cutMetric ? label : 0);
+          d.el.style.setProperty('--warm', warm);
+        });
+
+        // Spikes: appear in a held row, then drop onto the line by their metric.
+        spikePool.forEach((d, i) => {
+          d.el.style.opacity = clamp(spikeIn * (SPIKES + 6) - i);
+          const x = lerp(d.holdX, metricToX(d.m), spikeLn);
+          const y = lerp(d.holdY, d.lineY, spikeLn);
+          d.el.setAttribute('transform', `translate(${x},${y})`);
+        });
+
+        // The known insertion rate ramps while the spikes are held.
+        count.style.opacity = spikeIn * (1 - spikeLn);
+        count.textContent = 'inserted ×' + RATES[Math.min(RATES.length - 1, Math.floor(countP * RATES.length))];
+
+        // The guess line wanders during calibrate; the boundary commits in beat 3.
+        guess.style.opacity = heur;
+        const gx = metricToX(0.5 + 0.12 * Math.sin(p * 55));
+        guessLine.setAttribute('x1', gx); guessLine.setAttribute('x2', gx); guessMark.setAttribute('x', gx);
+        cut.style.opacity = pCut;
+
+        // The single sentence, and the active frame: the first one not yet passed.
+        const active = FRAMES.find((f) => p < f.end) || FRAMES[FRAMES.length - 1];
+        say(active.line);
+
+        // The one ruler: spine fills with scroll; each frame tick lights as the
+        // fill reaches it; each chapter numeral lights once its span begins.
+        rail.style.setProperty('--rail', p);
+        FRAMES.forEach((f) => {
+          f.dot.style.setProperty('--on', smooth((p - frameStart(f.id)) / (f.end - frameStart(f.id))));
+          f.dot.classList.toggle('active', f === active);
+        });
+        CHAPTERS.forEach((c) => {
+          c.el.style.setProperty('--on', smooth((p - c.start) / 0.04));
+          c.el.classList.toggle('active', p >= c.start && p < c.end);
+        });
+      }
+
+      // === Drive render from scroll progress through the sticky track ===
+      function progress() {
+        const total = track.offsetHeight - window.innerHeight;
+        return total > 0 ? clamp(-track.getBoundingClientRect().top / total) : 0;
+      }
+      let ticking = false;
+      function onScroll() {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(() => { render(progress()); ticking = false; });
+      }
+
+      // Reduced motion: skip the choreography and show the resolved final state.
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        render(1);
+      } else {
+        window.addEventListener('scroll', onScroll, { passive: true });
+        window.addEventListener('resize', onScroll);
+        render(progress());
+      }
+    })();
   </script>
 </body>
 </html>
