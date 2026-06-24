@@ -102,6 +102,32 @@
     }
     .cta:hover { background: rgba(159, 196, 255, 0.14); border-color: var(--accent); }
 
+    /* === Load choreography ===
+       Staged entrances on first paint. First all the hero text glides up into
+       place together. Then the sky arrives in two beats of its own: the mint
+       gradient fades in first, and the stars fade up over it once it has settled.
+       Those two sky beats are driven in the script as time-based alphas inside
+       the canvas, so the gradient and the starlight can fade independently on a
+       single element — there is no opacity animation on #sky here. */
+
+    /* Each line rises from a little below its resting spot while fading in. */
+    @keyframes text-rise {
+      from { opacity: 0; transform: translateY(1.5rem); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* All the hero text glides in together as one block on a single shared delay. */
+    .hero-content > * {
+      opacity: 0;
+      animation: text-rise 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.2s forwards;
+    }
+
+    /* Respect a reduced-motion preference: skip the text entrance and show it
+       immediately. The script makes the same check for the sky's fades. */
+    @media (prefers-reduced-motion: reduce) {
+      .hero-content > * { animation: none; opacity: 1; }
+    }
+
     /* === Site chrome (nav, sections, footer) ===
        These sit outside the inverted hero, so their colors are authored normally
        — a light, daybreak page that continues out of the hero's near-white base. */
@@ -120,12 +146,17 @@
       border-bottom: 1px solid var(--page-line);
     }
     .nav-brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
       font-family: 'Source Serif 4', Georgia, serif;
       font-size: 1.15rem;
       letter-spacing: -0.01em;
       color: var(--page-ink);
       text-decoration: none;
     }
+    /* Virgo constellation mark; inherits the wordmark color via currentColor. */
+    .nav-brand .brand-mark { height: 1.4em; width: auto; flex: none; }
     .nav-links {
       display: flex;
       align-items: center;
@@ -293,7 +324,41 @@
 </head>
 <body>
   <header class="nav">
-    <a class="nav-brand" href="#">&#10022; Project Spica</a>
+    <a class="nav-brand" href="#">
+      <svg class="brand-mark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 184 131" fill="currentColor" role="img" aria-label="Virgo">
+        <g stroke="currentColor" stroke-width="0.9" stroke-linecap="round" opacity="0.45">
+          <line x1="180.6" y1="21.3" x2="147.2" y2="50.1"/>
+          <line x1="147.2" y1="50.1" x2="125.8" y2="53.2"/>
+          <line x1="125.8" y1="53.2" x2="83.1" y2="92.1"/>
+          <line x1="83.1" y1="92.1" x2="36.3" y2="88.5"/>
+          <line x1="36.3" y1="88.5" x2="33.3" y2="71.4"/>
+          <line x1="33.3" y1="71.4" x2="6.7" y2="70.1"/>
+          <line x1="83.1" y1="92.1" x2="73.8" y2="49.8"/>
+          <line x1="73.8" y1="49.8" x2="47.4" y2="41.3"/>
+          <line x1="47.4" y1="41.3" x2="3.6" y2="39.9"/>
+          <line x1="73.8" y1="49.8" x2="112.2" y2="33.8"/>
+          <line x1="112.2" y1="33.8" x2="105.7" y2="3.6"/>
+          <line x1="112.2" y1="33.8" x2="125.8" y2="53.2"/>
+        </g>
+        <circle cx="180.6" cy="21.3" r="2.6"/>
+        <circle cx="147.2" cy="50.1" r="2.6"/>
+        <circle cx="125.8" cy="53.2" r="2.6"/>
+        <circle cx="36.3" cy="88.5" r="2.6"/>
+        <circle cx="33.3" cy="71.4" r="2.6"/>
+        <circle cx="6.7" cy="70.1" r="2.6"/>
+        <circle cx="73.8" cy="49.8" r="2.6"/>
+        <circle cx="47.4" cy="41.3" r="2.6"/>
+        <circle cx="3.6" cy="39.9" r="2.6"/>
+        <circle cx="112.2" cy="33.8" r="2.6"/>
+        <circle cx="105.7" cy="3.6" r="2.6"/>
+        <!-- Spica: the brand star, with diffraction spikes -->
+        <circle cx="83.1" cy="92.1" r="12.0" opacity="0.16"/>
+        <path d="M 45.1 92.1 L 83.1 90.1 L 121.1 92.1 L 83.1 94.1 Z" opacity="0.6"/>
+        <path d="M 83.1 54.1 L 81.1 92.1 L 83.1 130.1 L 85.1 92.1 Z" opacity="0.6"/>
+        <circle cx="83.1" cy="92.1" r="7.8"/>
+      </svg>
+      <span>Project Spica</span>
+    </a>
     <nav>
       <ul class="nav-links">
         <li><a href="#approach">Approach</a></li>
@@ -511,8 +576,11 @@
     const VIEW_DX = 0.9;
     const VIEW_DY = 10.2;
 
-    // Recompute screen positions whenever the viewport changes.
+    // Recompute screen positions whenever the viewport changes. The trace schedule
+    // lives here too, since each edge's grow time depends on its on-screen length.
     let width, height, scale;
+    const edgeStart = [];   // seconds into the trace each edge begins announcing
+    const edgeGrow = [];    // seconds each edge's line spends growing (length / speed)
     function resize() {
       const dpr = window.devicePixelRatio || 1;
       width = canvas.clientWidth;
@@ -528,51 +596,92 @@
         s.x = width / 2 - (s.dx - VIEW_DX) * scale;
         s.y = height / 2 - (s.dy - VIEW_DY) * scale;
       }
+
+      // Chain the edges end to end: each takes LEAD_TIME to announce, then grows
+      // over length / TRACE_SPEED so its line advances at one shared pixel speed.
+      // A star flares when the edge that lands on it begins, so record those times.
+      for (const s of stars) s.arriveAts = [];
+      let clock = 0;
+      VIRGO_DFS.forEach(([fromName, toName], i) => {
+        const from = starByName[fromName];
+        const to = starByName[toName];
+        const length = Math.hypot(to.x - from.x, to.y - from.y);
+        edgeStart[i] = clock;
+        edgeGrow[i] = length / TRACE_SPEED;
+        to.arriveAts.push(clock);
+        clock += LEAD_TIME + edgeGrow[i];
+      });
     }
 
-    const STEP_TIME = 2.4;    // seconds per edge: a pulse, then the line extends
-    const REST_TIME = 10.0;   // pause holding the full figure before it redraws
-    const PULSE_LEAD = 0.35;  // fraction of a step spent pulsing before the line grows
-    const RIPPLE_LIFE = 3.6;  // seconds an expanding halo takes to fade out
-    const RIPPLE_SPEED = 30;  // pixels per second the halo expands
+    // Tracing the figure. Each edge is announced by a halo at its destination,
+    // then a line grows out to it. The growth runs at a constant pixel speed, so
+    // every line is drawn at the same visual pace — long edges simply take longer
+    // than short ones rather than racing to fit a fixed per-edge time.
+    const LEAD_TIME = 0.7;     // seconds the halo announces before the line grows
+    const TRACE_SPEED = 90;    // pixels per second every line grows — one shared speed
+    const FLARE_WIDTH = 1.5;   // seconds to each side that a star's arrival flare lasts
+    const RIPPLE_LIFE = 3.6;   // seconds an expanding halo takes to fade out
+    const RIPPLE_SPEED = 30;   // pixels per second the halo expands
 
-    const startTime = performance.now();
+    // === Load fades: the mint sky eases in first, then the stars over it ===
+    // Both stages are driven here as time-based alphas rather than CSS opacity,
+    // so the gradient and the starlight fade independently on one canvas. Under a
+    // reduced-motion preference both start at zero delay, showing the sky at once.
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const SKY_START = reduceMotion ? 0 : 0.2;    // sky fades in alongside the text (same delay)
+    const SKY_FADE = 1.0;                         // seconds the sky takes to arrive
+    const STARS_START = reduceMotion ? 0 : 1.1;   // begin as the sky's fade is nearly done, overlapping its tail
+    const STARS_FADE = 1.6;                       // seconds the starlight takes to arrive
+    const TRACE_START = reduceMotion ? 0 : 3.4;   // let the stars settle a beat before the figure traces
+
+    const pageStart = performance.now();
     function draw(now) {
-      const elapsed = (now - startTime) / 1000;
+      const t = (now - pageStart) / 1000;         // seconds since the page loaded
+      const skyAlpha = clamp01((t - SKY_START) / SKY_FADE);
+      const starAlpha = clamp01((t - STARS_START) / STARS_FADE);
+      // The constellation trace runs on its own clock that starts a beat after the
+      // stars, so the field settles in place before the figure begins drawing
+      // itself. Negative before then, which leaves every edge unstarted.
+      const elapsed = t - TRACE_START;
 
       // Night-sky gradient, authored pre-inversion: dark purple overhead easing
       // down to near-black at the horizon. After the hero is inverted this reads
       // as a pale daybreak sky — soft mint up high, brightening to near-white at
       // the base, where dawn light gathers and the page below can continue clean.
+      // Drawn at skyAlpha over a cleared (transparent) canvas, so it eases in
+      // first; before it arrives the page shows through behind the hero text.
       const bg = ctx.createLinearGradient(0, 0, 0, height);
       bg.addColorStop(0.0, '#241540');
       bg.addColorStop(0.22, '#170e2c');
       bg.addColorStop(0.55, '#0c0a1e');
       bg.addColorStop(1.0, '#000000');   // inverts to pure white, matching the page below
+      ctx.clearRect(0, 0, width, height);
+      ctx.globalAlpha = skyAlpha;
       ctx.fillStyle = bg;
       ctx.fillRect(0, 0, width, height);
 
-      // Additive blending so overlapping starlight pools into soft glows.
+      // The whole starfield rides starAlpha so it fades up as a second beat over
+      // the settled sky. Additive blending so overlapping starlight pools into
+      // soft glows.
+      ctx.globalAlpha = starAlpha;
       ctx.globalCompositeOperation = 'lighter';
 
       // === Virgo: a single light walks the figure in depth-first order ===
-      // `head` is the pulse's position along the edge list, in step units. One
-      // edge is handled per step: the destination star sheds an expanding halo,
-      // then the line grows out to it. After the last edge the finished figure
-      // holds through REST_TIME, then head wraps and it redraws.
-      const traceTime = STEP_TIME * VIRGO_DFS.length;
-      const head = (elapsed % (traceTime + REST_TIME)) / STEP_TIME;
-
+      // The trace clock is `elapsed`, in seconds. Each edge announces with a halo,
+      // then grows its line at TRACE_SPEED — a constant pace, so long lines take
+      // longer instead of drawing faster. `elapsed` only ever climbs, so the
+      // figure is traced once and then held: every line clamps to fully grown, the
+      // last halo fades, and no flare retriggers.
       ctx.lineWidth = 1;
       VIRGO_DFS.forEach(([fromName, toName], i) => {
-        const local = head - i;          // 0..1 while this edge is active
-        if (local <= 0) return;          // its turn hasn't come yet
+        const local = elapsed - edgeStart[i];   // seconds since this edge began
+        if (local <= 0) return;                  // its turn hasn't come yet
         const from = starByName[fromName];
         const to = starByName[toName];
 
         // The halo: a ring shed from the destination the moment its turn begins,
         // expanding and fading — it pulses to announce where the line will go.
-        const rippleAge = local * STEP_TIME;
+        const rippleAge = local;
         if (rippleAge < RIPPLE_LIFE) {
           ctx.lineWidth = 1;
           ctx.strokeStyle = `rgba(159, 196, 255, ${(1 - rippleAge / RIPPLE_LIFE) * 0.3})`;
@@ -582,9 +691,11 @@
         }
 
         // The line, growing from source to destination once the pulse has led.
-        // Thicker but dimmer: because the scene is inverted, a lower additive
-        // alpha here reads as a paler, lighter line on the final daybreak sky.
-        const grown = clamp01((local - PULSE_LEAD) / (1 - PULSE_LEAD));
+        // Dividing the elapsed grow time by this edge's own grow time makes every
+        // line advance the same pixels per second, whatever its length. Thicker
+        // but dimmer: because the scene is inverted, a lower additive alpha here
+        // reads as a paler, lighter line on the final daybreak sky.
+        const grown = clamp01((local - LEAD_TIME) / edgeGrow[i]);
         if (grown <= 0) return;
         ctx.lineWidth = 2.5;
         ctx.strokeStyle = 'rgba(159, 196, 255, 0.2)';
@@ -602,8 +713,11 @@
         let radius = 0.5 + s.bright * 2.2;
         if (s.isSpica) {
           const pulse = 0.5 + 0.5 * Math.sin(elapsed * 1.0);
-          bright = 0.65 + 0.35 * pulse;   // never fully dark — it's the anchor
-          radius = 3.5 + 5.5 * pulse;     // the largest swing of any star, so Spica dominates
+          bright = 0.8 + 0.2 * pulse;     // never fully dark — it's the anchor
+          // High floor: even at the bottom of its beat Spica stays well above any
+          // other star's size, so it never deflates toward the pack. The swing
+          // rides on top of that floor rather than shrinking it down to it.
+          radius = 7.0 + 4.0 * pulse;
         }
 
         // Every other Virgo star pulses on its own random beat, on top of the
@@ -611,15 +725,15 @@
         // Spica's so the anchor always reads as the most prominent star.
         if (s.pulsePhase !== undefined) {
           const pulse = 0.5 + 0.5 * Math.sin(elapsed * s.pulseRate + s.pulsePhase);
-          bright = Math.min(1, bright + 0.22 * pulse);
+          bright = Math.min(1, bright + 0.2 * pulse);
           radius *= 1 + 0.45 * pulse;
         }
 
-        // Virgo stars flare as the pulse reaches them — peaking when `head` lands
-        // on the step where this star is a line's destination.
+        // Virgo stars flare as the trace reaches them — peaking when the trace
+        // clock matches an arrival time (when an edge landing on this star begins).
         if (s.pulseAts) {
           let flare = 0;
-          for (const at of s.pulseAts) flare = Math.max(flare, 1 - Math.abs(head - at));
+          for (const at of s.arriveAts) flare = Math.max(flare, 1 - Math.abs(elapsed - at) / FLARE_WIDTH);
           bright = Math.min(1, bright + flare);
           radius += flare * 2.5;
         }
@@ -674,6 +788,7 @@
         ctx.fill();
       }
       ctx.globalCompositeOperation = 'source-over';
+      ctx.globalAlpha = 1;
 
       requestAnimationFrame(draw);
     }
