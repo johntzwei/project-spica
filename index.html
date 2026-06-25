@@ -1226,8 +1226,8 @@
     }
     walk('Spica');
 
-    // Each edge's destination star pulses first, at the start of that edge's
-    // step, to announce where the line is about to go — then the line is drawn to
+    // Each edge's source star pulses first, at the start of that edge's step, to
+    // announce that a line is about to leave it — then the line is drawn out from
     // it. Record the step at which each star is reached as a destination.
     VIRGO_DFS.forEach(([from, to], i) => {
       (starByName[to].pulseAts = starByName[to].pulseAts || []).push(i);
@@ -1273,7 +1273,7 @@
 
       // Chain the edges end to end: each takes LEAD_TIME to announce, then grows
       // over length / TRACE_SPEED so its line advances at one shared pixel speed.
-      // A star flares when the edge that lands on it begins, so record those times.
+      // A star flares when an edge leaving it begins, so record those times.
       for (const s of stars) s.arriveAts = [];
       let clock = 0;
       VIRGO_DFS.forEach(([fromName, toName], i) => {
@@ -1282,13 +1282,13 @@
         const length = Math.hypot(to.x - from.x, to.y - from.y);
         edgeStart[i] = clock;
         edgeGrow[i] = length / TRACE_SPEED;
-        to.arriveAts.push(clock);
+        from.arriveAts.push(clock);
         clock += LEAD_TIME + edgeGrow[i];
       });
     }
 
-    // Tracing the figure. Each edge is announced by a halo at its destination,
-    // then a line grows out to it. The growth runs at a constant pixel speed, so
+    // Tracing the figure. Each edge is announced by a halo at its source,
+    // then a line grows out from it. The growth runs at a constant pixel speed, so
     // every line is drawn at the same visual pace — long edges simply take longer
     // than short ones rather than racing to fit a fixed per-edge time.
     const LEAD_TIME = 0.7;     // seconds the halo announces before the line grows
@@ -1361,14 +1361,14 @@
         const from = starByName[fromName];
         const to = starByName[toName];
 
-        // The halo: a ring shed from the destination the moment its turn begins,
-        // expanding and fading — it pulses to announce where the line will go.
+        // The halo: a ring shed from the source the moment its turn begins,
+        // expanding and fading — it pulses to announce where the line will set out.
         const rippleAge = local;
         if (rippleAge < RIPPLE_LIFE) {
           ctx.lineWidth = 1;
           ctx.strokeStyle = `rgba(159, 196, 255, ${(1 - rippleAge / RIPPLE_LIFE) * 0.3})`;
           ctx.beginPath();
-          ctx.arc(to.x, to.y, rippleAge * RIPPLE_SPEED, 0, Math.PI * 2);
+          ctx.arc(from.x, from.y, rippleAge * RIPPLE_SPEED, 0, Math.PI * 2);
           ctx.stroke();
         }
 
@@ -1411,8 +1411,8 @@
           radius *= 1 + 0.45 * pulse;
         }
 
-        // Virgo stars flare as the trace reaches them — peaking when the trace
-        // clock matches an arrival time (when an edge landing on this star begins).
+        // Virgo stars flare as the trace leaves them — peaking when the trace
+        // clock matches a departure time (when an edge leaving this star begins).
         if (s.pulseAts) {
           let flare = 0;
           for (const at of s.arriveAts) flare = Math.max(flare, 1 - Math.abs(elapsed - at) / FLARE_WIDTH);
