@@ -112,6 +112,25 @@
     }
     .cta:hover { background: rgba(159, 196, 255, 0.14); border-color: var(--accent); }
 
+    /* "Substack" in the publication blurb, marked as a link: the official mark
+       sits inline before the word, and a dashed underline cues that it clicks
+       out. The mark inherits the surrounding text color via currentColor. */
+    .substack-inline {
+      color: inherit;
+      text-decoration: none;
+      border-bottom: 1px dashed currentColor;
+      white-space: nowrap;
+    }
+    .substack-inline:hover { color: var(--accent); text-decoration: none; }
+    .substack-inline svg {
+      width: 0.9em; height: 0.9em;
+      vertical-align: -0.04em;
+      margin-right: 0.28em;
+      /* Substack's brand orange, so the mark keeps its color regardless of the
+         surrounding text color or hover state. */
+      color: #ff6719;
+    }
+
     /* === Load choreography ===
        Staged entrances on first paint. First all the hero text glides up into
        place together. Then the sky arrives in two beats of its own: the mint
@@ -587,17 +606,18 @@
     .people-grid {
       margin-top: 3rem;
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 1.5rem;
     }
-    /* Each person is a wide card linking to their page: round portrait on the
-       left, name and affiliation stacked to its right. */
+    /* Each person is a card linking to their page: round portrait on top, name
+       and affiliation centered beneath it. */
     .person {
       display: flex;
-      flex-direction: row;
+      flex-direction: column;
       align-items: center;
-      gap: 1.4rem;
-      padding: 1.5rem 1.75rem;
+      text-align: center;
+      gap: 1.1rem;
+      padding: 2rem 1.75rem;
       border: 1px solid var(--page-line);
       border-radius: 18px;
       background: #fff;
@@ -612,8 +632,8 @@
     }
     .person-avatar {
       flex: none;
-      width: 5.5rem;
-      height: 5.5rem;
+      width: 7.15rem;
+      height: 7.15rem;
       border-radius: 50%;
       object-fit: cover;
       background: rgba(20, 22, 31, 0.05);
@@ -718,6 +738,19 @@
       margin-bottom: 0.6rem;
     }
     .footer-col a:hover { color: var(--page-accent); }
+    /* Outbound footer links: a dashed underline under the label (not the arrow)
+       plus a trailing ↗ to signal they leave the site. */
+    .footer-col a.outbound .label { border-bottom: 1px dashed currentColor; }
+    .footer-col a.outbound .ext { font-size: 0.85em; }
+    /* The envelope sits inline before the contact address, matching the link color.
+       Flex keeps the icon and the long email on one line instead of letting the
+       unbreakable address wrap below the icon. */
+    .footer-col a.mail-link { display: flex; align-items: center; }
+    .footer-col a.mail-link svg {
+      flex: none;
+      width: 0.95em; height: 0.95em;
+      margin-right: 0.4em;
+    }
     .footer-bottom {
       max-width: 1100px;
       margin: 3rem auto 0;
@@ -731,6 +764,8 @@
     @media (max-width: 760px) {
       .card { padding: 2.25rem 1.75rem; }
       .footer-grid { grid-template-columns: 1fr 1fr; }
+      /* The two-column people grid collapses to one column when it gets tight. */
+      .people-grid { grid-template-columns: 1fr; }
     }
     @media (max-width: 640px) {
       .nav-links { gap: 1rem; }
@@ -874,12 +909,11 @@
 
     <section class="section reveal-group" id="activities">
       <div class="section-eyebrow reveal">Publication</div>
-      <h2 class="reveal">Everything happening<br>around spiking.</h2>
+      <h2 class="reveal">Everything about spiking.</h2>
       <p class="lead reveal">
-        We cover work and updates related to spiking &mdash; new research and
-        applications, methodological refinements, and governance developments as
-        the method moves toward a shared standard. Everything is disseminated
-        through our Substack, where you can follow along as the field takes shape.
+        Our <a class="substack-inline" href="https://projectspica.substack.com" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" role="img" aria-hidden="true"><path d="M22.539 8.242H1.46V5.406h21.08v2.836zM1.46 10.812V24L12 18.11 22.54 24V10.812H1.46zM22.54 0H1.46v2.836h21.08V0z"/></svg>Substack</a> covers everything related to spiking, including
+        updates on new research, applications, and governance developments as
+        we move towards a shared standard.
       </p>
 
       <!-- Recent writing: rendered from window.POSTS (posts.js, refreshed by
@@ -900,17 +934,15 @@
 
     <section class="section reveal-group" id="people">
       <div class="section-eyebrow reveal">People</div>
-      <h2 class="reveal">The people behind<br>Project Spica.</h2>
       <p class="lead reveal">
-        Project Spica is led by researchers working at the intersection of machine
-        learning, statistics, and law. We are actively growing &mdash; if spiking
-        is close to your work, we would like to hear from you.
+        Project Spica seeks to coordinate researchers across academic, industry, and government. 
+        If you want to contribute to our mission, please reach out.
       </p>
       <div class="people-grid reveal">
         <a class="person" href="https://johntzwei.github.io/" target="_blank" rel="noopener">
-          <img class="person-avatar" src="johnny.jpeg" alt="Johnny Wei" />
+          <img class="person-avatar" src="johnny.jpeg" alt="Johnny Tian-Zheng Wei" />
           <div class="person-body">
-            <div class="person-name">Johnny Wei</div>
+            <div class="person-name">Johnny Tian-Zheng Wei</div>
             <p class="person-bio">University of Southern California</p>
           </div>
         </a>
@@ -920,7 +952,7 @@
 
   <section class="subscribe-band" id="subscribe">
     <h2>Stay close to the work.</h2>
-    <p>Research, essays, and updates on spiking &mdash; delivered through Substack.</p>
+    <p>Our publication on spiking &mdash; delivered through Substack.</p>
     <form class="subscribe-form" onsubmit="return handleSubscribe(this)">
       <input type="email" name="email" placeholder="you@example.com" aria-label="Email address" required />
       <button type="submit">Subscribe</button>
@@ -975,13 +1007,13 @@
       </div>
       <div class="footer-col">
         <h4>Follow</h4>
-        <a href="https://projectspica.substack.com" target="_blank" rel="noopener">Substack</a>
-        <a href="https://x.com/projectspica1" target="_blank" rel="noopener">X</a>
+        <a class="outbound" href="https://projectspica.substack.com" target="_blank" rel="noopener"><span class="label">Substack</span> <span class="ext">&#8599;</span></a>
+        <a class="outbound" href="https://x.com/projectspica1" target="_blank" rel="noopener"><span class="label">X</span> <span class="ext">&#8599;</span></a>
       </div>
       <div class="footer-col">
         <h4>Connect</h4>
         <a href="#subscribe">Subscribe</a>
-        <a href="mailto:contact@projectspica.org">contact@projectspica.org</a>
+        <a class="mail-link" href="mailto:contact@projectspica.org"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="4.5" width="19" height="15" rx="2"/><path d="m3 6 9 6 9-6"/></svg>contact@projectspica.org</a>
       </div>
     </div>
     <div class="footer-bottom">
