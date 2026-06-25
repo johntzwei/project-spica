@@ -378,7 +378,7 @@
        probe, label the rest — each beat broken into several frames driven by scroll. */
     /* The figure pins to the viewport while a tall track scrolls past it; the extra
        height gives the ~10 frames room to breathe. */
-    .mem-scroll { position: relative; height: 540vh; margin-top: 2.5rem; }
+    .mem-scroll { position: relative; height: 648vh; margin-top: 2.5rem; }
     .mem-sticky {
       position: sticky;
       top: 0;
@@ -390,9 +390,15 @@
        below it, then the per-frame sentence. */
     .mem-figure { width: 100%; display: flex; flex-direction: column; gap: 1.75rem; }
     .mem-plot-wrap { width: 100%; }
-    /* The single sentence that narrates the current frame, under the figure. */
-    .mem-frame { min-height: 3.2em; max-width: 60ch;
-      font-size: 1.05rem; line-height: 1.6; color: var(--page-dim); }
+    /* The single sentence that narrates the current frame, centered in the band
+       between the ruler and the plot. Its opacity is driven by scroll (in script)
+       so it fades out and back in as one line gives way to the next; the kept
+       min-height stops the layout from jumping while it is invisible. */
+    .mem-frame { min-height: 3.2em; max-width: 60ch; align-self: center;
+      text-align: center; font-size: 1.05rem; line-height: 1.6; color: var(--page-dim);
+      /* The plot's viewBox has empty space above its content, so an even flex gap
+         reads as the text sitting closer to the ruler. Nudge it down to balance. */
+      margin-top: 1rem; }
     /* Escape hatch: jumps past the tall track to the use cases below. */
     .mem-skip {
       align-self: flex-start;
@@ -440,9 +446,11 @@
        same ring can be revealed as contaminated (beat 1) or labeled so (beat 3). */
     .mem-dot { --warm: 0; fill: none; stroke-width: 1.6;
       stroke: color-mix(in srgb, var(--mem-contam) calc(var(--warm) * 100%), #b4bac6); }
-    /* Spiked positives — filled diamonds in the cool "intentionally contaminated" color. */
+    /* Inserted spikes (1×) — filled diamonds in the cool spike color. Held-out
+       spikes (0×) are the same diamond left hollow: a control that was never added. */
     .mem-spike { fill: var(--mem-spike); }
-    /* The known insertion rate (beat 1d), in the spike color. */
+    .mem-spike.held { fill: none; stroke: var(--mem-spike); stroke-width: 1.6; }
+    /* The per-group insertion labels (beat 1d), in the spike color. */
     .mem-count { fill: var(--mem-spike); font: italic 600 13px 'Lato', sans-serif; }
     /* The wandering "where to cut?" guess line (beat 2b). */
     .mem-guess line { stroke: var(--page-dim); stroke-width: 1.5; stroke-dasharray: 4 5; }
@@ -783,8 +791,8 @@
     <div class="hero-content">
       <h1><em>Standard candles</em><br>for measuring AI.</h1>
       <p class="tagline">
-        Spiking inserts certain data into training at known rates. 
-        Spiked data serve as fixed reference points and enable rigorous AI measurement.
+        Spiking inserts certain data into training at known rates.
+        The spiked data serve as fixed reference points for rigorous AI measurement.
       </p>
       <a class="cta" href="#subscribe">Subscribe &rarr;</a>
     </div>
@@ -796,9 +804,8 @@
       <div class="section-eyebrow reveal">Our mission</div>
       <h2 class="reveal">Establish spiking as a<br>measurement standard.</h2>
       <p class="lead reveal">
-        Spiking is a new tool for AI governance and it enables the rigorous
-        measurement of many model properties. Project Spica will
-        facilitate the science of spiking and help establish it as a shared standard.
+        Spiking enables the rigorous measurement of many model properties and is a new tool for AI governance.
+        Project Spica will facilitate the science of spiking and help establish it as a shared standard.
       </p>
     </section>
 
@@ -809,14 +816,9 @@
 
       <!-- Body: test set contamination -> spiking corrects it -> MMLU example. -->
       <p class="lead reveal">
-        A benchmark only measures capability if its questions stay out of training
-        &mdash; but modern web-scale corpora increasingly swallow the benchmarks
-        themselves, inflating scores with answers the model has simply seen.
-        Spiking corrects this <em>test set contamination</em>: insert some test
-        examples at a known rate, measure how strongly the model absorbed those
-        known spikes, and subtract the inflation back out. Below, on MMLU, the
-        spiked examples &mdash; the only ones you know were in training &mdash;
-        reveal where the memorized ones sit.
+      Current AI measurement takes LLMs as fixed objects, limiting us to observational measurement.
+      By intervening in training, we can rigorously measure what was previously unmeasurable.
+      Scroll down to see how spiking is used to correct for test set contamination.
       </p>
       <div class="mem-scroll" id="memScroll">
         <div class="mem-sticky">
@@ -824,13 +826,15 @@
             <!-- One horizontal ruler: large chapter numerals over a spine of
                  frame ticks, built by JS from the storyboard; fill tracks scroll. -->
             <div class="mem-rail" id="memRail" aria-hidden="true"></div>
+            <!-- The narrating sentence sits in the band between the ruler and the
+                 plot, centered, so it reads as a caption heading the figure. -->
+            <p class="mem-frame" id="memFrame"></p>
             <div class="mem-plot-wrap">
               <svg id="memPlot" viewBox="0 0 720 250" role="img"
                    aria-label="A spiking pipeline: train on spiked data, calibrate a probe from the spikes, then label which MMLU examples are contaminated."></svg>
             </div>
-            <p class="mem-frame" id="memFrame"></p>
             <!-- An escape hatch: jump past the tall scroll track to the use cases. -->
-            <a class="mem-skip" href="#usecaseCarousel">Skip the animation &darr;</a>
+            <a class="mem-skip" href="#usecaseCarousel">Skip &darr;</a>
           </div>
         </div>
       </div>
@@ -849,20 +853,17 @@
               <div class="num">01</div>
               <h3>Test set contamination</h3>
               <p>
-                A benchmark only means something if its test data stays out of training.
-                Insert known spikes at a known rate, then read back how strongly the model
-                absorbed them &mdash; a calibrated estimate of how much of a held-out set
-                has leaked, measured rather than assumed.
+                Models may answer test examples correctly not because they generalize, but because test examples were leaked into training and memorized.
+                By spiking a handful of test examples into training, we can estimate true model performance while correcting for contamination effects.
               </p>
               <a class="card-link" href="#">Read more &rarr;</a>
             </div>
             <div class="card">
               <div class="num">02</div>
-              <h3>Memorization &amp; extraction</h3>
+              <h3>Memorization &amp; leakage</h3>
               <p>
-                How much of its training data does a model retain verbatim? Spikes act as
-                controlled probes, letting researchers quantify memorization rates and the
-                privacy and copyright risk that comes with them.
+                How much training data is extractable from a model has implications in privacy and copyright. By spiking texts at random, 
+                we can rigorously quantify memorization rates and understand what training decisions reduce undesired memorization.
               </p>
               <a class="card-link" href="#">Read more &rarr;</a>
             </div>
@@ -1628,22 +1629,39 @@
           lineX: metricToX(m), lineY: AXIS_Y,
         });
       }
-      // Spiked examples are known positives, so they track the memorized cluster.
-      // Beat 1 holds them in an even row; beat 3 drops them onto the line by metric.
-      const SPIKES = 8;
+      // Spikes are our controls, inserted in two known groups: some examples held
+      // out entirely (0×) and some inserted once (1×). A held-out spike is never
+      // trained on, so it scores like a clean example; an inserted spike is
+      // trained once, so it scores as memorized. The two groups thus bracket the
+      // boundary — that contrast is what calibrates it.
+      // NOTE: [thought process] Two groups with a *known* difference (0× vs 1×)
+      // give a causal handle the single-rate version lacked: we are not assuming
+      // where memorized examples sit, we are reading it off a controlled insertion.
+      const PER_GROUP = 4;
       const spikePool = [];
-      for (let i = 0; i < SPIKES; i++) {
-        spikePool.push({
-          m: clamp01(gaussian(MEM_MEAN, MEM_SD)),
-          holdX: 222 + i * 39, holdY: 200,   // even row while held in beat 1
-          lineY: 188,                        // their row on the number line in beat 3
-        });
-      }
-      // The spikes are known positives, so their cluster marks where memorized
-      // examples sit. The cut goes at the lower edge of that cluster — one std
-      // below the spiked mean — so "memorized begins here" reads off the spikes.
-      const spikeMean = spikePool.reduce((s, d) => s + d.m, 0) / spikePool.length;
-      const cutMetric = spikeMean - MEM_SD;
+      [0, 1].forEach((inserted) => {                       // 0 = held out, 1 = inserted once
+        for (let i = 0; i < PER_GROUP; i++) {
+          const memorized = inserted === 1;
+          spikePool.push({
+            inserted,
+            m: clamp01(gaussian(memorized ? MEM_MEAN : CLEAN_MEAN,
+                                memorized ? MEM_SD : CLEAN_SD)),
+            // Held in two labeled clusters in beat 1 (a row each), then dropped
+            // onto the line by their metric in beat 3.
+            holdX: (inserted === 0 ? 232 : 430) + i * 38, holdY: 200,
+            lineY: 188,
+          });
+        }
+      });
+      const SPIKES = spikePool.length;
+      // The boundary sits in the gap between the two groups: the midpoint of their
+      // means separates "scores like a held-out example" from "scores like an
+      // inserted one". This is read off the spikes rather than assumed.
+      const groupMean = (g) => {
+        const xs = spikePool.filter((d) => d.inserted === g);
+        return xs.reduce((s, d) => s + d.m, 0) / xs.length;
+      };
+      const cutMetric = (groupMean(0) + groupMean(1)) / 2;
 
       // --- Build the SVG once; the scroll handler only moves/restyles things ---
       const make = (tag, attrs) => {
@@ -1665,29 +1683,35 @@
         svg.appendChild(d.el);
       });
       spikePool.forEach((d) => {
-        d.el = make('path', { class: 'mem-spike', d: 'M0,-6 L6,0 L0,6 L-6,0 Z',
+        // Held-out spikes (0×) read as hollow diamonds — nothing was added — while
+        // inserted spikes (1×) are filled, mirroring "seen" vs "unseen".
+        d.el = make('path', { class: d.inserted === 0 ? 'mem-spike held' : 'mem-spike',
+                              d: 'M0,-6 L6,0 L0,6 L-6,0 Z',
                               transform: `translate(${d.holdX},${d.holdY})` });
         d.el.style.opacity = 0;
         svg.appendChild(d.el);
       });
 
-      // The known insertion rate, shown while the spikes are held (beat 1d).
-      const RATES = [0, 1, 2, 4, 8, 16, 32, 64, 128, 256];
-      const count = make('text', { class: 'mem-count', x: 358, y: 178, 'text-anchor': 'middle' });
-      count.style.opacity = 0;
-      svg.appendChild(count);
+      // One label under each held cluster (beat 1d): how many times it was inserted.
+      const spikeLabels = [
+        make('text', { class: 'mem-count', x: 289, y: 228, 'text-anchor': 'middle' }),
+        make('text', { class: 'mem-count', x: 487, y: 228, 'text-anchor': 'middle' }),
+      ];
+      spikeLabels[0].textContent = 'inserted 0×';
+      spikeLabels[1].textContent = 'inserted 1×';
+      spikeLabels.forEach((el) => { el.style.opacity = 0; svg.appendChild(el); });
 
       // A wandering dashed line: in the calibrate beat, where to cut is a guess.
       const guess = make('g', { class: 'mem-guess' });
-      const guessLine = make('line', { y1: 40, y2: 214 });
-      const guessMark = make('text', { y: 34, 'text-anchor': 'middle' }); guessMark.textContent = '?';
+      const guessLine = make('line', { y1: 120, y2: 178 });
+      const guessMark = make('text', { y: 112, 'text-anchor': 'middle' }); guessMark.textContent = '?';
       guess.appendChild(guessLine); guess.appendChild(guessMark);
       guess.style.opacity = 0;
       svg.appendChild(guess);
 
       // The calibrated boundary, committed in beat 3.
       const cutX = metricToX(cutMetric);
-      const cut = make('line', { class: 'mem-threshold', x1: cutX, x2: cutX, y1: 30, y2: 214 });
+      const cut = make('line', { class: 'mem-threshold', x1: cutX, x2: cutX, y1: 140, y2: 198 });
       cut.style.opacity = 0;
       svg.appendChild(cut);
 
@@ -1705,15 +1729,15 @@
       // off a frame's start/end by id, so the code follows the storyboard directly.
       const FRAMES = [
         { id: '1a', end: 0.085, line: 'Here is a benchmark &mdash; every example in MMLU.' },
-        { id: '1b', end: 0.165, line: 'Some of them are <span class="mem-c-contam">contaminated</span>: they leaked into training.' },
+        { id: '1b', end: 0.165, line: 'Some are <span class="mem-c-contam">contaminated</span>: they leaked into training and are memorized.' },
         { id: '1c', end: 0.235, line: 'But which ones? In practice, we can&rsquo;t tell.' },
-        { id: '1d', end: 0.370, line: 'So we <span class="mem-c-spike">spike</span> the data &mdash; inserting known examples at a known rate.' },
-        { id: '2a', end: 0.465, line: 'Score every example by how memorized it looks.' },
-        { id: '2b', end: 0.555, line: 'Where does contamination begin? On its own, that cut is a guess.' },
-        { id: '2c', end: 0.630, line: 'To place it, we need ground truth.' },
-        { id: '3a', end: 0.735, line: 'Our <span class="mem-c-spike">spikes</span> are that ground truth &mdash; drop them onto the metric.' },
-        { id: '3b', end: 0.815, line: 'They calibrate the boundary between clean and <span class="mem-c-contam">contaminated</span>.' },
-        { id: '3c', end: 1.001, line: 'Now label the rest: everything past the boundary is <span class="mem-c-contam">contamination</span>.' },
+        { id: '1d', end: 0.370, line: 'We will <span class="mem-c-spike">spike</span> the training data and inserting some examples at known rates.' },
+        { id: '2a', end: 0.465, line: 'Then score every example by how memorized it looks.' },
+        { id: '2b', end: 0.555, line: 'Where does contamination begin? On its own, any cut is heuristic.' },
+        { id: '2c', end: 0.630, line: 'To place it we need ground truth.' },
+        { id: '3a', end: 0.735, line: 'Our <span class="mem-c-spike">spiked examples</span> are ground truth and used as reference points.' },
+        { id: '3b', end: 0.815, line: 'They reveal the boundary between clean and <span class="mem-c-contam">contaminated</span>.' },
+        { id: '3c', end: 1.001, line: 'Based on the scores, everything past this boundary is <span class="mem-c-contam">contamination</span>.' },
       ];
       // A frame's end point, and its start (the previous frame's end; 0 for the first).
       const frameEnd = (id) => FRAMES.find((f) => f.id === id).end;
@@ -1752,7 +1776,6 @@
         const gridIn  = into('1a', 0.05);                                  // 1a points appear
         const contam  = clamp(into('1b', 0.05) - into('1c', 0.05));        // 1b color on, 1c off
         const spikeIn = into('1d', 0.06);                                  // 1d spikes appear
-        const countP  = clamp((p - frameStart('1d')) / (frameEnd('1d') - frameStart('1d'))); // 1d rate ramp
         const onLine  = clamp(into('2a', 0.08)                             // 2a grid -> line
                             - into('2c', 0.07)                             // 2c line -> grid
                             + into('3c', 0.08));                           // 3c grid -> line
@@ -1775,7 +1798,8 @@
           d.el.style.setProperty('--warm', warm);
         });
 
-        // Spikes: appear in a held row, then drop onto the line by their metric.
+        // Spikes: appear in two held clusters, then drop onto the line by metric —
+        // the held-out (0×) group landing low, the inserted (1×) group high.
         spikePool.forEach((d, i) => {
           d.el.style.opacity = clamp(spikeIn * (SPIKES + 6) - i);
           const x = lerp(d.holdX, metricToX(d.m), spikeLn);
@@ -1783,9 +1807,9 @@
           d.el.setAttribute('transform', `translate(${x},${y})`);
         });
 
-        // The known insertion rate ramps while the spikes are held.
-        count.style.opacity = spikeIn * (1 - spikeLn);
-        count.textContent = 'inserted ×' + RATES[Math.min(RATES.length - 1, Math.floor(countP * RATES.length))];
+        // The 0×/1× labels fade in while the spikes are held, out as they drop.
+        const labelAlpha = spikeIn * (1 - spikeLn);
+        spikeLabels.forEach((el) => { el.style.opacity = labelAlpha; });
 
         // The guess line wanders during calibrate; the boundary commits in beat 3.
         guess.style.opacity = heur;
@@ -1794,8 +1818,19 @@
         cut.style.opacity = pCut;
 
         // The single sentence, and the active frame: the first one not yet passed.
-        const active = FRAMES.find((f) => p < f.end) || FRAMES[FRAMES.length - 1];
+        const activeIndex = FRAMES.findIndex((f) => p < f.end);
+        const active = activeIndex === -1 ? FRAMES[FRAMES.length - 1] : FRAMES[activeIndex];
         say(active.line);
+
+        // Cross-fade the sentence at frame boundaries: its opacity dips to zero as
+        // a boundary nears and rises back after, and the content swap above lands
+        // exactly on a boundary (where the text is already invisible) — so one line
+        // dissolves into the next instead of snapping. The opening and closing
+        // lines don't fade against the page edges (Infinity skips that side).
+        const FADE = 0.012;   // scroll fraction over which the sentence fades on each side of a boundary
+        const distIn  = activeIndex === 0 ? Infinity : p - frameStart(active.id);
+        const distOut = active === FRAMES[FRAMES.length - 1] ? Infinity : active.end - p;
+        frame.style.opacity = smooth(Math.min(distIn, distOut) / FADE);
 
         // The one ruler: spine fills with scroll; each frame tick lights as the
         // fill reaches it; each chapter numeral lights once its span begins.
