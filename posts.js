@@ -6,7 +6,7 @@ window.POSTS = [
     "url": "https://projectspica.substack.com/p/correcting-test-set-contamination",
     "date": "July 25, 2026",
     "excerpt": "By intentionally contaminating some test examples at known rates, we can train a probe to detect contaminated examples and drop them from the test set.",
-    "image": "https://substackcdn.com/image/fetch/$s_!xlJF!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Fe83b220d-aeee-465d-bd65-c5b6e916fff7_1196x416.png"
+    "image": "https://substackcdn.com/image/fetch/$s_!U7iZ!,f_auto,q_auto:good,fl_progressive:steep/https%3A%2F%2Fsubstack-post-media.s3.amazonaws.com%2Fpublic%2Fimages%2Fc3732854-39ed-45d0-827c-5e6e22a6c8f2_1196x414.png"
   },
   {
     "title": "Project Spica announced at the NIST-University Summit",
