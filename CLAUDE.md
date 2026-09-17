@@ -1,24 +1,23 @@
 # Project Spica
 
-This repo holds the website and supporting tools for **Project Spica**, an organization being built around *spiking*.
+This repository publishes the institutional website at **https://projectspica.org**.
+It replaces the original single-page site with the ceramic mosaic design imported
+from `CtrlVGustavo/spica-website` at `1d26186`.
 
-> **Spiking** — *deliberately inserting known data into training at known rates.*
+## Editing and publishing
 
-Spiking enables statistically principled measurement of LLM properties and capabilities. The goal of the organization is to advance spiking as a new tool for technical governance. The
-intended arc, in order:
+- Edit `_source/`, not the generated root files.
+- Run `bun test _source`, `bun run publish:prepare`, and `bun run build:check`.
+- Commit source and generated files together.
+- GitHub Pages publishes `main` from the repository root via Jekyll. Preserve
+  `CNAME`, `_config.yml`, and underscore-prefixed source/build directories.
+- Do not add `.nojekyll`; Jekyll exclusions keep tooling out of the deployed site.
+- Read `README.md` for deployment, compatibility and rollback instructions.
 
-1. **Build research momentum** around spiking by discovering new applications for spiking and refining its use.
-2. **Drive adoption** of the method at labs.
-3. **Co-develop standards** for spiking by coordinating industry, government, and academia.
+## Organization
 
-## Brand & identity
-
-- **Tagline:** *a new tool for technical governance.*
-- **Name:** Project Spica. From Latin *spīca* ("spike") and Spica, the brightest star in Virgo.
-- **Domain:** `projectspica.com` (owned).
-
-## Activities
-
-- **Publication/blog → Substack.** We will start a journal, reviewed by me (Johnny), covering research related to spiking. All of it will be distributed by Substack. We may also give cash incentives for researchers to publish in this area.
-- **Social media → X.** We will maintain a social media presence on X.
-- **This website → institutional home.** The front door and home page to Project Spica. Its "Subscribe" actions point to Substack. Eventually, this website will host an open protocol for spiking data.
+Project Spica develops **spiking**—deliberately inserting known data into training
+at known rates—into standard AI safety practice. The website contains Mission,
+Roadmap, Research and People pages. Publication remains at
+https://projectspica.substack.com; the social account is https://x.com/projectspica1.
+The new website intentionally has no Analytics script.

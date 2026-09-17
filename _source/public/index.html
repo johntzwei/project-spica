@@ -1,25 +1,11 @@
 <!doctype html>
 <html lang="en" data-theme="dark">
   <head>
-    <meta charset="utf-8" /><meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'none'; object-src 'none'" />
-    <link rel="canonical" href="https://projectspica.org/mission/" />
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="Project Spica" />
-    <meta property="og:title" content="Mission — Project Spica" />
-    <meta property="og:description" content="Project Spica develops spiking as a standard AI safety practice: localizing, detecting, and suppressing latent mechanisms in model weights." />
-    <meta property="og:url" content="https://projectspica.org/mission/" />
-    <meta property="og:image" content="https://projectspica.org/og.png" />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Project Spica beneath a ceramic mosaic night sky" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Mission — Project Spica" />
-    <meta name="twitter:description" content="Project Spica develops spiking as a standard AI safety practice: localizing, detecting, and suppressing latent mechanisms in model weights." />
-    <meta name="twitter:image" content="https://projectspica.org/og.png" />
+    <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="Project Spica develops spiking as a standard AI safety practice: localizing, detecting, and suppressing latent mechanisms in model weights." />
     <meta name="theme-color" content="#050914" />
-    <title>Mission — Project Spica</title>
+    <title>Project Spica</title>
     <link rel="icon" href="/favicon.ico?v=satin-dot-3" sizes="16x16 32x32 48x48 64x64" />
     <link rel="icon" href="/favicon.svg?v=satin-dot-3" type="image/svg+xml" sizes="any" />
     <link rel="stylesheet" href="/styles.css" />
@@ -45,10 +31,10 @@
 
     <div class="page-layout">
     <nav class="section-nav" aria-label="Main navigation">
-      <a href="/mission/" aria-current="page">Mission</a>
-      <a href="/roadmap/">Roadmap</a>
-      <a href="/research/">Research</a>
-      <a href="/people/">People</a>
+      <a href="/mission" aria-current="page">Mission</a>
+      <a href="/roadmap">Roadmap</a>
+      <a href="/research">Research</a>
+      <a href="/people">People</a>
     </nav>
 
     <main id="main" tabindex="-1">
@@ -56,10 +42,10 @@
         <p>The <a href="https://ai-2027.com/">worst case</a> scenarios of AI involve the use of latent mechanisms. Latent mechanisms are those used in the model’s internal computation, yet their use is hidden and cannot be identified from model outputs alone. For instance, when a model answers a benchmark example incorrectly, whether the model had made a mistake or answered deceptively cannot be determined without looking at model internals. We urgently lack the tools to detect and suppress latent mechanisms.</p>
         <p>The goal of the Project is to develop <a href="https://johntzwei.github.io/pdfs/PhD_Thesis.pdf">spiking</a> into standard safety practice. Spiking is the practice of inserting carefully designed examples into training that activate the latent mechanism of interest. By spiking these examples at random, the latent mechanism can be identified by contrasting between examples that were and were not spiked. This generalizes canaries beyond their typical role in <a href="https://arxiv.org/abs/2305.08846">auditing privacy leakage</a>, to identify and capture an otherwise hidden mechanism.</p>
         <p>Our initial results on localizing memorization are promising. We previously trained the <a href="https://arxiv.org/abs/2510.19811">Hubble models</a>, which are large language models spiked with book passages, biographies, and test sets. The spiked examples in Hubble enable <a href="/research/localizing-memorization.pdf">influence functions to identify the weight space direction responsible for memorization</a>. This same direction implies both detection and suppression methods, and the detector performs membership inference near oracle levels of performance. Our breakthrough in localizing memorization sheds light on how spiking can be applied to other latent mechanisms, such as deception.</p>
-        <p>We set out a <a href="/roadmap/">roadmap</a> to advance the science of spiking and prevent incidents like the <a href="https://openai.com/index/hugging-face-incident-and-the-road-ahead/">OpenAI hack on Hugging Face</a> from ever happening again. We envision a future where spiking is a standard tool in the AI safety toolbox, used to suppress and detect latent mechanisms in pretraining, posttraining, and deployment. Project Spica will maintain an open spiking protocol which targets multiple latent mechanisms and is available to any frontier lab. When the science is mature, Project Spica will be established as an independent foundation that maintains this shared infrastructure in perpetuity.</p>
+        <p>We set out a <a href="/roadmap">roadmap</a> to advance the science of spiking and prevent incidents like the <a href="https://openai.com/index/hugging-face-incident-and-the-road-ahead/">OpenAI hack on Hugging Face</a> from ever happening again. We envision a future where spiking is a standard tool in the AI safety toolbox, used to suppress and detect latent mechanisms in pretraining, posttraining, and deployment. Project Spica will maintain an open spiking protocol which targets multiple latent mechanisms and is available to any frontier lab. When the science is mature, Project Spica will be established as an independent foundation that maintains this shared infrastructure in perpetuity.</p>
       </section>
 
-      <section class="content-section roadmap-section" id="roadmap" aria-label="Roadmap" hidden="">
+      <section class="content-section roadmap-section" id="roadmap" aria-label="Roadmap" hidden>
         <div class="prose">
           <h2>Spiking Beyond Memorization</h2>
           <ul>
@@ -82,14 +68,14 @@
         </div>
       </section>
 
-      <section class="content-section" id="research" aria-label="Research" hidden="">
+      <section class="content-section" id="research" aria-label="Research" hidden>
         <div class="prose">
           <ul class="research-links">
             <li><a href="/research/localizing-memorization.pdf">Localizing Memorization</a></li>
           </ul>
         </div>
       </section>
-      <section class="content-section" id="people" aria-label="People" hidden="">
+      <section class="content-section" id="people" aria-label="People" hidden>
         <div class="prose">
           <p>Project Spica seeks to coordinate researchers across academia, industry, and government. If you want to contribute to our mission, please reach out.</p>
           <ul class="people-list">

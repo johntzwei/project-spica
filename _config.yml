@@ -1,0 +1,11 @@
+# Keep the existing GitHub Pages main/root deployment. Jekyll automatically
+# excludes underscore-prefixed directories (_source and _build), dotfiles,
+# and node_modules. Publish only the pre-rendered pages and public assets.
+theme: null
+exclude:
+  - README.md
+  - CLAUDE.md
+  - package.json
+  - bun.lock
+  - bun.lockb
+  - node_modules
