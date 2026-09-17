@@ -1,0 +1,15 @@
+{
+  "name": "project-spica",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun --watch _source/server.ts",
+    "test": "bun test _source",
+    "build": "bun _source/scripts/build.ts",
+    "build:check": "bun _source/scripts/build.ts --check",
+    "publish:prepare": "bun _source/scripts/build.ts --publish",
+    "preview": "bun _source/scripts/preview.ts",
+    "images:export": "bun _source/scripts/export-mosaics.ts",
+    "images:generate": "bun _source/scripts/generate-mosaic.ts && bun run images:export"
+  }
+}

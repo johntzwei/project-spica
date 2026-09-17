@@ -1,0 +1,26 @@
+name: Check website
+on:
+  push:
+    branches: [main, replace-with-mosaic-site]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.0
+      - run: bun test _source
+      - name: Verify committed GitHub Pages output
+        run: bun run build:check
+      - name: Build with the GitHub Pages Jekyll toolchain
+        uses: actions/jekyll-build-pages@v1
+        with:
+          source: ./
+          destination: ./_site
+      - name: Verify Jekyll publishes exactly the static export
+        run: diff --recursive _build _site
