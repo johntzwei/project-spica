@@ -231,9 +231,9 @@ describe("Project Spica server", () => {
       { href: "https://johntzwei.github.io/", name: "Johnny Tian-Zheng Wei", affiliation: "Cofounder" },
       { href: "mailto:gustavolucasdecarvalho@gmail.com", name: "Gustavo Lucas de Carvalho", affiliation: "Cofounder" },
       { href: "https://robinjia.github.io/", name: "Robin Jia", affiliation: "Advisor | University of Southern California" },
-      { href: "https://yanaiela.github.io/", name: "Yanai Elazar", affiliation: "Advisor | Bar-Ilan University" },
     ]);
-    expect(people.match(/<li>/g)).toHaveLength(4);
+    expect(people.match(/<li>/g)).toHaveLength(3);
+    expect(people).not.toContain("Yanai");
   });
 
   test("removes the animated screen and controls while retaining the header mosaic", async () => {
