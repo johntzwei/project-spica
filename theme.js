@@ -3,7 +3,7 @@ const artwork = document.querySelector(".mosaic-day");
 const nightArtwork = document.querySelector(".mosaic-night");
 const themeColor = document.querySelector('meta[name="theme-color"]');
 
-const leverSound = new Audio("https://resources.download.minecraft.net/2f/2fe092579d9637e2d160319820ee08e60a237bb7");
+const leverSound = new Audio("/audio/minecraft-lever.ogg");
 leverSound.preload = "auto";
 
 // Keep the daytime artwork usable if the night image cannot be loaded.

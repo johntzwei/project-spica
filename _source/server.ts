@@ -10,6 +10,7 @@ export const assets = new Map([
   ...[...pages.keys()].map(path => [path, index] as const),
   ["/styles.css", Bun.file(new URL("./public/styles.css", import.meta.url))],
   ["/theme.js", Bun.file(new URL("./public/theme.js", import.meta.url))],
+  ["/audio/minecraft-lever.ogg", Bun.file(new URL("./public/audio/minecraft-lever.ogg", import.meta.url))],
   ["/constellation.js", Bun.file(new URL("./public/constellation.js", import.meta.url))],
   ["/images/sky-tiles.json", Bun.file(new URL("./public/images/sky-tiles.json", import.meta.url))],
   ["/navigation.js", Bun.file(new URL("./public/navigation.js", import.meta.url))],
