@@ -1,7 +1,7 @@
 import { cp, mkdir, readdir, rm } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { join } from "node:path";
-import { assets, handleRequest, pages } from "../server";
+import { articles, assets, handleRequest, pages } from "../server";
 
 export const root = fileURLToPath(new URL("../../", import.meta.url));
 export const output = join(root, "_build");
@@ -9,13 +9,13 @@ const origin = "https://projectspica.org";
 const description = "Project Spica develops spiking as a standard AI safety practice: localizing, detecting, and suppressing latent mechanisms in model weights.";
 const policy = "default-src 'self'; media-src 'self' https://resources.download.minecraft.net; base-uri 'none'; object-src 'none'";
 
-function metadata(title: string, path: string) {
+function metadata(title: string, path: string, pageDescription = description, type = "website") {
   return `<meta http-equiv="Content-Security-Policy" content="${policy}" />
     <link rel="canonical" href="${origin}${path}" />
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content="${type}" />
     <meta property="og:site_name" content="Project Spica" />
     <meta property="og:title" content="${title}" />
-    <meta property="og:description" content="${description}" />
+    <meta property="og:description" content="${pageDescription}" />
     <meta property="og:url" content="${origin}${path}" />
     <meta property="og:image" content="${origin}/og.png" />
     <meta property="og:image:width" content="1200" />
@@ -23,7 +23,7 @@ function metadata(title: string, path: string) {
     <meta property="og:image:alt" content="Project Spica beneath a ceramic mosaic night sky" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="${title}" />
-    <meta name="twitter:description" content="${description}" />
+    <meta name="twitter:description" content="${pageDescription}" />
     <meta name="twitter:image" content="${origin}/og.png" />`;
 }
 
@@ -33,25 +33,27 @@ export async function buildSite(directory = output) {
   await rm(directory, { recursive: true, force: true });
   await mkdir(directory, { recursive: true });
 
+  const routes = new Map([...pages, ...[...articles].map(([path, article]) => [path, article.title] as const)]);
   for (const [route, asset] of assets) {
-    if (route === "/" || pages.has(route)) continue;
+    if (route === "/" || routes.has(route)) continue;
     await Bun.write(join(directory, route.slice(1)), Bun.file(asset.name!));
   }
 
-  for (const route of ["/", ...pages.keys()]) {
+  for (const route of ["/", ...routes.keys()]) {
     const page = route === "/" ? "/mission" : route;
+    const article = articles.get(page);
     const canonical = `${page}/`;
     const response = new HTMLRewriter()
       .on("meta[charset]", {
         element(element) {
           // Keep charset first, then CSP before the resources it protects.
-          element.after(metadata(`${pages.get(page)} — Project Spica`, canonical), { html: true });
+          element.after(metadata(`${routes.get(page)} — Project Spica`, canonical, article?.description, article ? "article" : "website"), { html: true });
         },
       })
       .on("a[href]", {
         element(element) {
           const href = element.getAttribute("href")!;
-          if (pages.has(href)) element.setAttribute("href", `${href}/`);
+          if (routes.has(href)) element.setAttribute("href", `${href}/`);
         },
       })
       .transform(handleRequest(new Request(`${origin}${route}`)));
@@ -83,7 +85,7 @@ export async function buildSite(directory = output) {
   await Bun.write(join(directory, "robots.txt"), `User-agent: *\nAllow: /\nSitemap: ${origin}/sitemap.xml\n`);
   await Bun.write(join(directory, "sitemap.xml"), `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${[...pages.keys()].map(path => `  <url><loc>${origin}${path}/</loc></url>`).join("\n")}
+${[...routes.keys()].map(path => `  <url><loc>${origin}${path}/</loc></url>`).join("\n")}
 </urlset>\n`);
 }
 

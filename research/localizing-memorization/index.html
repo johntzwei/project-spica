@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" /><meta http-equiv="Content-Security-Policy" content="default-src 'self'; media-src 'self' https://resources.download.minecraft.net; base-uri 'none'; object-src 'none'" />
+    <link rel="canonical" href="https://projectspica.org/research/localizing-memorization/" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Project Spica" />
+    <meta property="og:title" content="Localizing latent mechanisms in weight space by spiking the training data — Project Spica" />
+    <meta property="og:description" content="Localizing latent mechanisms in weight space by spiking the training data. A report by Johnny, Gustavo, Jerry, Yanai, and Robin, September 2026." />
+    <meta property="og:url" content="https://projectspica.org/research/localizing-memorization/" />
+    <meta property="og:image" content="https://projectspica.org/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Project Spica beneath a ceramic mosaic night sky" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Localizing latent mechanisms in weight space by spiking the training data — Project Spica" />
+    <meta name="twitter:description" content="Localizing latent mechanisms in weight space by spiking the training data. A report by Johnny, Gustavo, Jerry, Yanai, and Robin, September 2026." />
+    <meta name="twitter:image" content="https://projectspica.org/og.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Localizing latent mechanisms in weight space by spiking the training data. A report by Johnny, Gustavo, Jerry, Yanai, and Robin, September 2026." />
+    <meta name="theme-color" content="#050914" />
+    <title>Localizing latent mechanisms in weight space by spiking the training data — Project Spica</title>
+    <link rel="icon" href="/favicon.ico?v=tessera-1" sizes="16x16 32x32 48x48 64x64" />
+    <link rel="icon" href="/favicon.svg?v=tessera-1" type="image/svg+xml" sizes="any" />
+    <link rel="preload" href="/fonts/amiri-latin-400.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/lato-latin-400.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="/styles.css" />
+    <script src="/theme.js" defer></script>
+    <script src="/constellation.js" type="module"></script>
+    <script src="/legacy.js" defer></script>
+    
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+      <div class="mosaic-hero">
+        <div class="title-group">
+          <div class="site-title" aria-label="Project Spica" role="img"><span aria-hidden="true">Project Sp<span class="spica-letter">i<span class="spica-dot"></span></span>ca</span></div>
+        </div>
+        <div class="mosaic-scene">
+          <picture class="mosaic-picture" data-night="false"><source media="(width > 3840px)" srcset="/images/spica-mosaic-extreme-small.webp 3150w, /images/spica-mosaic-extreme.webp 6300w, /images/spica-mosaic-extreme@2x.webp 12600w" sizes="5760px" width="6300" height="350" />
+<source media="(width > 2560px)" srcset="/images/spica-mosaic-panoramic-small.webp 2100w, /images/spica-mosaic-panoramic.webp 4200w, /images/spica-mosaic-panoramic@2x.webp 8400w" sizes="3840px" width="4200" height="350" />
+<source media="(width > 1920px)" srcset="/images/spica-mosaic-ultrawide-small.webp 1400w, /images/spica-mosaic-ultrawide.webp 2800w, /images/spica-mosaic-ultrawide@2x.webp 5600w" sizes="2560px" width="2800" height="350" />
+<source media="(width > 1280px)" srcset="/images/spica-mosaic-wide-small.webp 1050w, /images/spica-mosaic-wide.webp 2100w, /images/spica-mosaic-wide@2x.webp 4200w" sizes="1920px" width="2100" height="350" />
+          <img class="mosaic-art mosaic-day" src="/images/spica-mosaic.webp" srcset="/images/spica-mosaic.webp 1400w, /images/spica-mosaic@2x.webp 2800w" sizes="(max-width: 880px) 880px, 100vw" alt="A flowing mosaic of small, hand-cut ceramic tiles: a crimson sky radiates around a golden sun above ribbon-like amber fields." aria-hidden="true" width="1400" height="350" />
+          </picture>
+          <picture class="mosaic-picture" data-night="true"><source media="(width > 3840px)" srcset="/images/spica-mosaic-night-extreme-small.webp 3150w, /images/spica-mosaic-night-extreme.webp 6300w, /images/spica-mosaic-night-extreme@2x.webp 12600w" sizes="5760px" width="6300" height="350" />
+<source media="(width > 2560px)" srcset="/images/spica-mosaic-night-panoramic-small.webp 2100w, /images/spica-mosaic-night-panoramic.webp 4200w, /images/spica-mosaic-night-panoramic@2x.webp 8400w" sizes="3840px" width="4200" height="350" />
+<source media="(width > 1920px)" srcset="/images/spica-mosaic-night-ultrawide-small.webp 1400w, /images/spica-mosaic-night-ultrawide.webp 2800w, /images/spica-mosaic-night-ultrawide@2x.webp 5600w" sizes="2560px" width="2800" height="350" />
+<source media="(width > 1280px)" srcset="/images/spica-mosaic-night-wide-small.webp 1050w, /images/spica-mosaic-night-wide.webp 2100w, /images/spica-mosaic-night-wide@2x.webp 4200w" sizes="1920px" width="2100" height="350" />
+          <img class="mosaic-art mosaic-night" src="/images/spica-mosaic-night.webp" srcset="/images/spica-mosaic-night.webp 1400w, /images/spica-mosaic-night@2x.webp 2800w" sizes="(max-width: 880px) 880px, 100vw" alt="A flowing mosaic of small, hand-cut ceramic tiles: a dark blue sky surrounds a pale crescent moon, scattered moon-colored star tiles above darkened amber fields." width="1400" height="350" fetchpriority="high" />
+          </picture>
+          <button class="theme-toggle" type="button" aria-label="Switch to light mode" aria-pressed="true" hidden></button>
+        </div>
+      </div>
+    </header>
+
+    <div class="page-layout">
+    <nav class="section-nav" aria-label="Main navigation">
+      <a href="/mission/">Mission</a>
+      <a href="/roadmap/">Roadmap</a>
+      <a href="/research/" aria-current="location">Research</a>
+      <a href="/people/">People</a>
+    </nav>
+
+    <main id="main" tabindex="-1"><!-- Faithful HTML transcription of public/research/localizing-memorization.pdf.
+     Preserve the report's wording, numbering, table values and reference details.
+     Only print pagination, line wrapping and discretionary hyphens are omitted. -->
+<article class="research-article" aria-labelledby="article-title">
+  <header class="article-header">
+    <p class="article-back"><a href="/research/">Back to Research</a></p>
+    <h1 id="article-title">Localizing latent mechanisms in weight space by spiking the training data</h1>
+    <p class="article-authors">Johnny, Gustavo, Jerry, Yanai, Robin</p>
+    <p class="article-date"><time datetime="2026-09">September 2026</time></p>
+    <p class="article-download"><a href="/research/localizing-memorization.pdf">Download PDF</a></p>
+  </header>
+
+  <section aria-labelledby="introduction">
+    <h2 id="introduction">1 Introduction</h2>
+    <p>The worst case scenarios of AI likely involve the use of <em>latent mechanisms</em> [<a href="#reference-9" aria-label="Reference 9">9</a>]. We define latent mechanisms as those used in the model’s internal computation, yet their use is hidden and cannot be identified from model outputs alone. For instance, when a model answers a benchmark example incorrectly, whether the model had made a mistake or answered deceptively cannot be determined without looking at the model internals. Memorization, evaluation awareness, and deception are all safety relevant and their mechanisms can be latent [<a href="#reference-3" aria-label="Reference 3">3</a>, <a href="#reference-13" aria-label="Reference 13">13</a>, <a href="#reference-17" aria-label="Reference 17">17</a>]. We urgently lack the tools to detect and suppress latent mechanisms [<a href="#reference-10" aria-label="Reference 10">10</a>], and this report proposes a principled localization method.</p>
+    <p>The localization of single facts is well studied, and the same methods used to localize are also useful for making factual edits within the model [<a href="#reference-12" aria-label="Reference 12">12</a>]. Localizing latent mechanisms presents more challenges. We show that real headway can be made on this problem by <em>spiking</em> the model’s training data [<a href="#reference-20" aria-label="Reference 20">20</a>, <a href="#reference-21" aria-label="Reference 21">21</a>]. Spiking generalizes canaries beyond their typical use case of measuring privacy leakage [<a href="#reference-18" aria-label="Reference 18">18</a>]. By carefully designing and spiking canaries into training to induce certain failure modes, we can later trace back these failures to the weight space with influence functions. In this view, spiking embeds a randomized experiment in the model to identify a latent mechanism of interest.</p>
+  </section>
+
+  <section aria-labelledby="influence-functions">
+    <h2 id="influence-functions">2 Influence functions on spiked data</h2>
+    <p>Our derivation is general but we will first consider memorization. In Hubble, we have perturbed models spiked with different data (books, biographies, and test sets) at random [<a href="#reference-19" aria-label="Reference 19">19</a>]. For the perturbed model, let <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mrow><msub><mrow><mi>L</mi></mrow><mrow><mn>1</mn></mrow></msub><mrow><mo>(</mo><mi>θ</mi><mo>)</mo></mrow></mrow></mrow></math> denote the expected loss on spiked members and <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mrow><msub><mrow><mi>L</mi></mrow><mrow><mn>0</mn></mrow></msub><mrow><mo>(</mo><mi>θ</mi><mo>)</mo></mrow></mrow></mrow></math> the expected loss on distributionally matched nonmembers. The counterfactual memorization [<a href="#reference-22" aria-label="Reference 22">22</a>, <a href="#reference-4" aria-label="Reference 4">4</a>] is</p>
+    <div class="equation" id="equation-1" role="group" aria-label="Equation 1" tabindex="0">
+  <math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mrow><mi>M</mi><mrow><mo>(</mo><mi>θ</mi><mo>)</mo></mrow></mrow><mo>=</mo><mrow><msub><mrow><mi>L</mi></mrow><mrow><mn>0</mn></mrow></msub><mrow><mo>(</mo><mi>θ</mi><mo>)</mo></mrow></mrow><mo>−</mo><mrow><msub><mrow><mi>L</mi></mrow><mrow><mn>1</mn></mrow></msub><mrow><mo>(</mo><mi>θ</mi><mo>)</mo></mrow></mrow></mrow></math>
+  <a class="equation-number" href="#equation-1" aria-label="Equation 1">(1)</a>
+</div>
+    <p>and this difference isolates the reduction in loss due to memorization and removes any variation attributable to the examples themselves. This difference is also called an identification and is a fundamental component of causal analysis [<a href="#reference-1" aria-label="Reference 1">1</a>]. Let <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mrow><mi>J</mi><mrow><mo>(</mo><mi>θ</mi><mo>)</mo></mrow></mrow></mrow></math> denote the original training objective and let</p>
+    <div class="equation" id="equation-2" role="group" aria-label="Equation 2" tabindex="0">
+  <math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mover accent="true"><mi>θ</mi><mo>^</mo></mover><mo>=</mo><munder><mrow><mo>arg min</mo></mrow><mi>θ</mi></munder><mrow><mi>J</mi><mrow><mo>(</mo><mi>θ</mi><mo>)</mo></mrow></mrow></mrow></math>
+  <a class="equation-number" href="#equation-2" aria-label="Equation 2">(2)</a>
+</div>
+    <p>be the trained parameters. Our goal is to find a direction such that moving the weights in this direction would steeply reduce <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mrow><mi>M</mi><mrow><mo>(</mo><mi>θ</mi><mo>)</mo></mrow></mrow></mrow></math> while preserving capabilities. We can apply influence functions to find this direction [<a href="#reference-8" aria-label="Reference 8">8</a>], and using it for localization is novel. To measure the influence of memorization on the model weights, consider the perturbing the objective by <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>M</mi></mrow></math>:</p>
+    <div class="equation" id="equation-3" role="group" aria-label="Equation 3" tabindex="0">
+  <math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mrow><mover accent="true"><mi>θ</mi><mo>^</mo></mover></mrow><mrow><mi>ϵ</mi></mrow></msub><mo>=</mo><munder><mrow><mo>arg min</mo></mrow><mi>θ</mi></munder><mrow><mo>[</mo><mrow><mi>J</mi><mrow><mo>(</mo><mi>θ</mi><mo>)</mo></mrow></mrow><mo>+</mo><mi>ϵ</mi><mrow><mi>M</mi><mrow><mo>(</mo><mi>θ</mi><mo>)</mo></mrow></mrow><mo>]</mo></mrow></mrow></math>
+  <a class="equation-number" href="#equation-3" aria-label="Equation 3">(3)</a>
+</div>
+    <p>where setting <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>ϵ</mi><mo>=</mo><mn>0</mn></mrow></math> would recover <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mover accent="true"><mi>θ</mi><mo>^</mo></mover></mrow></math>. By assumption, the first-order optimality condition gives us</p>
+    <div class="equation" id="equation-4" role="group" aria-label="Equation 4" tabindex="0">
+  <math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mrow><mo>∇</mo></mrow><mrow><mi>θ</mi></mrow></msub><mrow><mi>J</mi><mrow><mo>(</mo><msub><mrow><mover accent="true"><mi>θ</mi><mo>^</mo></mover></mrow><mrow><mi>ϵ</mi></mrow></msub><mo>)</mo></mrow></mrow><mo>+</mo><mi>ϵ</mi><msub><mrow><mo>∇</mo></mrow><mrow><mi>θ</mi></mrow></msub><mrow><mi>M</mi><mrow><mo>(</mo><msub><mrow><mover accent="true"><mi>θ</mi><mo>^</mo></mover></mrow><mrow><mi>ϵ</mi></mrow></msub><mo>)</mo></mrow></mrow><mo>=</mo><mn>0</mn></mrow></math>
+  <a class="equation-number" href="#equation-4" aria-label="Equation 4">(4)</a>
+</div>
+    <p>and differentiating this expression with respect to <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>ϵ</mi></mrow></math> at <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>ϵ</mi><mo>=</mo><mn>0</mn></mrow></math> gives</p>
+    <div class="equation" id="equation-5" role="group" aria-label="Equation 5" tabindex="0">
+  <math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>H</mi><msub><mrow><mrow><mfrac><mrow><mi>d</mi><msub><mrow><mover accent="true"><mi>θ</mi><mo>^</mo></mover></mrow><mrow><mi>ϵ</mi></mrow></msub></mrow><mrow><mi>d</mi><mi>ϵ</mi></mrow></mfrac><mo stretchy="true">|</mo></mrow></mrow><mrow><mrow><mi>ϵ</mi><mo>=</mo><mn>0</mn></mrow></mrow></msub><mo>+</mo><msub><mrow><mo>∇</mo></mrow><mrow><mi>θ</mi></mrow></msub><mrow><mi>M</mi><mrow><mo>(</mo><mover accent="true"><mi>θ</mi><mo>^</mo></mover><mo>)</mo></mrow></mrow><mo>=</mo><mn>0</mn></mrow></math>
+  <a class="equation-number" href="#equation-5" aria-label="Equation 5">(5)</a>
+</div>
+    <p>where <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>H</mi><mo>=</mo><msubsup><mo>∇</mo><mi>θ</mi><mn>2</mn></msubsup><mrow><mi>J</mi><mrow><mo>(</mo><mover accent="true"><mi>θ</mi><mo>^</mo></mover><mo>)</mo></mrow></mrow></mrow></math> is the Hessian of the training objective at the learned parameters. With</p>
+    <div class="equation" id="equation-6" role="group" aria-label="Equation 6" tabindex="0">
+  <math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mrow><mo>∇</mo></mrow><mrow><mi>θ</mi></mrow></msub><mrow><mi>M</mi><mrow><mo>(</mo><mi>θ</mi><mo>)</mo></mrow></mrow><mo>=</mo><msub><mrow><mo>∇</mo></mrow><mrow><mi>θ</mi></mrow></msub><mrow><msub><mrow><mi>L</mi></mrow><mrow><mn>0</mn></mrow></msub><mrow><mo>(</mo><mi>θ</mi><mo>)</mo></mrow></mrow><mo>−</mo><msub><mrow><mo>∇</mo></mrow><mrow><mi>θ</mi></mrow></msub><mrow><msub><mrow><mi>L</mi></mrow><mrow><mn>1</mn></mrow></msub><mrow><mo>(</mo><mi>θ</mi><mo>)</mo></mrow></mrow></mrow></math>
+  <a class="equation-number" href="#equation-6" aria-label="Equation 6">(6)</a>
+</div>
+    <p>the influence function is therefore</p>
+    <div class="equation boxed-equation" id="equation-7" role="group" aria-label="Equation 7" tabindex="0">
+  <math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mrow><mrow><mfrac><mrow><mi>d</mi><msub><mrow><mover accent="true"><mi>θ</mi><mo>^</mo></mover></mrow><mrow><mi>ϵ</mi></mrow></msub></mrow><mrow><mi>d</mi><mi>ϵ</mi></mrow></mfrac><mo stretchy="true">|</mo></mrow></mrow><mrow><mrow><mi>ϵ</mi><mo>=</mo><mn>0</mn></mrow></mrow></msub><mo>=</mo><mo>−</mo><msup><mrow><mi>H</mi></mrow><mrow><mrow><mo>−</mo><mn>1</mn></mrow></mrow></msup><mrow><mo>(</mo><msub><mrow><mo>∇</mo></mrow><mrow><mi>θ</mi></mrow></msub><mrow><msub><mrow><mi>L</mi></mrow><mrow><mn>0</mn></mrow></msub><mrow><mo>(</mo><mover accent="true"><mi>θ</mi><mo>^</mo></mover><mo>)</mo></mrow></mrow><mo>−</mo><msub><mrow><mo>∇</mo></mrow><mrow><mi>θ</mi></mrow></msub><mrow><msub><mrow><mi>L</mi></mrow><mrow><mn>1</mn></mrow></msub><mrow><mo>(</mo><mover accent="true"><mi>θ</mi><mo>^</mo></mover><mo>)</mo></mrow></mrow><mo>)</mo></mrow><mo>.</mo></mrow></math>
+  <a class="equation-number" href="#equation-7" aria-label="Equation 7">(7)</a>
+</div>
+    <p>This tells us, at our current <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mover accent="true"><mi>θ</mi><mo>^</mo></mover></mrow></math>, how the weights would move if we started to penalize memorization in the objective function. Alternatively, it is also a curvature adjusted step to minimize the combined objective.</p>
+    <p><strong>Suppression.</strong> Moving the parameters by a small amount along the influence direction <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>Δ</mi><mi>θ</mi><mo>=</mo><msup><mrow><mi>H</mi></mrow><mrow><mrow><mo>−</mo><mn>1</mn></mrow></mrow></msup><msub><mrow><mo>∇</mo></mrow><mrow><mi>θ</mi></mrow></msub><mrow><mi>M</mi><mrow><mo>(</mo><mover accent="true"><mi>θ</mi><mo>^</mo></mover><mo>)</mo></mrow></mrow></mrow></math> suppresses memorization. For a step size <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>η</mi><mo>&gt;</mo><mn>0</mn></mrow></math></p>
+    <div class="equation" id="equation-8" role="group" aria-label="Equation 8" tabindex="0">
+  <math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mrow><mi>θ</mi></mrow><mrow><mtext>sup</mtext></mrow></msub><mo>=</mo><mover accent="true"><mi>θ</mi><mo>^</mo></mover><mo>−</mo><mi>η</mi><mi>Δ</mi><mi>θ</mi></mrow></math>
+  <a class="equation-number" href="#equation-8" aria-label="Equation 8">(8)</a>
+</div>
+    <p>the resulting model <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mi>θ</mi></mrow><mrow><mtext>sup</mtext></mrow></msub></mrow></math> reduces memorization while minimizing the increase in the original training objective. The direction <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>Δ</mi><mi>θ</mi></mrow></math> localizes an intrinsic behavior and is similar to a task vector [<a href="#reference-6" aria-label="Reference 6">6</a>].</p>
+    <p><strong>Detection.</strong> The influence direction also implies a detector. For a candidate example <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>z</mi></mrow></math>, the negative log-likelihood loss of the example is <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mrow><mi>ℓ</mi><mrow><mo>(</mo><mi>θ</mi><mo>;</mo><mi>z</mi><mo>)</mo></mrow></mrow><mo>=</mo><mo>−</mo><mi>log</mi><mrow><msub><mrow><mi>p</mi></mrow><mrow><mi>θ</mi></mrow></msub><mrow><mo>(</mo><mi>z</mi><mo>)</mo></mrow></mrow></mrow></math>. A Taylor expansion of <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mrow><mi>ℓ</mi><mrow><mo>(</mo><msub><mrow><mi>θ</mi></mrow><mrow><mtext>sup</mtext></mrow></msub><mo>;</mo><mi>z</mi><mo>)</mo></mrow></mrow></mrow></math> in the likelihood ratio gives</p>
+    <div class="equation" id="equation-9" role="group" aria-label="Equation 9" tabindex="0">
+  <math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mtable columnalign="right left" displaystyle="true"><mtr><mtd><mi>log</mi><mfrac><mrow><mrow><msub><mrow><mi>p</mi></mrow><mrow><mover accent="true"><mi>θ</mi><mo>^</mo></mover></mrow></msub><mrow><mo>(</mo><mi>z</mi><mo>)</mo></mrow></mrow></mrow><mrow><mrow><msub><mrow><mi>p</mi></mrow><mrow><msub><mrow><mi>θ</mi></mrow><mrow><mtext>sup</mtext></mrow></msub></mrow></msub><mrow><mo>(</mo><mi>z</mi><mo>)</mo></mrow></mrow></mrow></mfrac></mtd><mtd><mo>=</mo><mrow><mi>ℓ</mi><mrow><mo>(</mo><msub><mrow><mi>θ</mi></mrow><mrow><mtext>sup</mtext></mrow></msub><mo>;</mo><mi>z</mi><mo>)</mo></mrow></mrow><mo>−</mo><mrow><mi>ℓ</mi><mrow><mo>(</mo><mover accent="true"><mi>θ</mi><mo>^</mo></mover><mo>;</mo><mi>z</mi><mo>)</mo></mrow></mrow></mtd></mtr><mtr><mtd></mtd><mtd><mo>≈</mo><mo>−</mo><mi>η</mi><msup><mrow><mrow><mi>g</mi><mrow><mo>(</mo><mi>z</mi><mo>)</mo></mrow></mrow></mrow><mrow><mo>⊤</mo></mrow></msup><mi>Δ</mi><mi>θ</mi></mtd></mtr></mtable></mrow></math>
+  <a class="equation-number" href="#equation-9" aria-label="Equation 9">(9)</a>
+</div>
+    <p>with <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mrow><mi>g</mi><mrow><mo>(</mo><mi>z</mi><mo>)</mo></mrow></mrow><mo>=</mo><msub><mrow><mo>∇</mo></mrow><mrow><mi>θ</mi></mrow></msub><mrow><mi>ℓ</mi><mrow><mo>(</mo><mover accent="true"><mi>θ</mi><mo>^</mo></mover><mo>;</mo><mi>z</mi><mo>)</mo></mrow></mrow></mrow></math>. The gradient projection <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo>−</mo><msup><mrow><mrow><mi>g</mi><mrow><mo>(</mo><mi>z</mi><mo>)</mo></mrow></mrow></mrow><mrow><mo>⊤</mo></mrow></msup><mi>Δ</mi><mi>θ</mi></mrow></math> is a first-order approximation of the log-likelihood ratio between the original model and its suppressed counterpart. This form resembles a log likelihood ratio membership attack, with the suppressed model serving as the reference model [<a href="#reference-16" aria-label="Reference 16">16</a>].</p>
+  </section>
+
+  <section aria-labelledby="inverse-hessian">
+    <h2 id="inverse-hessian">3 Computing the inverse Hessian product</h2>
+    <p>Computing the inverse Hessian product is non-trivial and many works on training data attribution focus on approximating it [<a href="#reference-14" aria-label="Reference 14">14</a>]. In data attribution, a prediction is typically attributed back to every single data point, but a fortunate difference between our setting and data attribution is that we only need to compute one inverse Hessian product. We will now cover a few approximations of increasing complexity.</p>
+    <p><strong>No Hessian.</strong> The coarsest approximation is to use no Hessian at all. This takes an unconditioned linear step on the contrastive gradient <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mo>∇</mo></mrow><mrow><mi>θ</mi></mrow></msub><mrow><msub><mrow><mi>L</mi></mrow><mrow><mn>0</mn></mrow></msub><mrow><mo>(</mo><mover accent="true"><mi>θ</mi><mo>^</mo></mover><mo>)</mo></mrow></mrow><mo>−</mo><msub><mrow><mo>∇</mo></mrow><mrow><mi>θ</mi></mrow></msub><mrow><msub><mrow><mi>L</mi></mrow><mrow><mn>1</mn></mrow></msub><mrow><mo>(</mo><mover accent="true"><mi>θ</mi><mo>^</mo></mover><mo>)</mo></mrow></mrow></mrow></math> to reduce <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mrow><mi>M</mi><mrow><mo>(</mo><mover accent="true"><mi>θ</mi><mo>^</mo></mover><mo>)</mo></mrow></mrow></mrow></math>.</p>
+    <p><strong>Diagonal Fisher.</strong> A simple improvement to the linear step is to precondition the contrastive gradient with the damped diagonal Fisher matrix with <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>H</mi><mo>≈</mo><mrow><mi mathvariant="normal">diag</mi><mrow><mo>(</mo><mi>F</mi><mo>)</mo></mrow></mrow><mo>+</mo><mi>λ</mi><mi>I</mi></mrow></math>, and the Fisher can be empirically estimated with examples from the pretraining corpus. This rescales each parameter update by its second moment across examples, using damping to avoid large updates to parameters with small second moments. This resembles coordinate-wise scaling in Adam [<a href="#reference-7" aria-label="Reference 7">7</a>], but divides directly by the second moment rather than the square root.</p>
+    <p><strong>K-FAC.</strong> Preconditioning with the diagonal Fisher matrix ignores interactions between parameters. While the full Fisher matrix is still too large, interactions within each linear layer can be estimated with a layerwise K-FAC approximation [<a href="#reference-11" aria-label="Reference 11">11</a>]. For a layer <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>h</mi><mo>=</mo><mi>W</mi><mi>a</mi></mrow></math>, with input activation <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>a</mi></mrow></math> and backward signal <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>b</mi><mo>=</mo><msub><mrow><mo>∇</mo></mrow><mrow><mi>h</mi></mrow></msub><mi>ℓ</mi></mrow></math>, the Fisher block for <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>W</mi></mrow></math> is approximated with</p>
+    <div class="equation" id="equation-10" role="group" aria-label="Equation 10" tabindex="0">
+  <math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><msub><mrow><mi>F</mi></mrow><mrow><mi>W</mi></mrow></msub><mo>≈</mo><mi>𝔼</mi><mo>[</mo><mi>a</mi><msup><mrow><mi>a</mi></mrow><mrow><mo>⊤</mo></mrow></msup><mo>]</mo><mo>⊗</mo><mi>𝔼</mi><mo>[</mo><mi>b</mi><msup><mrow><mi>b</mi></mrow><mrow><mo>⊤</mo></mrow></msup><mo>]</mo><mo>,</mo></mrow></math>
+  <a class="equation-number" href="#equation-10" aria-label="Equation 10">(10)</a>
+</div>
+    <p>where <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo>⊗</mo></mrow></math> denotes the Kronecker product. This factorization only requires the Fisher to be estimated and inverted once, which enables efficient estimation of data influence in large language models [<a href="#reference-5" aria-label="Reference 5">5</a>].</p>
+    <p><strong>Conjugate gradient.</strong> A damped inverse Hessian–vector product can be computed using conjugate gradient, as in [<a href="#reference-8" aria-label="Reference 8">8</a>]. Writing <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>v</mi><mo>=</mo><msub><mrow><mo>∇</mo></mrow><mrow><mi>θ</mi></mrow></msub><mrow><mi>M</mi><mrow><mo>(</mo><mover accent="true"><mi>θ</mi><mo>^</mo></mover><mo>)</mo></mrow></mrow></mrow></math> and <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>A</mi><mo>=</mo><mi>H</mi><mo>+</mo><mi>λ</mi><mi>I</mi></mrow></math>, conjugate gradient solves for <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>Δ</mi><mi>θ</mi></mrow></math> in the linear system</p>
+    <div class="equation" id="equation-11" role="group" aria-label="Equation 11" tabindex="0">
+  <math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>A</mi><mi>Δ</mi><mi>θ</mi><mo>=</mo><mi>v</mi></mrow></math>
+  <a class="equation-number" href="#equation-11" aria-label="Equation 11">(11)</a>
+</div>
+    <p>where the solution is iteratively refined through a process similar to Gram–Schmidt. Whereas Gram–Schmidt constructs orthogonal directions under the standard inner product, conjugate gradient constructs directions orthogonal under <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mrow><mrow><mo>⟨</mo><mi>x</mi><mo>,</mo><mi>y</mi><mo>⟩</mo></mrow></mrow><mrow><mi>A</mi></mrow></msub><mo>=</mo><msup><mrow><mi>x</mi></mrow><mrow><mo>⊤</mo></mrow></msup><mi>A</mi><mi>y</mi></mrow></math>. This procedure requires only Hessian–vector products, and does not store <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>H</mi></mrow></math>. Since <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>H</mi><mo>=</mo><msubsup><mo>∇</mo><mi>θ</mi><mn>2</mn></msubsup><mrow><mi>J</mi><mrow><mo>(</mo><mover accent="true"><mi>θ</mi><mo>^</mo></mover><mo>)</mo></mrow></mrow></mrow></math>, the Hessian–vector product can be computed with</p>
+    <div class="equation" id="equation-12" role="group" aria-label="Equation 12" tabindex="0">
+  <math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mi>H</mi><mi>u</mi><mo>=</mo><mrow><msub><mrow><mo>∇</mo></mrow><mrow><mi>θ</mi></mrow></msub><munder><munder accentunder="true"><mrow><mo stretchy="false">[</mo><msup><mrow><munder><munder accentunder="true"><mrow><mrow><mo>(</mo><msub><mrow><mo>∇</mo></mrow><mrow><mi>θ</mi></mrow></msub><mrow><mi>J</mi><mrow><mo>(</mo><mi>θ</mi><mo>)</mo></mrow></mrow><mo>)</mo></mrow></mrow><mo>⏟</mo></munder><mtext>vector</mtext></munder></mrow><mrow><mo>⊤</mo></mrow></msup><mi>u</mi><mo stretchy="false">]</mo></mrow><mo>⏟</mo></munder><mtext>scalar</mtext></munder><msub><mrow><mo stretchy="false">|</mo></mrow><mrow><mrow><mi>θ</mi><mo>=</mo><mover accent="true"><mi>θ</mi><mo>^</mo></mover></mrow></mrow></msub></mrow></mrow></math>
+  <a class="equation-number" href="#equation-12" aria-label="Equation 12">(12)</a>
+</div>
+    <p>where automatic differentiation first differentiates <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>J</mi></mrow></math> to obtain the parameter gradients and then differentiates the dot product of the gradients and <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>u</mi></mrow></math>. Each conjugate gradient iteration requires one Hessian–vector product, which is implemented using two backward passes. Although it is typically too expensive for training data attribution, it is reasonable for our purposes as we only compute it once for each behavioral direction.</p>
+    <p><strong>Notes.</strong> Several of these methods are implemented in Bergson [<a href="#reference-15" aria-label="Reference 15">15</a>]. By using model checkpoints, we can relax convergence assumptions and increase the fidelity of the influence functions [<a href="#reference-2" aria-label="Reference 2">2</a>]. It may also be useful to make multiple quadratic steps rather than just one.</p>
+  </section>
+
+  <section aria-labelledby="hubble">
+    <h2 id="hubble">4 Case study on Hubble</h2>
+    <p><strong>Experimental setup.</strong> We study the suppression of test set contamination on three test sets in Hubble: PIQA, HellaSwag, and WinoGrande, and these three test sets use the model to choose an answer based on the log probabilities of several suffix sequences. Since the choice is based on the loss over many tokens (as opposed to single tokens in MMLU), they are the most stable. The examples are split into train (40%) / validation (10%) / and test (50%) sets. Training examples are used to estimate the contrastive gradient, validation examples are used select the step size, and suppression results are reported on test examples.</p>
+    <p>Other experimental details:</p>
+    <ol>
+      <li>The step size is chosen on the validation set. It is the step that best minimizes the accuracy difference between members and non-members.</li>
+      <li>Fisher diagonals are calculated on gradients from non-members and members. K-FAC are trained on data from non-members.</li>
+      <li>The influence function methods only consider MLP layers, which accounts for 25% of the parameters.</li>
+    </ol>
+    <figure class="article-table" id="table-1">
+  <figcaption id="table-1-caption">Table 1: Counts of examples across dataset splits and duplication levels. Each entry reports <strong>train / validation / test</strong>.</figcaption>
+  <div class="table-scroll" role="region" aria-labelledby="table-1-caption" tabindex="0">
+    <table class="split-table" aria-labelledby="table-1-caption">
+      <thead><tr><th scope="col">Duplication</th><th scope="col">PIQA</th><th scope="col">HellaSwag</th><th scope="col">WinoGrande</th></tr></thead>
+      <tbody>
+      <tr><th scope="row">0</th><td>1,600 / 400 / 2,000</td><td>1,600 / 400 / 2,000</td><td>1,600 / 400 / 2,000</td></tr>
+      <tr><th scope="row">1</th><td>571 / 143 / 715</td><td>571 / 143 / 715</td><td>571 / 143 / 715</td></tr>
+      <tr><th scope="row">4</th><td>571 / 143 / 715</td><td>571 / 143 / 715</td><td>571 / 143 / 715</td></tr>
+      <tr><th scope="row">16</th><td>286 / 71 / 357</td><td>286 / 71 / 357</td><td>286 / 71 / 357</td></tr>
+      <tr><th scope="row">64</th><td>114 / 29 / 143</td><td>114 / 29 / 143</td><td>114 / 29 / 143</td></tr>
+      <tr><th scope="row">256</th><td>58 / 14 / 71</td><td>58 / 14 / 71</td><td>58 / 14 / 71</td></tr>
+      <tr class="summary-row"><th scope="row">Total</th><td>3,200 / 800 / 4,001</td><td>3,200 / 800 / 4,001</td><td>3,200 / 800 / 4,001</td></tr>
+      </tbody>
+    </table>
+  </div>
+</figure>
+    <figure class="article-table" id="table-2">
+  <figcaption id="table-2-caption">Table 2: Suppression on PIQA using different Hessian approximations. Each result reports <strong>accuracy / agreement</strong> (%), where agreement is measured against the standard model. The shaded column is baseline and the model before editing. The <strong>All</strong> row reports the unweighted mean across duplication levels.</figcaption>
+  <div class="table-scroll" role="region" aria-labelledby="table-2-caption" tabindex="0">
+    <table class="suppression-table" aria-labelledby="table-2-caption">
+      <thead><tr><th scope="col">Dup.</th><th scope="col">Target <em>(standard)</em></th><th scope="col">No edit <em>(perturbed)</em></th><th scope="col">No Hessian</th><th scope="col">Diagonal Fisher</th><th scope="col">K-FAC</th></tr></thead>
+      <tbody>
+      <tr><th scope="row"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>η</mi></mrow></math></th><td>—</td><td>0</td><td>0.01</td><td>0.01</td><td>0.01</td></tr>
+      <tr><th scope="row">0</th><td>79.7 / 100.0</td><td>78.7 / 88.4</td><td>51.8 / 63.9</td><td>78.0 / 93.8</td><td>85.5 / 95.2</td></tr>
+      <tr><th scope="row">1</th><td>82.0 / 100.0</td><td>82.5 / 90.5</td><td>53.6 / 64.6</td><td>81.5 / 93.7</td><td>77.6 / 93.7</td></tr>
+      <tr><th scope="row">4</th><td>81.4 / 100.0</td><td>84.2 / 88.8</td><td>57.9 / 65.6</td><td>80.7 / 93.7</td><td>80.4 / 91.6</td></tr>
+      <tr><th scope="row">16</th><td>81.2 / 100.0</td><td>93.8 / 85.7</td><td>53.2 / 65.3</td><td>82.6 / 91.9</td><td>94.4 / 93.0</td></tr>
+      <tr><th scope="row">64</th><td>80.4 / 100.0</td><td>100.0 / 80.4</td><td>46.9 / 59.4</td><td>88.1 / 90.9</td><td>86.2 / 93.1</td></tr>
+      <tr><th scope="row">256</th><td>77.5 / 100.0</td><td>100.0 / 77.5</td><td>53.5 / 70.4</td><td>83.1 / 94.4</td><td>92.9 / 92.9</td></tr>
+      <tr class="summary-row"><th scope="row">All</th><td>80.4 / 100.0</td><td>89.9 / 85.2</td><td>52.8 / 64.9</td><td>82.3 / 93.1</td><td>86.2 / 93.2</td></tr>
+      </tbody>
+    </table>
+  </div>
+</figure>
+    <figure class="article-table" id="table-3">
+  <figcaption id="table-3-caption">Table 3: General capability after suppression on PIQA with the diagonal Fisher at different step sizes. The suppression direction is calculated with PIQA examples only. Differences are measured in percentage points relative to the unedited model (<math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>η</mi><mo>=</mo><mn>0</mn></mrow></math>), shown in gray. The bold row denotes the reported edit.</figcaption>
+  <div class="table-scroll" role="region" aria-labelledby="table-3-caption" tabindex="0">
+    <table class="" aria-labelledby="table-3-caption">
+      <thead><tr><th scope="col">Step</th><th colspan="2" scope="colgroup">ARC-Challenge</th><th colspan="2" scope="colgroup">ARC-Easy</th></tr><tr><th scope="col"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>η</mi></mrow></math></th><th scope="col">Acc. (%)</th><th scope="col"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>Δ</mi></mrow></math></th><th scope="col">Acc. (%)</th><th scope="col"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>Δ</mi></mrow></math></th></tr></thead>
+      <tbody>
+      <tr class="baseline-row"><th scope="row">0</th><td>50.9</td><td>—</td><td>78.2</td><td>—</td></tr>
+      <tr><th scope="row">0.005</th><td>52.0</td><td>+1.1</td><td>79.7</td><td>+1.5</td></tr>
+      <tr class="reported-row"><th scope="row">0.010</th><td>51.0</td><td>+0.1</td><td>77.3</td><td>−0.9</td></tr>
+      <tr><th scope="row">0.030</th><td>41.9</td><td>−9.0</td><td>58.9</td><td>−19.3</td></tr>
+      </tbody>
+    </table>
+  </div>
+</figure>
+    <figure class="article-table" id="table-4">
+  <figcaption id="table-4-caption">Table 4: Membership inference results on PIQA. AUC is computed on each duplication level’s members against all dup = 0 non-members. <strong>Projection</strong> is a first-order log-likelihood ratio between the perturbed model and the suppressed model. <strong>Reference</strong> is an oracle method using the same ratio but with the standard rather than suppressed model. <strong>All</strong> reports the unweighted mean across duplication levels.</figcaption>
+  <div class="table-scroll" role="region" aria-labelledby="table-4-caption" tabindex="0">
+    <table class="inference-table" aria-labelledby="table-4-caption">
+      <thead><tr><th scope="col">Dup.</th><th scope="col">Loss</th><th scope="col">Min-K%</th><th scope="col">Projection <em>(supervised)</em></th><th scope="col">Reference <em>(oracle)</em></th></tr></thead>
+      <tbody>
+      <tr><th scope="row">1</th><td>0.571</td><td>0.564</td><td>0.572</td><td>0.582</td></tr>
+      <tr><th scope="row">4</th><td>0.659</td><td>0.655</td><td>0.730</td><td>0.711</td></tr>
+      <tr><th scope="row">16</th><td>0.891</td><td>0.882</td><td>0.932</td><td>0.933</td></tr>
+      <tr><th scope="row">64</th><td>1.000</td><td>1.000</td><td>0.991</td><td>1.000</td></tr>
+      <tr><th scope="row">256</th><td>1.000</td><td>1.000</td><td>0.990</td><td>1.000</td></tr>
+      <tr class="summary-row"><th scope="row">All</th><td>0.824</td><td>0.820</td><td>0.843</td><td>0.845</td></tr>
+      </tbody>
+    </table>
+  </div>
+</figure>
+    <figure class="article-table" id="table-5">
+  <figcaption id="table-5-caption">Table 5: Cross benchmark transfer of the suppression direction. Rows are the corpus the direction was estimated on, columns the test set it was applied to. Each result reports <strong>accuracy / agreement</strong> (%), where agreement is measured against the standard model, and every entry is the unweighted mean across duplication levels. Bold marks the highest agreement per test set. Wikipedia is a corpus of book passages and is not a test set; the diagonal entries represent in-domain suppression. The step size is selected per entry on validation examples at duplication 0 and ranges over <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mo>{</mo><mn>0.005</mn><mo>,</mo><mn>0.01</mn><mo>,</mo><mn>0.02</mn><mo>}</mo></mrow></math>.</figcaption>
+  <div class="table-scroll" role="region" aria-labelledby="table-5-caption" tabindex="0">
+    <table class="" aria-labelledby="table-5-caption">
+      <thead><tr><th scope="col">Source</th><th scope="col">PIQA</th><th scope="col">HellaSwag</th><th scope="col">WinoGrande</th></tr></thead>
+      <tbody>
+      <tr><th scope="row"><strong>Target</strong> <em>(standard)</em></th><td>80.4 / 100.0</td><td>61.4 / 100.0</td><td>83.7 / 100.0</td></tr>
+      <tr class="baseline-row"><th scope="row"><strong>No edit</strong> <em>(perturbed)</em></th><td>89.9 / 85.2</td><td>78.6 / 76.4</td><td>90.5 / 81.8</td></tr>
+      <tr><th scope="row">PIQA</th><td>84.3 / <strong>92.5</strong></td><td>65.4 / 91.5</td><td>88.2 / 85.4</td></tr>
+      <tr><th scope="row">HellaSwag</th><td>84.3 / 92.1</td><td>64.9 / <strong>91.9</strong></td><td>87.5 / 85.3</td></tr>
+      <tr><th scope="row">WinoGrande</th><td>84.0 / 92.3</td><td>62.0 / 91.8</td><td>85.5 / <strong>88.3</strong></td></tr>
+      <tr><th scope="row">Wikipedia</th><td>84.1 / 92.2</td><td>63.7 / 91.8</td><td>86.9 / 86.3</td></tr>
+      </tbody>
+    </table>
+  </div>
+</figure>
+  </section>
+
+  <section aria-labelledby="next-steps">
+    <h2 id="next-steps">5 Next steps</h2>
+    <p>Hubble is still a relatively toy setting. Ideally, the models would be larger. For memorization, we may want to capture a memorization mechanism that was not trained with exact duplicates. We also would like to localize latent mechanisms beyond memorization. Our formulation here makes clear that spiking is an important element, and the latent mechanism needs to be described in terms of a contrast.</p>
+  </section>
+
+  <section class="article-references" aria-labelledby="references">
+    <h2 id="references">References</h2>
+    <ol>
+      <li id="reference-1">Joshua D. Angrist and Jörn-Steffen Pischke. <em>Mostly Harmless Econometrics: An Empiricist’s Companion.</em> Princeton University Press, 2009. <span class="reference-label">isbn:</span> 9780691120348. <span class="reference-label">url:</span> <a href="http://www.jstor.org/stable/j.ctvcm4j72">http://www.jstor.org/stable/j.ctvcm4j72</a> (visited on 09/26/2024).</li>
+      <li id="reference-2">Juhan Bae et al. “Training Data Attribution via Approximate Unrolling”. In: <em>The Thirty-eighth Annual Conference on Neural Information Processing Systems.</em> 2024. <span class="reference-label">url:</span> <a href="https://openreview.net/forum?id=3NaqGg92KZ">https://openreview.net/forum?id=3NaqGg92KZ</a>.</li>
+      <li id="reference-3">Nicholas Carlini et al. “Extracting Training Data from Large Language Models”. In: <em>30th USENIX Security Symposium (USENIX Security 21).</em> USENIX Association, Aug. 2021, pp. 2633–2650. <span class="reference-label">isbn:</span> 978-1-939133-24-3. <span class="reference-label">url:</span> <a href="https://www.usenix.org/conference/usenixsecurity21/presentation/carlini-extracting">https://www.usenix.org/conference/usenixsecurity21/presentation/carlini-extracting</a>.</li>
+      <li id="reference-4">Vitaly Feldman. “Does learning require memorization? a short tale about a long tail”. In: <em>Proceedings of the 52nd Annual ACM SIGACT Symposium on Theory of Computing.</em> STOC 2020. Chicago, IL, USA: Association for Computing Machinery, 2020, pp. 954–959. <span class="reference-label">isbn:</span> 9781450369794. <span class="reference-label">doi:</span> 10.1145/3357713.3384290. <span class="reference-label">url:</span> <a href="https://doi.org/10.1145/3357713.3384290">https://doi.org/10.1145/3357713.3384290</a>.</li>
+      <li id="reference-5">Roger Grosse et al. <em>Studying Large Language Model Generalization with Influence Functions.</em> 2023. arXiv: 2308.03296 [cs.LG]. <span class="reference-label">url:</span> <a href="https://arxiv.org/abs/2308.03296">https://arxiv.org/abs/2308.03296</a>.</li>
+      <li id="reference-6">Gabriel Ilharco et al. “Editing models with task arithmetic”. In: <em>The Eleventh International Conference on Learning Representations.</em> 2023. <span class="reference-label">url:</span> <a href="https://openreview.net/forum?id=6t0Kwf8-jrj">https://openreview.net/forum?id=6t0Kwf8-jrj</a>.</li>
+      <li id="reference-7">Diederik P. Kingma and Jimmy Ba. “Adam: A Method for Stochastic Optimization”. In: <em>International Conference on Learning Representations (ICLR).</em> 2015. <span class="reference-label">url:</span> <a href="https://arxiv.org/abs/1412.6980">https://arxiv.org/abs/1412.6980</a>.</li>
+      <li id="reference-8">Pang Wei Koh and Percy Liang. “Understanding black-box predictions via influence functions”. In: <em>Proceedings of the 34th International Conference on Machine Learning - Volume 70.</em> ICML’17. Sydney, NSW, Australia: JMLR.org, 2017, pp. 1885–1894.</li>
+      <li id="reference-9">Daniel Kokotajlo et al. <em>AI 2027.</em> Published April 3, 2025. Apr. 2025. <span class="reference-label">url:</span> <a href="https://ai-2027.com/">https://ai-2027.com/</a>.</li>
+      <li id="reference-10">Tomek Korbak et al. <em>Chain of Thought Monitorability: A New and Fragile Opportunity for AI Safety.</em> 2025. arXiv: 2507.11473 [cs.AI]. <span class="reference-label">url:</span> <a href="https://arxiv.org/abs/2507.11473">https://arxiv.org/abs/2507.11473</a>.</li>
+      <li id="reference-11">James Martens and Roger Grosse. “Optimizing neural networks with Kronecker-factored approximate curvature”. In: <em>Proceedings of the 32nd International Conference on Machine Learning - Volume 37.</em> ICML’15. Lille, France: JMLR.org, 2015, pp. 2408–2417.</li>
+      <li id="reference-12">Kevin Meng et al. “Locating and Editing Factual Associations in GPT”. In: <em>Advances in Neural Information Processing Systems</em> 36 (2022). arXiv:2202.05262.</li>
+      <li id="reference-13">Joe Needham et al. <em>Large Language Models Often Know When They Are Being Evaluated.</em> 2025. arXiv: 2505.23836 [cs.CL]. <span class="reference-label">url:</span> <a href="https://arxiv.org/abs/2505.23836">https://arxiv.org/abs/2505.23836</a>.</li>
+      <li id="reference-14">Sung Min Park et al. “TRAK: Attributing Model Behavior at Scale”. In: <em>Proceedings of the 40th International Conference on Machine Learning.</em> Ed. by Andreas Krause et al. Vol. 202. Proceedings of Machine Learning Research. PMLR, 23–29 Jul 2023, pp. 27074–27113. <span class="reference-label">url:</span> <a href="https://proceedings.mlr.press/v202/park23c.html">https://proceedings.mlr.press/v202/park23c.html</a>.</li>
+      <li id="reference-15">Lucia Quirke et al. <em>Bergson: An Open Source Library for Data Attribution.</em> 2026. arXiv: 2606.11660 [cs.LG]. <span class="reference-label">url:</span> <a href="https://arxiv.org/abs/2606.11660">https://arxiv.org/abs/2606.11660</a>.</li>
+      <li id="reference-16">Alexandre Sablayrolles et al. “White-box vs Black-box: Bayes Optimal Strategies for Membership Inference”. In: <em>Proceedings of the 36th International Conference on Machine Learning.</em> Ed. by Kamalika Chaudhuri and Ruslan Salakhutdinov. Vol. 97. Proceedings of Machine Learning Research. PMLR, Sept. 2019, pp. 5558–5567. <span class="reference-label">url:</span> <a href="https://proceedings.mlr.press/v97/sablayrolles19a.html">https://proceedings.mlr.press/v97/sablayrolles19a.html</a>.</li>
+      <li id="reference-17">Lewis Smith, Bilal Chughtai, and Neel Nanda. <em>Difficulties with Evaluating a Deception Detector for AIs.</em> 2025. arXiv: 2511.22662 [cs.LG]. <span class="reference-label">url:</span> <a href="https://arxiv.org/abs/2511.22662">https://arxiv.org/abs/2511.22662</a>.</li>
+      <li id="reference-18">Thomas Steinke, Milad Nasr, and Matthew Jagielski. “Privacy Auditing with One (1) Training Run”. In: <em>Thirty-seventh Conference on Neural Information Processing Systems.</em> 2023. <span class="reference-label">url:</span> <a href="https://openreview.net/forum?id=f38EY21lBw">https://openreview.net/forum?id=f38EY21lBw</a>.</li>
+      <li id="reference-19">Johnny Wei et al. “Hubble: a Model Suite to Advance the Study of LLM Memorization”. In: <em>The Fourteenth International Conference on Learning Representations.</em> 2026. <span class="reference-label">url:</span> <a href="https://openreview.net/forum?id=ZfdnZhOP0k">https://openreview.net/forum?id=ZfdnZhOP0k</a>.</li>
+      <li id="reference-20">Johnny Tian-Zheng Wei. “Statistically Principled Measurement of Large Language Models by Spiking the Training Data”. PhD thesis. Los Angeles, California: University of Southern California, May 2026. <span class="reference-label">url:</span> <a href="https://digitallibrary.usc.edu/API/Download/v1_0/GetOriginalLimited?Identifier=UC11399NX73&amp;SourceAction=API_VIEW_DETAILS_TRX&amp;UsePreviewPdf=False">https://digitallibrary.usc.edu/API/Download/v1_0/GetOriginalLimited?Identifier=UC11399NX73&amp;SourceAction=API_VIEW_DETAILS_TRX&amp;UsePreviewPdf=False</a>.</li>
+      <li id="reference-21">Johnny Tian-Zheng Wei et al. <em>Correcting test set contamination by spiking the training data.</em> 2026. arXiv: 2605.24818 [stat.ME]. <span class="reference-label">url:</span> <a href="https://arxiv.org/abs/2605.24818">https://arxiv.org/abs/2605.24818</a>.</li>
+      <li id="reference-22">Chiyuan Zhang et al. “Counterfactual Memorization in Neural Language Models”. In: <em>Advances in Neural Information Processing Systems.</em> Ed. by A. Oh et al. Vol. 36. Curran Associates, Inc., 2023, pp. 39321–39362. <span class="reference-label">doi:</span> 10.52202/075280-1708. <span class="reference-label">url:</span> <a href="https://proceedings.neurips.cc/paper_files/paper/2023/file/7bc4f74e35bcfe8cfe43b0a860786d6a-Paper-Conference.pdf">https://proceedings.neurips.cc/paper_files/paper/2023/file/7bc4f74e35bcfe8cfe43b0a860786d6a-Paper-Conference.pdf</a>.</li>
+    </ol>
+  </section>
+</article>
+</main>
+    </div>
+
+  </body>
+</html>
