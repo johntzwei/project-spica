@@ -158,6 +158,21 @@ describe("Project Spica server", () => {
     expect(css).toMatch(/html\s*\{[^}]*scrollbar-gutter:\s*stable;/);
   });
 
+  test("marks links that stay on the site with a superscript ring", async () => {
+    const css = await request("/styles.css").text();
+    expect(css).toMatch(/\.prose a\[href\^="\/"\]::after\s*\{[^}]*content: "\\b0";[^}]*vertical-align: super;/);
+    // Copy stays selectable and the hover underline stops before the ring.
+    expect(css).toMatch(/\.prose a\[href\^="\/"\]::after\s*\{[^}]*display: inline-block;/);
+    // Only prose carries the ring; the sidebar keeps its selected-page underline.
+    expect(css).not.toMatch(/\.section-nav a::after\s*\{[^}]*content: "\\b0"/);
+    const html = await request("/").text();
+    const prose = html.slice(html.indexOf('class="mission prose"'), html.indexOf("</section>"));
+    const links = [...prose.matchAll(/<a href="([^"]+)"/g)].map(match => match[1]);
+    expect(links).toContain("/roadmap");
+    expect(links).toContain("/research/localizing-memorization.pdf");
+    expect(links.filter(href => href.startsWith("https://")).length).toBeGreaterThan(0);
+  });
+
   test("shows only Mission initially and loads the page switcher", async () => {
     const html = await request("/").text();
     expect(html).toContain('<script src="/navigation.js" defer></script>');

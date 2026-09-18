@@ -202,6 +202,20 @@ h3 { font-size: 25px; line-height: 1.3; margin: 32px 0 16px; }
 .research-links { margin: 0; padding-left: 22px; font-size: 17px; line-height: 1.85; }
 .mission a, .research-links a, .people-list a { color: var(--accent); text-decoration: none; }
 .mission a:hover, .research-links a:hover, .people-list a:hover { text-decoration: underline; }
+/* Mark links that stay on projectspica.org with a superscript ring, the way
+   LessWrong flags its own content. inline-block keeps the hover underline off
+   the ring; the second content line hides it from screen readers where the
+   alt-text syntax is supported. */
+.prose a[href^="/"]::after {
+  content: "\b0";
+  content: "\b0" / "";
+  display: inline-block;
+  vertical-align: super;
+  font-size: 0.62em;
+  line-height: 0;
+  margin-left: 1.5px;
+  opacity: 0.75;
+}
 .people-list { list-style: none; margin: 32px 0 0; padding: 0; }
 .people-list li + li { margin-top: 24px; }
 .people-list a { font-size: 18px; line-height: 1.5; }
