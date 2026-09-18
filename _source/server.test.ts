@@ -225,9 +225,9 @@ describe("Project Spica server", () => {
     expect(research).not.toContain('<h2 id="research-title">Research</h2>');
     expect(research).toContain('<ul class="research-links">');
     expect(research.match(/<li>/g)).toHaveLength(3);
-    expect(research).toContain('<a href="/research/phd-thesis.pdf">Statistically principled measurement of large language models by spiking the training data</a>. Johnny Tian-Zheng Wei. PhD thesis.');
+    expect(research).toContain('<a href="/research/phd-thesis.pdf">Statistically principled measurement of large language models by spiking the training data</a>, Johnny Tian-Zheng Wei, PhD thesis,');
     expect(research).toContain('<a href="/research/localizing-memorization.pdf">Localizing memorization</a>');
-    expect(research).toContain('<a href="https://huggingface.co/collections/allegrolab/hubble-core">Model organisms for memorization (Hubble)</a>. Open source release on 🤗. <time datetime="2025-10">October 2025</time>');
+    expect(research).toContain('<a href="https://huggingface.co/collections/allegrolab/hubble-core">Model organisms for memorization (Hubble)</a>, Open source release on 🤗, <time datetime="2025-10">October 2025</time>');
     // Research entries appear newest first.
     expect(research.indexOf("localizing-memorization.pdf")).toBeLessThan(research.indexOf("phd-thesis.pdf"));
     expect(research.indexOf("phd-thesis.pdf")).toBeLessThan(research.indexOf("hubble-core"));
@@ -249,7 +249,7 @@ describe("Project Spica server", () => {
     const css = await request("/styles.css").text();
     expect(css).toMatch(/\.people-list\s*\{[^}]*list-style: none;[^}]*margin: 20px 0 0;[^}]*padding: 0;[^}]*font-size: 17px;[^}]*line-height: 1.7;/);
     expect(css).toContain('.people-list a { font-size: inherit; }');
-    expect(css).toContain('.people-list .person-role { color: var(--muted); }');
+    expect(css).toContain('.people-list .person-role { color: inherit; }');
   });
 
   test("removes the animated screen and controls while retaining the header mosaic", async () => {
