@@ -161,6 +161,31 @@ for (let attempt = 0; attempt < 1000 && rightStars.length < 8; attempt++) {
 // so every other star stays put; snap to the nearest fitted tessera.
 lightStar([(681.15 + 801.67) / 2, 52]);
 
+// Bake the quiet background field into the artwork, so its first paint is also
+// its final state. Preserve the former browser pass's selection and glaze mix.
+const visibleStarCount = 13;
+const starDimming = 0.45;
+const stars = skyTiles.filter(tile => nightTiles[tile.index].includes('data-sky="star"'))
+  .sort((a, b) => a.center[0] - b.center[0] || a.center[1] - b.center[1]);
+const removeCount = stars.length - visibleStarCount;
+const removedStars = new Set<typeof stars[number]>();
+// Evenly spaced cuts in position order avoid clearing one region of the sky.
+for (let step = 0; step < removeCount; step++) {
+  removedStars.add(stars[Math.round(step * stars.length / removeCount)]);
+}
+for (const tile of stars) {
+  const removed = removedStars.has(tile);
+  const color = removed ? tile.skyFill : [0, 2, 4].map(offset => {
+    const moon = parseInt(tile.moonFill.slice(offset, offset + 2), 16);
+    const sky = parseInt(tile.skyFill.slice(offset, offset + 2), 16);
+    return Math.round(moon + (sky - moon) * starDimming).toString(16).padStart(2, "0");
+  }).join("");
+  nightTiles[tile.index] = nightTiles[tile.index].replace(
+    /data-sky="star" fill="#[a-f0-9]+"/,
+    `${removed ? "" : 'data-sky="star" '}fill="#${color}"`,
+  );
+}
+
 // Subdivide each existing colored ribbon into three rows, without changing
 // its height, color sequence, or contour. Shared joints keep the cuts fitted.
 for (let band = 0; band < 11; band++) {

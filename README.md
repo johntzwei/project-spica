@@ -94,8 +94,12 @@ rebuild the previous website at the same domain. Domain/DNS changes are not need
 
 ## Artwork
 
-Generated artwork is committed. Only regenerating it needs `rsvg-convert` and
-ImageMagick:
+Generated artwork is committed. The night image includes the final 13-star
+background field and its dimmed colors; `constellation.js` only adds the responsive,
+heading-aligned Spica star and halo. Background star selection and brightness are
+controlled in `_source/scripts/generate-mosaic.ts`.
+
+Only regenerating the artwork needs `rsvg-convert` and ImageMagick:
 
 ```sh
 bun run images:export

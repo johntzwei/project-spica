@@ -132,7 +132,7 @@ button { font: inherit; }
      amount, so Spica stays locked to its tile while the text moves. */
   --title-drop: 3px;
 }
-/* The invisible anchor marks the title's i-dot. The five lit tesserae are
+/* The invisible anchor marks the title's i-dot. The star and halo tiles are
    selected from the mosaic underneath it, keeping Spica aligned when the image
    is cropped. */
 .spica-letter { position: relative; display: inline-block; }
@@ -145,12 +145,11 @@ button { font: inherit; }
   height: 100%;
   pointer-events: none;
 }
-/* Daylight shows only the dim five-tile core; night swaps in the full cross.
+/* Daylight washes Spica and shadows its halo; night lights both.
    Both are drawn up front, so the toggle costs no relayout. */
-.spica-night-mark, .night-star-dimming { visibility: hidden; }
+.spica-night-mark { visibility: hidden; }
 :root[data-theme="dark"] .spica-day-mark { visibility: hidden; }
-:root[data-theme="dark"] .spica-night-mark,
-:root[data-theme="dark"] .night-star-dimming { visibility: visible; }
+:root[data-theme="dark"] .spica-night-mark { visibility: visible; }
 
 .site-title {
   position: relative;

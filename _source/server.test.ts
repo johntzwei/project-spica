@@ -37,7 +37,7 @@ describe("Project Spica server", () => {
       await Bun.write(indexPath, html.replace("<main", `<!--${"Extra copy ".repeat(200)}--><main`));
       const updated = await getResearch().text();
       expect(updated).toContain('<section class="content-section" id="research" aria-label="Research">');
-      expect(updated).toContain('<a href="/research/localizing-memorization.pdf">Localizing memorization</a>');
+      expect(updated).toContain('<a href="/research/localizing-memorization.pdf">Localizing Memorization</a>');
       expect(updated).toContain("</html>");
     } finally {
       await rm(directory, { recursive: true, force: true });
@@ -225,9 +225,10 @@ describe("Project Spica server", () => {
     expect(research).not.toContain('<h2 id="research-title">Research</h2>');
     expect(research).toContain('<ul class="research-links">');
     expect(research.match(/<li>/g)).toHaveLength(3);
-    expect(research).toContain('<a href="/research/phd-thesis.pdf">Statistically principled measurement of large language models by spiking the training data</a>. Johnny Tian-Zheng Wei. PhD thesis.');
-    expect(research).toContain('<a href="/research/localizing-memorization.pdf">Localizing memorization</a>');
-    expect(research).toContain('<a href="https://huggingface.co/collections/allegrolab/hubble-core">Model organisms for memorization (Hubble)</a>. Open source release on 🤗. <time datetime="2025-10">October 2025</time>');
+    expect(research).toContain('<a href="/research/phd-thesis.pdf">Statistically Principled Measurement of Large Language Models by Spiking the Training Data</a> Johnny Tian-Zheng Wei. PhD thesis.');
+    expect(research).toContain('<a href="/research/localizing-memorization.pdf">Localizing Memorization</a>');
+    expect(research).toContain('<a href="https://huggingface.co/collections/allegrolab/hubble-core">Memorization Model Organisms (Hubble)</a> <time datetime="2025-10">October 2025</time>');
+    expect(research).not.toContain('</a>.');
     // Research entries appear newest first.
     expect(research.indexOf("localizing-memorization.pdf")).toBeLessThan(research.indexOf("phd-thesis.pdf"));
     expect(research.indexOf("phd-thesis.pdf")).toBeLessThan(research.indexOf("hubble-core"));
@@ -237,15 +238,19 @@ describe("Project Spica server", () => {
     const html = await request("/people").text();
     const people = html.split('id="people" aria-label="People">')[1].split("</section>")[0];
     expect(people).toContain('<p>Project Spica seeks to coordinate researchers across academia, industry, and government. If you want to contribute to our mission, please <a href="mailto:contact@projectspica.org">reach out</a>.</p>');
-    const entries = [...people.matchAll(/<li>\s*<a href="([^"]+)"[^>]*>([^<]+)<\/a><span class="person-role">([^<]+)<\/span>\s*<\/li>/g)]
+    const entries = [...people.matchAll(/<li><a href="([^"]+)"[^>]*>([^<]+)<\/a> <span class="person-role">([^<]+)<\/span><\/li>/g)]
       .map(([, href, name, affiliation]) => ({ href, name, affiliation }));
     expect(entries).toEqual([
-      { href: "https://johntzwei.github.io/", name: "Johnny Tian-Zheng Wei", affiliation: ", Cofounder" },
-      { href: "mailto:gustavolucasdecarvalho@gmail.com", name: "Gustavo Lucas de Carvalho", affiliation: ", Cofounder" },
-      { href: "https://robinjia.github.io/", name: "Robin Jia", affiliation: ", Advisor, USC" },
+      { href: "https://johntzwei.github.io/", name: "Johnny Tian-Zheng Wei", affiliation: "Cofounder" },
+      { href: "mailto:gustavolucasdecarvalho@gmail.com", name: "Gustavo Lucas de Carvalho", affiliation: "Cofounder" },
+      { href: "https://robinjia.github.io/", name: "Robin Jia", affiliation: "Advisor | University of Southern California" },
     ]);
     expect(people.match(/<li>/g)).toHaveLength(3);
     expect(people).not.toContain("Yanai");
+    const css = await request("/styles.css").text();
+    expect(css).toMatch(/\.people-list\s*\{[^}]*list-style: none;[^}]*margin: 20px 0 0;[^}]*padding: 0;[^}]*font-size: 17px;[^}]*line-height: 1.7;/);
+    expect(css).toContain('.people-list a { font-size: inherit; }');
+    expect(css).toContain('.people-list .person-role { color: var(--muted); }');
   });
 
   test("removes the animated screen and controls while retaining the header mosaic", async () => {
@@ -268,16 +273,17 @@ describe("Project Spica server", () => {
     expect(html).toContain('src="/images/spica-mosaic-night.webp"');
   });
 
-  test("anchors the five-tile Spica star to the dot of the title's i", async () => {
+  test("anchors the Spica star and halo to the dot of the title's i", async () => {
     const html = await request("/").text();
     const css = await request("/styles.css").text();
     const script = await request("/constellation.js").text();
     expect(html).toContain('Project Sp<span class="spica-letter">i<span class="spica-dot"></span></span>ca');
     expect(html).toContain('<script src="/constellation.js" type="module"></script>');
-    expect(script).toContain('<g class="spica-day-mark"></g><g class="night-star-dimming"></g><g class="spica-night-mark"></g>');
-    expect(css).toContain('.spica-night-mark, .night-star-dimming { visibility: hidden; }');
-    expect(css).toContain(':root[data-theme="dark"] .spica-night-mark,');
-    expect(css).toContain(':root[data-theme="dark"] .night-star-dimming { visibility: visible; }');
+    expect(script).toContain('<g class="spica-day-mark"></g><g class="spica-night-mark"></g>');
+    expect(script).not.toContain("night-star-dimming");
+    expect(css).not.toContain("night-star-dimming");
+    expect(css).toContain('.spica-night-mark { visibility: hidden; }');
+    expect(css).toContain(':root[data-theme="dark"] .spica-night-mark { visibility: visible; }');
     expect(css).toContain('top: calc(0.3em - var(--title-drop, 0px));');
     expect(css).toMatch(/\.site-title\s*\{[^}]*top: var\(--title-drop, 0px\);/);
     expect(css).toMatch(/\.mosaic-tile-colors\s*\{[^}]*pointer-events: none;/);
@@ -291,22 +297,16 @@ describe("Project Spica server", () => {
     }
   });
 
-  test("makes night stars from existing moon-colored sky tiles", async () => {
+  test("bakes the quiet night star field into existing sky tiles", async () => {
     const day = await request("/images/spica-mosaic.svg").text();
     const night = await request("/images/spica-mosaic-night.svg").text();
     expect(day).not.toContain("data-sky=");
-    expect(night.match(/data-sky="star"/g)!.length).toBeGreaterThan(20);
-    // Virgo is selected responsively at the title, not baked at a fixed location.
+    expect(night.match(/data-sky="star"/g)).toHaveLength(13);
+    // Spica is selected responsively at the title, not baked at a fixed location.
     expect(night).not.toContain('data-sky="virgo-');
     const dayTiles = new Set([...day.matchAll(/<path fill="#[a-f0-9]+" d="([^"]+)"\/>/g)].map(match => match[1]));
-    for (const [, kind, color, geometry] of night.matchAll(/<path data-sky="([^"]+)" fill="#([a-f0-9]+)" d="([^"]+)"\/>/g)) {
+    for (const [, geometry] of night.matchAll(/<path data-sky="star" fill="#[a-f0-9]+" d="([^"]+)"\/>/g)) {
       expect(dayTiles.has(geometry)).toBe(true);
-      if (kind !== "virgo-line") {
-        // The pale moon palette, including the same subtle glaze variations.
-        const channels = [0, 2, 4].map(offset => parseInt(color.slice(offset, offset + 2), 16));
-        expect(Math.min(...channels)).toBeGreaterThan(175);
-        expect(Math.max(...channels)).toBeLessThan(250);
-      }
     }
     expect(night).not.toContain("<circle");
   });

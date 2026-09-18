@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { coreGlow, dayDim, dayWash, dimmedTileMarkup, haloDayTileMarkup, haloGlow, haloTileMarkup, layoutConstellation, nightDimming, spicaDayTileMarkup, spicaTileMarkup, starField, visibleStarCount } from "./public/constellation.js";
+import { coreGlow, dayDim, dayWash, haloDayTileMarkup, haloGlow, haloTileMarkup, layoutConstellation, spicaDayTileMarkup, spicaTileMarkup } from "./public/constellation.js";
 
 const tiles = await Bun.file(new URL("./public/images/sky-tiles.json", import.meta.url)).json();
 const artwork = await Bun.file(new URL("./public/images/spica-mosaic-night.svg", import.meta.url)).text();
@@ -96,46 +96,47 @@ describe("Spica: one bright tessera with a halo", () => {
     expect(geometry.has(markup.match(/ d="([^"]+)"/)![1])).toBe(true);
   });
 
-  test("dims the surviving stars without erasing them into the sky", () => {
-    expect(tiles.filter((tile: any) => tile.star)).toHaveLength(21);
-    const { kept } = starField(tiles);
-    for (const tile of kept) {
-      const dimmed = luminance(fill(dimmedTileMarkup(tile, nightDimming.star, "dimmed-star")));
-      expect(dimmed).toBeLessThan(luminance(tile.moon));
-      // A star pulled all the way to its sky color would leave a hole.
-      expect(dimmed).toBeGreaterThan(luminance(tile.sky));
-    }
-    expect(nightDimming.star).toBeGreaterThan(0);
-    expect(nightDimming.star).toBeLessThan(1);
+  test("bakes the same 13 retained background stars into the artwork", () => {
+    const stars = tiles.filter((tile: any) => tile.star)
+      .sort((a: any, b: any) => a.center[0] - b.center[0]);
+    // Snapshot of the former browser pass: baking must not reshuffle the sky.
+    expect(stars.map((tile: any) => tile.center)).toEqual([
+      [102.91, 70.51], [140.69, 22.02], [225.49, 69.3],
+      [409.35, 119.92], [479.92, 62.98], [543.79, 35.94],
+      [654.2, 82.7], [744.54, 52.08], [872.97, 85.07],
+      [954.21, 17.68], [1138.57, 21.18], [1255.12, 44.99],
+      [1362.62, 143.33],
+    ]);
+    expect(artwork.match(/data-sky="star"/g)).toHaveLength(13);
   });
 
-  test("thins the field to the visible count, spread across the sky", () => {
-    const { kept, removed } = starField(tiles);
-    expect(kept).toHaveLength(visibleStarCount);
-    expect(removed).toHaveLength(21 - visibleStarCount);
-    expect(new Set([...kept, ...removed]).size).toBe(21);
-    // A removed star is repainted in its own sky color, leaving no bright patch.
-    for (const tile of removed) {
-      expect(fill(dimmedTileMarkup(tile, 1, "removed-star"))).toBe(tile.sky);
+  test("bakes dimmed star colors and leaves all other sky tiles unlit", () => {
+    const painted = new Map([...artwork.matchAll(/<path (data-sky="star" )?fill="#([a-f0-9]+)" d="([^"]+)"\/>/g)]
+      .map(([, star, color, outline]) => [outline, { star: Boolean(star), color }]));
+    for (const tile of tiles) {
+      const outline = `M${tile.points.map((point: number[]) => point.map(n => n.toFixed(2)).join(" ")).join("L")}Z`;
+      const actual = painted.get(outline)!;
+      expect(actual).toBeDefined();
+      expect(actual.star).toBe(tile.star);
+      if (tile.star) {
+        const expected = [0, 2, 4].map(offset => {
+          const moon = parseInt(tile.moon.slice(offset, offset + 2), 16);
+          const sky = parseInt(tile.sky.slice(offset, offset + 2), 16);
+          return Math.round(moon * 0.55 + sky * 0.45).toString(16).padStart(2, "0");
+        }).join("");
+        expect(actual.color).toBe(expected);
+        expect(luminance(actual.color)).toBeLessThan(luminance(tile.moon));
+        expect(luminance(actual.color)).toBeGreaterThan(luminance(tile.sky));
+      } else {
+        // Includes the eight formerly bright tiles: no correction layer needed.
+        expect(actual.color).toBe(tile.sky);
+      }
     }
-    // NOTE: [thought process] Counting per third is what distinguishes an even
-    // thinning from one that happens to total 13 while clearing a whole region.
-    const third = (tile: any) => Math.min(2, Math.floor(tile.center[0] / (1400 / 3)));
-    const perThird = [0, 1, 2].map(index => removed.filter((tile: any) => third(tile) === index).length);
-    expect(Math.max(...perThird) - Math.min(...perThird)).toBeLessThanOrEqual(2);
-    for (const index of [0, 1, 2]) {
-      expect(kept.filter((tile: any) => third(tile) === index).length).toBeGreaterThan(0);
-    }
-    // Selection is pure, so the field does not reshuffle between renders.
-    expect(starField(tiles)).toEqual({ kept, removed });
   });
 
-  test("leaves the generated star field and the retired overlays alone", () => {
-    expect(artwork.match(/data-sky="star"/g)).toHaveLength(21);
-    // NOTE: [thought process] The cross is gone deliberately, not by accident.
-    // These names are listed so that reintroducing arms, spikes or a Virgo
-    // overlay has to be a decision someone makes against a failing test.
-    for (const retired of ["virgo", "spica-raster", "night-sky-adjustments", "diagonals", "armDirections"]) {
+  test("leaves background stars and retired overlays out of the browser pass", () => {
+    for (const retired of ["night-star-dimming", "dimmedTileMarkup", "starField", "nightDimming", "visibleStarCount",
+      "virgo", "spica-raster", "night-sky-adjustments", "diagonals", "armDirections"]) {
       expect(script).not.toContain(retired);
     }
   });
