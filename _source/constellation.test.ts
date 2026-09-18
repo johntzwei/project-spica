@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { daySkyTileMarkup, selectHiddenStars, selectSpicaUnderlayTiles, skyTileMarkup, spicaMarkup } from "./public/constellation.js";
+import { selectHiddenStars, skyTileMarkup, spicaMarkup } from "./public/constellation.js";
 
 const tiles = await Bun.file(new URL("./public/images/sky-tiles.json", import.meta.url)).json();
 const artwork = await Bun.file(new URL("./public/images/spica-mosaic-night.svg", import.meta.url)).text();
@@ -28,17 +28,6 @@ describe("title-anchored Spica overlay", () => {
     expect(markup).not.toContain("data-tile");
     expect(markup).not.toContain("moon");
     expect(markup).not.toContain("sky");
-  });
-
-  test("replaces the fitted background tiles beneath Spica", () => {
-    const underlay = selectSpicaUnderlayTiles(tiles, [290, 100], 0.56);
-    expect(underlay.length).toBeGreaterThan(10);
-    expect(underlay.length).toBeLessThan(60);
-    expect(new Set(underlay).size).toBe(underlay.length);
-    for (const tile of underlay) {
-      expect(skyTileMarkup(tile)).toContain(`fill="#${tile.sky}"`);
-      expect(daySkyTileMarkup(tile)).toContain('data-tile="day-sky-mask"');
-    }
   });
 
   test("keeps the night background quieter by masking several baked stars", () => {

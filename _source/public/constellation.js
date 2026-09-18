@@ -33,37 +33,9 @@ export function spicaMarkup() {
   return `<g class="spica-day-mark">${paths}</g><g class="spica-night-mark">${paths}</g>`;
 }
 
-const daySkyPalette = ["9e0f2a", "b41429", "c31f28", "920d28", "c62628", "ae1229"];
-
-function tileOutline(tile) {
-  const point = p => p.map(n => n.toFixed(2)).join(" ");
-  return `M${tile.points.map(point).join("L")}Z`;
-}
-
 export function skyTileMarkup(tile) {
-  return `<path data-tile="sky-mask" fill="#${tile.sky}" d="${tileOutline(tile)}"/>`;
-}
-
-export function daySkyTileMarkup(tile) {
-  // Use the same red family as the generated day mosaic, with deterministic
-  // variation so the replacement tiles do not read as a flat painted patch.
-  const index = Math.abs(Math.round(tile.center[0] * 7 + tile.center[1] * 11)) % daySkyPalette.length;
-  return `<path data-tile="day-sky-mask" fill="#${daySkyPalette[index]}" d="${tileOutline(tile)}"/>`;
-}
-
-export function selectSpicaUnderlayTiles(tiles, center, scale) {
-  // Transform fitted sky-tile centers into the custom star's 48-unit local
-  // coordinate system. Select a padded cross/diamond footprint so the original
-  // colored tesserae beneath Spica are replaced while nearby grout remains.
-  return tiles.filter(tile => {
-    const x = (tile.center[0] - center[0]) / scale + 24;
-    const y = (tile.center[1] - center[1]) / scale + 24;
-    const dx = Math.abs(x - 24);
-    const dy = Math.abs(y - 24);
-    const cardinal = (dx <= 8 && dy <= 38) || (dy <= 8 && dx <= 38);
-    const centerDiamond = dx + dy <= 23;
-    return cardinal || centerDiamond;
-  });
+  const point = p => p.map(n => n.toFixed(2)).join(" ");
+  return `<path data-tile="sky-mask" fill="#${tile.sky}" d="M${tile.points.map(point).join("L")}Z"/>`;
 }
 
 async function attachSpica() {
@@ -92,16 +64,12 @@ async function attachSpica() {
     </filter>
   </defs>
   <g class="night-sky-adjustments"></g>
-  <g class="spica-underlay-day"></g>
-  <g class="spica-underlay-night"></g>
   <g class="spica-overlay" filter="url(#spica-ceramic)">
     ${spicaMarkup()}
   </g>`;
 
   scene.append(svg);
   const adjustments = svg.querySelector(".night-sky-adjustments");
-  const dayUnderlay = svg.querySelector(".spica-underlay-day");
-  const nightUnderlay = svg.querySelector(".spica-underlay-night");
   const overlay = svg.querySelector(".spica-overlay");
 
   // Dim a handful of the baked night stars; Spica is now the only prominent
@@ -123,9 +91,6 @@ async function attachSpica() {
     // The cross now extends farther than the original compact mark while keeping
     // its center anchored precisely over the i-dot.
     const scale = (fontSize * 0.48 / 48) / pixelScale;
-    const underlayTiles = selectSpicaUnderlayTiles(tiles, [x, y], scale);
-    dayUnderlay.innerHTML = underlayTiles.map(daySkyTileMarkup).join("");
-    nightUnderlay.innerHTML = underlayTiles.map(skyTileMarkup).join("");
     overlay.setAttribute("transform", `translate(${x} ${y}) scale(${scale}) translate(-24 -24)`);
   }
 
