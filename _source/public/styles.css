@@ -110,8 +110,8 @@ button { font: inherit; }
   left: clamp(20px, 4vw, 64px);
   font-size: clamp(32px, 4vw, 56px);
 }
-/* The invisible anchor is the original dot position. Recolor only the fitted
-   mosaic tiles underneath it, keeping Spica aligned when the image is cropped. */
+/* The invisible anchor marks the title's i-dot. A custom mosaic Spica star
+   is positioned over it at runtime so its shape is independent of sky tesserae. */
 .spica-letter { position: relative; display: inline-block; }
 /* Offset the anchor against the lowered text so the star stays in place. */
 .spica-dot { position: absolute; top: calc(0.3em - var(--title-drop, 0px)); left: calc(50% + 0.5px); }
@@ -123,14 +123,52 @@ button { font: inherit; }
   pointer-events: none;
 }
 .night-sky-adjustments,
-.spica-night-tiles { visibility: hidden; }
-.spica-day-tiles { opacity: 0.44; }
-:root[data-theme="dark"] .night-sky-adjustments,
-:root[data-theme="dark"] .spica-night-tiles { visibility: visible; }
-:root[data-theme="dark"] .spica-day-tiles { visibility: hidden; }
-:root[data-theme="dark"] .spica-night-tiles {
-  filter: drop-shadow(0 0 2px rgba(255, 239, 196, 0.55));
+.spica-night-mark { visibility: hidden; }
+
+.spica-overlay .spica-piece {
+  stroke: #6d3c24;
+  stroke-width: 0.95;
+  stroke-linejoin: round;
 }
+
+.spica-day-mark {
+  opacity: 0.82;
+}
+
+.spica-day-mark .spica-piece-0 { fill: #ffe3a0; }
+.spica-day-mark .spica-piece-1,
+.spica-day-mark .spica-piece-2,
+.spica-day-mark .spica-piece-3,
+.spica-day-mark .spica-piece-4 { fill: #efc66c; }
+.spica-day-mark .spica-piece-5,
+.spica-day-mark .spica-piece-6,
+.spica-day-mark .spica-piece-7,
+.spica-day-mark .spica-piece-8 { fill: #d6a953; }
+
+:root[data-theme="dark"] .night-sky-adjustments,
+:root[data-theme="dark"] .spica-night-mark { visibility: visible; }
+
+:root[data-theme="dark"] .spica-day-mark { visibility: hidden; }
+
+:root[data-theme="dark"] .spica-night-mark {
+  filter:
+    drop-shadow(0 0 1.2px rgba(255, 250, 224, 0.95))
+    drop-shadow(0 0 4px rgba(255, 232, 164, 0.48));
+}
+
+:root[data-theme="dark"] .spica-overlay .spica-piece {
+  stroke: #574838;
+}
+
+:root[data-theme="dark"] .spica-night-mark .spica-piece-0 { fill: #fffdf3; }
+:root[data-theme="dark"] .spica-night-mark .spica-piece-1,
+:root[data-theme="dark"] .spica-night-mark .spica-piece-2,
+:root[data-theme="dark"] .spica-night-mark .spica-piece-3,
+:root[data-theme="dark"] .spica-night-mark .spica-piece-4 { fill: #f8e8b9; }
+:root[data-theme="dark"] .spica-night-mark .spica-piece-5,
+:root[data-theme="dark"] .spica-night-mark .spica-piece-6,
+:root[data-theme="dark"] .spica-night-mark .spica-piece-7,
+:root[data-theme="dark"] .spica-night-mark .spica-piece-8 { fill: #d9c69a; }
 .site-title {
   position: relative;
   top: var(--title-drop, 0px);
