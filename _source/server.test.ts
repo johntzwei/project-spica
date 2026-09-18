@@ -37,7 +37,7 @@ describe("Project Spica server", () => {
       await Bun.write(indexPath, html.replace("<main", `<!--${"Extra copy ".repeat(200)}--><main`));
       const updated = await getResearch().text();
       expect(updated).toContain('<section class="content-section" id="research" aria-label="Research">');
-      expect(updated).toContain('<a href="/research/localizing-memorization.pdf">Localizing Memorization</a>');
+      expect(updated).toContain('<a href="/research/localizing-memorization.pdf">Localizing memorization</a>');
       expect(updated).toContain("</html>");
     } finally {
       await rm(directory, { recursive: true, force: true });
@@ -225,10 +225,9 @@ describe("Project Spica server", () => {
     expect(research).not.toContain('<h2 id="research-title">Research</h2>');
     expect(research).toContain('<ul class="research-links">');
     expect(research.match(/<li>/g)).toHaveLength(3);
-    expect(research).toContain('<a href="/research/phd-thesis.pdf">Statistically Principled Measurement of Large Language Models by Spiking the Training Data</a> Johnny Tian-Zheng Wei. PhD thesis.');
-    expect(research).toContain('<a href="/research/localizing-memorization.pdf">Localizing Memorization</a>');
-    expect(research).toContain('<a href="https://huggingface.co/collections/allegrolab/hubble-core">Memorization Model Organisms (Hubble)</a> <time datetime="2025-10">October 2025</time>');
-    expect(research).not.toContain('</a>.');
+    expect(research).toContain('<a href="/research/phd-thesis.pdf">Statistically principled measurement of large language models by spiking the training data</a>. Johnny Tian-Zheng Wei. PhD thesis.');
+    expect(research).toContain('<a href="/research/localizing-memorization.pdf">Localizing memorization</a>');
+    expect(research).toContain('<a href="https://huggingface.co/collections/allegrolab/hubble-core">Model organisms for memorization (Hubble)</a>. Open source release on 🤗. <time datetime="2025-10">October 2025</time>');
     // Research entries appear newest first.
     expect(research.indexOf("localizing-memorization.pdf")).toBeLessThan(research.indexOf("phd-thesis.pdf"));
     expect(research.indexOf("phd-thesis.pdf")).toBeLessThan(research.indexOf("hubble-core"));
@@ -238,12 +237,12 @@ describe("Project Spica server", () => {
     const html = await request("/people").text();
     const people = html.split('id="people" aria-label="People">')[1].split("</section>")[0];
     expect(people).toContain('<p>Project Spica seeks to coordinate researchers across academia, industry, and government. If you want to contribute to our mission, please <a href="mailto:contact@projectspica.org">reach out</a>.</p>');
-    const entries = [...people.matchAll(/<li><a href="([^"]+)"[^>]*>([^<]+)<\/a> <span class="person-role">([^<]+)<\/span><\/li>/g)]
+    const entries = [...people.matchAll(/<li>\s*<a href="([^"]+)"[^>]*>([^<]+)<\/a><span class="person-role">([^<]+)<\/span>\s*<\/li>/g)]
       .map(([, href, name, affiliation]) => ({ href, name, affiliation }));
     expect(entries).toEqual([
-      { href: "https://johntzwei.github.io/", name: "Johnny Tian-Zheng Wei", affiliation: "Cofounder" },
-      { href: "mailto:gustavolucasdecarvalho@gmail.com", name: "Gustavo Lucas de Carvalho", affiliation: "Cofounder" },
-      { href: "https://robinjia.github.io/", name: "Robin Jia", affiliation: "Advisor | University of Southern California" },
+      { href: "https://johntzwei.github.io/", name: "Johnny Tian-Zheng Wei", affiliation: ", Cofounder" },
+      { href: "mailto:gustavolucasdecarvalho@gmail.com", name: "Gustavo Lucas de Carvalho", affiliation: ", Cofounder" },
+      { href: "https://robinjia.github.io/", name: "Robin Jia", affiliation: ", Advisor, USC" },
     ]);
     expect(people.match(/<li>/g)).toHaveLength(3);
     expect(people).not.toContain("Yanai");
