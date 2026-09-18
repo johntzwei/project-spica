@@ -110,8 +110,25 @@ button { font: inherit; }
   left: clamp(20px, 4vw, 64px);
   font-size: clamp(32px, 4vw, 56px);
 }
+/* The invisible anchor marks the title's i-dot. The five lit tesserae are
+   selected from the mosaic underneath it, keeping Spica aligned when the image
+   is cropped. */
 .spica-letter { position: relative; display: inline-block; }
-.spica-dot { display: none; }
+/* Offset the anchor against the lowered text so the star stays in place. */
+.spica-dot { position: absolute; top: calc(0.3em - var(--title-drop, 0px)); left: calc(50% + 0.5px); }
+.mosaic-tile-colors {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+/* Daylight shows only the dim five-tile core; night swaps in the full cross.
+   Both are drawn up front, so the toggle costs no relayout. */
+.spica-night-mark, .night-star-dimming { visibility: hidden; }
+:root[data-theme="dark"] .spica-day-mark { visibility: hidden; }
+:root[data-theme="dark"] .spica-night-mark,
+:root[data-theme="dark"] .night-star-dimming { visibility: visible; }
 
 .site-title {
   position: relative;
