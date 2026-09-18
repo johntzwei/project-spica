@@ -123,6 +123,7 @@ button { font: inherit; }
   pointer-events: none;
 }
 .night-sky-adjustments,
+.spica-underlay-night,
 .spica-night-mark { visibility: hidden; }
 
 .spica-overlay .spica-piece {
@@ -146,8 +147,10 @@ button { font: inherit; }
 .spica-day-mark .spica-piece-8 { fill: #d6a953; }
 
 :root[data-theme="dark"] .night-sky-adjustments,
+:root[data-theme="dark"] .spica-underlay-night,
 :root[data-theme="dark"] .spica-night-mark { visibility: visible; }
 
+:root[data-theme="dark"] .spica-underlay-day,
 :root[data-theme="dark"] .spica-day-mark { visibility: hidden; }
 
 :root[data-theme="dark"] .spica-night-mark {
