@@ -47,23 +47,15 @@
 
       <section class="content-section roadmap-section" id="roadmap" aria-label="Roadmap" hidden>
         <div class="prose">
-          <h2>Spiking Beyond Memorization</h2>
+          <p>Imagine that you are a frontier developer beginning RL on a new agent. In the world where we succeed, you download the open spiking protocol hosted by Project Spica, which contains examples you randomly spike into training to localize evaluation awareness and deception. You estimate directions in weight space for these mechanisms with our open source tools and it produces several efficient monitors for RL trajectories. During a rollout, the agent realizes that benchmark data is hosted on Hugging Face and finds a misconfigured route out of its sandbox to retrieve the answers. Before the model has the chance to act on this exploit, a spiking based detector flags the trajectory as aligned with evaluation awareness. The rollout is halted, removed from the backprop update and an alert for human oversight is triggered.</p>
+          <p>Here is our planned work to make this future a reality:</p>
           <ul>
-            <li>Expand localization techniques to deception, eval awareness, and more.</li>
-            <li>Release model organisms for these new domains</li>
-          </ul>
-
-          <h2>Detection and Suppression During Post-Training</h2>
-          <ul>
-            <li>Improve the efficiency of our latent mechanism detection and suppression techniques so they are practical to use during inference / RL.</li>
-            <li>Detect deceptiveness during rollouts , down-weighting trajectories that promote the deceptiveness mechanism.</li>
-            <li>Suppress the mechanism behind eval awareness and investigate how that affects model behavior on different benchmarks</li>
-          </ul>
-
-          <h2>Governance and Basic Science</h2>
-          <ul>
-            <li>Reverse engineer latent mechanisms to further advance understanding of model behavior</li>
-            <li>Design and maintain a standard spiking set that provides suppression controls for frontier developers</li>
+            <li>(Near term) Generalizing and scaling spiking to other latent mechanisms like deception, and eval awareness. Studying new mechanisms will require us to develop new model organisms spiked with relevant data. We will be able to test our methods, and release these model organisms as open source artifacts for the broader scientific community.</li>
+            <li>(Near term) Improve the efficiency of our latent mechanism detection and suppression techniques so they are practical to use during inference / RL. The best signal for these classifiers come from gradients, and we will study ways to efficiently approximate the gradient.</li>
+            <li>(Medium term) Detect deceptiveness during rollouts , down-weighting trajectories that promote the deceptiveness mechanism.</li>
+            <li>(Medium term) Suppress the mechanism behind eval awareness and investigate how that affects model behavior on different benchmarks</li>
+            <li>(Long term) Design and maintain a standard spiking set that provides suppression controls for frontier developers. Work with frontier labs and standards setting bodies to standardize and encourage the use of spiking.</li>
+            <li>(Long term) Reverse engineer latent mechanisms to further advance understanding of model behavior.</li>
           </ul>
         </div>
       </section>
@@ -71,8 +63,9 @@
       <section class="content-section" id="research" aria-label="Research" hidden>
         <div class="prose">
           <ul class="research-links">
-            <li><a href="/research/phd-thesis.pdf">Statistically Principled Measurement of Large Language Models by Spiking the Training Data</a>. Johnny Tian-Zheng Wei. PhD thesis.</li>
-            <li><a href="/research/localizing-memorization.pdf">Localizing Memorization</a></li>
+            <li><a href="/research/localizing-memorization.pdf">Localizing Memorization</a>. <time datetime="2026-09">September 2026</time>.</li>
+            <li><a href="/research/phd-thesis.pdf">Statistically Principled Measurement of Large Language Models by Spiking the Training Data</a>. Johnny Tian-Zheng Wei. PhD thesis. <time datetime="2026-05">May 2026</time>.</li>
+            <li><a href="https://huggingface.co/collections/allegrolab/hubble-core">Memorization Model Organisms (Hubble)</a>. <time datetime="2025-10">October 2025</time>.</li>
           </ul>
         </div>
       </section>

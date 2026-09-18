@@ -121,23 +121,21 @@ describe("Project Spica server", () => {
     }
   });
 
-  test("shows only the requested roadmap headings and bullet lists", async () => {
+  test("shows exactly the requested roadmap paragraphs and bullet list", async () => {
     const html = await request("/roadmap").text();
     const roadmap = html.split('id="roadmap" aria-label="Roadmap">')[1].split("</section>")[0];
-    const blocks = [...roadmap.matchAll(/<(h2|li)>([^<]*)<\/\1>/g)].map(([, tag, text]) => [tag, text]);
+    const blocks = [...roadmap.matchAll(/<(p|li)>([^<]*)<\/\1>/g)].map(([, tag, text]) => [tag, text.replace(/\s+/g, " ")]);
     expect(blocks).toEqual([
-      ["h2", "Spiking Beyond Memorization"],
-      ["li", "Expand localization techniques to deception, eval awareness, and more."],
-      ["li", "Release model organisms for these new domains"],
-      ["h2", "Detection and Suppression During Post-Training"],
-      ["li", "Improve the efficiency of our latent mechanism detection and suppression techniques so they are practical to use during inference / RL."],
-      ["li", "Detect deceptiveness during rollouts , down-weighting trajectories that promote the deceptiveness mechanism."],
-      ["li", "Suppress the mechanism behind eval awareness and investigate how that affects model behavior on different benchmarks"],
-      ["h2", "Governance and Basic Science"],
-      ["li", "Reverse engineer latent mechanisms to further advance understanding of model behavior"],
-      ["li", "Design and maintain a standard spiking set that provides suppression controls for frontier developers"],
+      ["p", "Imagine that you are a frontier developer beginning RL on a new agent. In the world where we succeed, you download the open spiking protocol hosted by Project Spica, which contains examples you randomly spike into training to localize evaluation awareness and deception. You estimate directions in weight space for these mechanisms with our open source tools and it produces several efficient monitors for RL trajectories. During a rollout, the agent realizes that benchmark data is hosted on Hugging Face and finds a misconfigured route out of its sandbox to retrieve the answers. Before the model has the chance to act on this exploit, a spiking based detector flags the trajectory as aligned with evaluation awareness. The rollout is halted, removed from the backprop update and an alert for human oversight is triggered."],
+      ["p", "Here is our planned work to make this future a reality:"],
+      ["li", "(Near term) Generalizing and scaling spiking to other latent mechanisms like deception, and eval awareness. Studying new mechanisms will require us to develop new model organisms spiked with relevant data. We will be able to test our methods, and release these model organisms as open source artifacts for the broader scientific community."],
+      ["li", "(Near term) Improve the efficiency of our latent mechanism detection and suppression techniques so they are practical to use during inference / RL. The best signal for these classifiers come from gradients, and we will study ways to efficiently approximate the gradient."],
+      ["li", "(Medium term) Detect deceptiveness during rollouts , down-weighting trajectories that promote the deceptiveness mechanism."],
+      ["li", "(Medium term) Suppress the mechanism behind eval awareness and investigate how that affects model behavior on different benchmarks"],
+      ["li", "(Long term) Design and maintain a standard spiking set that provides suppression controls for frontier developers. Work with frontier labs and standards setting bodies to standardize and encourage the use of spiking."],
+      ["li", "(Long term) Reverse engineer latent mechanisms to further advance understanding of model behavior."],
     ]);
-    expect(roadmap.match(/<ul>/g)).toHaveLength(3);
+    expect(roadmap.match(/<ul>/g)).toHaveLength(1);
     expect(roadmap.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim())
       .toBe(blocks.map(([, text]) => text).join(" "));
   });
@@ -220,17 +218,19 @@ describe("Project Spica server", () => {
     }
   });
 
-  test("lists the thesis and memorization PDFs in Research after the roadmap", async () => {
+  test("lists the PDFs and Hubble collection in Research after the roadmap", async () => {
     const html = await request("/").text();
     expect(html.indexOf('id="roadmap"')).toBeLessThan(html.indexOf('id="research"'));
     const research = html.split('id="research"')[1].split("</section>")[0];
     expect(research).not.toContain('<h2 id="research-title">Research</h2>');
     expect(research).toContain('<ul class="research-links">');
-    expect(research.match(/<li>/g)).toHaveLength(2);
+    expect(research.match(/<li>/g)).toHaveLength(3);
     expect(research).toContain('<a href="/research/phd-thesis.pdf">Statistically Principled Measurement of Large Language Models by Spiking the Training Data</a>. Johnny Tian-Zheng Wei. PhD thesis.');
     expect(research).toContain('<a href="/research/localizing-memorization.pdf">Localizing Memorization</a>');
-    // The thesis states the method in full, so it leads the list.
-    expect(research.indexOf("phd-thesis.pdf")).toBeLessThan(research.indexOf("localizing-memorization.pdf"));
+    expect(research).toContain('<a href="https://huggingface.co/collections/allegrolab/hubble-core">Memorization Model Organisms (Hubble)</a>. <time datetime="2025-10">October 2025</time>');
+    // Research entries appear newest first.
+    expect(research.indexOf("localizing-memorization.pdf")).toBeLessThan(research.indexOf("phd-thesis.pdf"));
+    expect(research.indexOf("phd-thesis.pdf")).toBeLessThan(research.indexOf("hubble-core"));
   });
 
   test("lists the original People copy and links with both cofounders first", async () => {

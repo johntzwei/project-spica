@@ -37,6 +37,19 @@ describe("exported GitHub Pages site", () => {
     expect(await request(path, "HEAD").text()).toBe("");
   });
 
+  test("research entries include dates in newest-first order", async () => {
+    const html = await request("/research/").text();
+    const list = html.match(/<ul class="research-links">([\s\S]*?)<\/ul>/)![1];
+    const entries = [...list.matchAll(/<li>([\s\S]*?)<\/li>/g)].map(match => match[1]);
+    expect(entries).toHaveLength(3);
+    expect(entries[0]).toContain('href="/research/localizing-memorization.pdf"');
+    expect(entries[0]).toContain('<time datetime="2026-09">September 2026</time>');
+    expect(entries[1]).toContain('href="/research/phd-thesis.pdf"');
+    expect(entries[1]).toContain('<time datetime="2026-05">May 2026</time>');
+    expect(entries[2]).toContain('<a href="https://huggingface.co/collections/allegrolab/hubble-core">Memorization Model Organisms (Hubble)</a>');
+    expect(entries[2]).toContain('<time datetime="2025-10">October 2025</time>');
+  });
+
   test.each([...pages, "about"])("redirects /%s to its directory URL", page => {
     const response = request(`/${page}?ref=test`);
     expect(response.status).toBe(301);
