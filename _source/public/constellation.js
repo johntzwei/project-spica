@@ -26,53 +26,109 @@ export const nightDimming = { arm: 0.1, diagonal: 0.42, star: 0.45 };
 // image: a quieter field reads as deeper sky and leaves Spica more room.
 export const visibleStarCount = 13;
 
-// Pick the tile just across one edge of `from`, following the mosaic's local
-// orientation rather than screen axes. `used` keeps rings from reusing tiles.
-function tileAcrossEdge(tiles, from, edge, used) {
-  const start = from.points[edge], end = from.points[(edge + 1) % from.points.length];
-  const midpoint = [(start[0] + end[0]) / 2, (start[1] + end[1]) / 2];
-  const outward = [midpoint[0] - from.center[0], midpoint[1] - from.center[1]];
-  // NOTE: [pedagogical] The dot product is positive only for tiles sitting on
-  // the outward side of this edge, which keeps a ring from folding back inward.
-  const neighbors = tiles.filter(tile => !used.includes(tile)
-    && (tile.center[0] - midpoint[0]) * outward[0] + (tile.center[1] - midpoint[1]) * outward[1] > 0);
-  return nearest(neighbors, midpoint);
+// The rough width of one tessera, used to say how far along an arm the next
+// tile should sit. Taken from Spica itself so the cross scales with the mosaic.
+function tileSize(tile) {
+  const spread = axis => Math.max(...tile.points.map(point => point[axis]))
+    - Math.min(...tile.points.map(point => point[axis]));
+  return (spread(0) + spread(1)) / 2;
 }
 
-// Continue straight out from `arm`, one more tessera along the same direction.
-function nextArmTile(tiles, center, arm, used) {
-  const direction = [arm.center[0] - center.center[0], arm.center[1] - center.center[1]];
-  const target = [arm.center[0] + direction[0], arm.center[1] + direction[1]];
-  const available = tiles.filter(tile => !used.includes(tile));
-  const forward = available.filter(tile =>
-    (tile.center[0] - arm.center[0]) * direction[0] + (tile.center[1] - arm.center[1]) * direction[1] > 0);
-  return nearest(forward.length ? forward : available, target);
+// NOTE: [thought process] Two earlier approaches failed here, and both failures
+// are worth keeping in view.
+//
+// Walking the Spica tile's own edges, one arm per edge, produced crooked
+// stars: a hand-cut tessera's edge normals are not a clean cross, so two arms
+// could face nearly the same way and the star grew two arms up and none down.
+//
+// Firing rays along the mosaic's local grid fixed the spacing but lost
+// adjacency. Where no tile happened to sit on a ray, the search reached past
+// the gap and took one off to the side, which bent the arm worse than before.
+//
+// What follows keeps both guarantees at once. The four directions are fixed to
+// the screen, so a vertical arm is vertical and its opposite always points
+// back; and each arm is filled by the tile that best matches that direction,
+// scored so that straightness outweighs reach.
+const armDirections = [[1, 0], [0, 1], [-1, 0], [0, -1]];
+// NOTE: [pedagogical] The gate below compares sideways offset to reach, which
+// is the tangent of the angle between the tile and the arm. Testing the ratio
+// rather than the offset alone is what makes the tolerance mean the same thing
+// close in and far out: a fixed offset would allow a nearly sideways tile at
+// short range while rejecting a well-aligned one further along the arm.
+// Measured against this mosaic: the tile best aligned with an axis sits within
+// 27 degrees of it in the worst case, so a tolerance below that starves arms
+// rather than straightening them. The outer ring is held tighter because it is
+// matched to its own inner arm, not to the axis.
+const armTolerance = Math.tan(30 * Math.PI / 180);
+const outerArmTolerance = Math.tan(20 * Math.PI / 180);
+const diagonalDirections = [[1, 1], [-1, 1], [-1, -1], [1, -1]]
+  .map(([x, y]) => [x / Math.SQRT2, y / Math.SQRT2]);
+
+function tileAlongDirection(tiles, origin, direction, reach, used, tolerance = armTolerance) {
+  let best = null;
+  let bestCost = Infinity;
+  for (const tile of tiles) {
+    if (used.includes(tile)) continue;
+    const dx = tile.center[0] - origin[0], dy = tile.center[1] - origin[1];
+    const along = dx * direction[0] + dy * direction[1];
+    // Only tiles genuinely out in this direction, never behind or beside Spica.
+    if (along < reach * 0.4 || along > reach * 1.8) continue;
+    const across = Math.abs(dx * -direction[1] + dy * direction[0]);
+    // NOTE: [thought process] This gate is the whole fix. Scoring alone still
+    // returns the least-bad tile when every candidate is bad, and beside the
+    // sun and moon discs there are no sky tesserae at all in some directions.
+    // That is where the bent arms came from: the search reached past the gap
+    // and took a tile far off to the side because nothing better existed.
+    // Refusing it outright is what keeps every arm straight.
+    if (across > along * tolerance) continue;
+    // Among tiles that pass, sideways error still outweighs reach error: a
+    // tile a little short or long reads as a straight arm, one offset does not.
+    const cost = across * 4 + Math.abs(along - reach);
+    if (cost < bestCost) {
+      bestCost = cost;
+      best = tile;
+    }
+  }
+  // NOTE: [edge case callout] Returns null when the gate rejects everything,
+  // so the cross gives up an arm near the sun rather than growing a bent one.
+  return best;
 }
 
 export function layoutConstellation(tiles, dot) {
   const spica = nearest(tiles, dot);
+  const size = tileSize(spica);
 
-  // The tesserae alternate long sides with chipped corners. The long sides
-  // (odd edges) give the compact five-tile core that daylight shows.
-  const core = [spica];
-  for (let edge = 1; edge < spica.points.length; edge += 2) {
-    core.push(tileAcrossEdge(tiles, spica, edge, core));
-  }
+  // The compact five-tile core that daylight shows. Kept aligned to
+  // armDirections, holes and all, so each outer arm can find its own inner one.
+  const inner = armDirections.map(direction =>
+    tileAlongDirection(tiles, spica.center, direction, size, [spica]));
+  const core = [spica, ...inner.filter(Boolean)];
 
   // At night each arm runs one tessera further, so the cross measures five
   // tiles across and reads as Spica rather than another background star.
+  // NOTE: [thought process] The outer tile continues the line the inner tile
+  // actually made, rather than the screen axis. Where the tiling runs a little
+  // off-axis the whole arm leans together, which still reads as straight; held
+  // to the axis instead, the two tiles would lean opposite ways and kink.
+  // An outer tile is only taken where the inner one exists, so a gap beside
+  // the star cannot leave a lone tessera floating two widths out.
   const arms = [];
-  for (const arm of core.slice(1)) {
-    arms.push(nextArmTile(tiles, spica, arm, [...core, ...arms]));
+  for (const innerTile of inner) {
+    if (!innerTile) continue;
+    const reach = [innerTile.center[0] - spica.center[0], innerTile.center[1] - spica.center[1]];
+    const length = Math.hypot(...reach);
+    const direction = [reach[0] / length, reach[1] / length];
+    const outer = tileAlongDirection(tiles, spica.center, direction, size * 2,
+      [...core, ...arms], outerArmTolerance);
+    if (outer) arms.push(outer);
   }
 
-  // The chipped corners (even edges) carry the short diagonal spikes. Kept to a
-  // single tessera each: refraction spikes read as brief flares off a bright
-  // star, so diagonals longer than the arms would look like a second cross.
-  const diagonals = [];
-  for (let edge = 0; edge < spica.points.length; edge += 2) {
-    diagonals.push(tileAcrossEdge(tiles, spica, edge, [...core, ...arms, ...diagonals]));
-  }
+  // The diagonals carry the short refraction spikes. Kept to a single tessera
+  // each: spikes read as brief flares off a bright star, so diagonals as long
+  // as the arms would look like a second cross rotated inside the first.
+  const diagonals = diagonalDirections
+    .map(direction => tileAlongDirection(tiles, spica.center, direction, size * 1.35, [...core, ...arms]))
+    .filter(Boolean);
 
   // Snap the heading by at most half a tessera so its i points exactly at Spica.
   const shift = [spica.center[0] - dot[0], spica.center[1] - dot[1]];

@@ -32,14 +32,33 @@ describe("Spica: a dim day core and a night cross", () => {
     expect(new Set(all).size).toBe(13);
     expect(layout.core[0]).toBe(layout.spica);
     for (const tile of all) expect(tiles.includes(tile)).toBe(true);
-    // Each core arm sits across a different long edge, not diagonally at a corner.
-    layout.core.slice(1).forEach((tile: any, index: number) => {
-      const start = layout.spica.points[index * 2 + 1];
-      const end = layout.spica.points[(index * 2 + 2) % layout.spica.points.length];
-      const midpoint = [(start[0] + end[0]) / 2, (start[1] + end[1]) / 2];
-      expect(Math.hypot(tile.center[0] - midpoint[0], tile.center[1] - midpoint[1])).toBeLessThan(7);
-      expect(Math.hypot(tile.center[0] - layout.spica.center[0], tile.center[1] - layout.spica.center[1])).toBeLessThan(12);
-    });
+
+    // NOTE: [thought process] These four assertions are the shape of the star.
+    // An earlier version picked one arm per edge of the Spica tile, which let
+    // two arms face nearly the same way and left the cross with two arms up
+    // and none down. Naming the axes here is what stops that returning.
+    const angle = (tile: any) => Math.atan2(
+      tile.center[1] - layout.spica.center[1], tile.center[0] - layout.spica.center[0]) * 180 / Math.PI;
+    const off = (tile: any, axis: number) => {
+      const difference = Math.abs(angle(tile) - axis);
+      return difference > 180 ? 360 - difference : difference;
+    };
+    const along = (ring: any[], axis: number) => ring.filter((tile: any) => off(tile, axis) < 50);
+
+    // Exactly one arm per screen axis: one up, one down, one left, one right.
+    for (const axis of [0, 90, 180, -90]) expect(along(layout.core.slice(1), axis)).toHaveLength(1);
+    // The vertical arms are the ones the eye checks, so they are held tightest.
+    for (const axis of [90, -90]) expect(off(along(layout.core.slice(1), axis)[0], axis)).toBeLessThan(10);
+    // Each outer arm continues its own inner arm, rather than kinking off it.
+    for (const outer of layout.arms) {
+      const inner = along(layout.core.slice(1), angle(outer));
+      expect(inner).toHaveLength(1);
+      expect(off(outer, angle(inner[0]))).toBeLessThan(16);
+      // ...and sits beyond it, so the arm runs outward rather than doubling back.
+      const reach = (tile: any) => Math.hypot(
+        tile.center[0] - layout.spica.center[0], tile.center[1] - layout.spica.center[1]);
+      expect(reach(outer)).toBeGreaterThan(reach(inner[0]));
+    }
     // The cross reaches five tesserae across: centre plus two along each arm.
     const width = Math.max(...layout.core[0].points.map((p: number[]) => p[0]))
       - Math.min(...layout.core[0].points.map((p: number[]) => p[0]));
