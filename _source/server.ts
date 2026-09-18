@@ -16,7 +16,7 @@ export const assets = new Map([
   ["/navigation.js", Bun.file(new URL("./public/navigation.js", import.meta.url))],
   ["/legacy.js", Bun.file(new URL("./public/legacy.js", import.meta.url))],
   ["/research/localizing-memorization.pdf", Bun.file(new URL("./public/research/localizing-memorization.pdf", import.meta.url))],
-  ["/images/spica-mosaic-night.svg", Bun.file(new URL("./public/images/spica-mosaic-night.svg", import.meta.url))],
+  ["/images/spica-star-mosaic.webp", Bun.file(new URL("./public/images/spica-star-mosaic.webp", import.meta.url))],\n  ["/images/spica-mosaic-night.svg", Bun.file(new URL("./public/images/spica-mosaic-night.svg", import.meta.url))],
   ["/images/spica-mosaic.svg", Bun.file(new URL("./public/images/spica-mosaic.svg", import.meta.url))],
   ["/images/spica-mosaic.webp", Bun.file(new URL("./public/images/spica-mosaic.webp", import.meta.url))],
   ["/images/spica-mosaic@2x.webp", Bun.file(new URL("./public/images/spica-mosaic@2x.webp", import.meta.url))],

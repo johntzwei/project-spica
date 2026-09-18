@@ -122,53 +122,27 @@ button { font: inherit; }
   height: 100%;
   pointer-events: none;
 }
-.night-sky-adjustments,
-.spica-night-mark { visibility: hidden; }
+.night-sky-adjustments { visibility: hidden; }
+:root[data-theme="dark"] .night-sky-adjustments { visibility: visible; }
 
-.spica-overlay .spica-piece {
-  stroke: #6d3c24;
-  stroke-width: 0.95;
-  stroke-linejoin: round;
+.spica-raster {
+  position: absolute;
+  z-index: 2;
+  display: block;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  opacity: 0.9;
+  filter: saturate(0.92) brightness(0.98);
 }
 
-.spica-day-mark {
-  opacity: 0.82;
-}
-
-.spica-day-mark .spica-piece-0 { fill: #ffe3a0; }
-.spica-day-mark .spica-piece-1,
-.spica-day-mark .spica-piece-2,
-.spica-day-mark .spica-piece-3,
-.spica-day-mark .spica-piece-4 { fill: #efc66c; }
-.spica-day-mark .spica-piece-5,
-.spica-day-mark .spica-piece-6,
-.spica-day-mark .spica-piece-7,
-.spica-day-mark .spica-piece-8 { fill: #d6a953; }
-
-:root[data-theme="dark"] .night-sky-adjustments,
-:root[data-theme="dark"] .spica-night-mark { visibility: visible; }
-
-:root[data-theme="dark"] .spica-day-mark { visibility: hidden; }
-
-:root[data-theme="dark"] .spica-night-mark {
+:root[data-theme="dark"] .spica-raster {
+  opacity: 1;
   filter:
-    drop-shadow(0 0 1.2px rgba(255, 250, 224, 0.95))
-    drop-shadow(0 0 4px rgba(255, 232, 164, 0.48));
+    brightness(1.12)
+    drop-shadow(0 0 1.5px rgba(255, 250, 225, 0.92))
+    drop-shadow(0 0 5px rgba(255, 230, 160, 0.5));
 }
 
-:root[data-theme="dark"] .spica-overlay .spica-piece {
-  stroke: #574838;
-}
-
-:root[data-theme="dark"] .spica-night-mark .spica-piece-0 { fill: #fffdf3; }
-:root[data-theme="dark"] .spica-night-mark .spica-piece-1,
-:root[data-theme="dark"] .spica-night-mark .spica-piece-2,
-:root[data-theme="dark"] .spica-night-mark .spica-piece-3,
-:root[data-theme="dark"] .spica-night-mark .spica-piece-4 { fill: #f8e8b9; }
-:root[data-theme="dark"] .spica-night-mark .spica-piece-5,
-:root[data-theme="dark"] .spica-night-mark .spica-piece-6,
-:root[data-theme="dark"] .spica-night-mark .spica-piece-7,
-:root[data-theme="dark"] .spica-night-mark .spica-piece-8 { fill: #d9c69a; }
 .site-title {
   position: relative;
   top: var(--title-drop, 0px);
