@@ -85,10 +85,12 @@ describe("Project Spica server", () => {
     expect((await response.arrayBuffer()).byteLength).toBeGreaterThan(0);
   });
 
-  test("links both satin favicon formats and serves the versioned URLs", async () => {
+  test("links both favicon formats and serves the versioned URLs", async () => {
     const html = await request("/").text();
     for (const extension of ["svg", "ico"]) {
-      const path = `/favicon.${extension}?v=satin-dot-3`;
+      // NOTE: [thought process] The version is bumped whenever the mark
+      // changes, because browsers cache a favicon far past a normal reload.
+      const path = `/favicon.${extension}?v=tessera-1`;
       expect(html).toContain(`href="${path}"`);
       expect(request(path).status).toBe(200);
     }
