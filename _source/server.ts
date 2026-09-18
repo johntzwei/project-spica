@@ -60,7 +60,7 @@ export function handleRequest(request: Request): Response {
       "Content-Type": asset.type,
       "Cache-Control": "no-cache",
       "X-Content-Type-Options": "nosniff",
-      "Content-Security-Policy": "default-src 'self'; base-uri 'none'; frame-ancestors 'none'",
+      "Content-Security-Policy": "default-src 'self'; media-src 'self' https://resources.download.minecraft.net; base-uri 'none'; frame-ancestors 'none'",
     },
   });
 
