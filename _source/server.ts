@@ -26,6 +26,7 @@ export const assets = new Map([
   ["/favicon.svg", Bun.file(new URL("./public/favicon.svg", import.meta.url))],
   ["/favicon.ico", Bun.file(new URL("./public/favicon.ico", import.meta.url))],
   ["/og.png", Bun.file(new URL("./public/og.png", import.meta.url))],
+  ["/fonts/amiri-latin-400.woff2", Bun.file(new URL("./public/fonts/amiri-latin-400.woff2", import.meta.url))],
 ]);
 
 export function handleRequest(request: Request): Response {

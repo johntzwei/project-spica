@@ -1,3 +1,13 @@
+/* The logo wordmark, self-hosted so the page stays free of third-party requests.
+   Only the latin subset is shipped; the title has no Arabic text to set. */
+@font-face {
+  font-family: 'Amiri';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(/fonts/amiri-latin-400.woff2) format('woff2');
+}
+
 :root {
   color-scheme: light;
   --burgundy: #730f24;
@@ -109,6 +119,9 @@ button { font: inherit; }
   top: calc(1.35em + 8px);
   left: clamp(20px, 4vw, 64px);
   font-size: clamp(32px, 4vw, 56px);
+  /* Nudge the wordmark down off the skyline. The star subtracts this same
+     amount, so Spica stays locked to its tile while the text moves. */
+  --title-drop: 3px;
 }
 /* The invisible anchor marks the title's i-dot. The five lit tesserae are
    selected from the mosaic underneath it, keeping Spica aligned when the image
@@ -136,7 +149,7 @@ button { font: inherit; }
   z-index: 1;
   margin: 0;
   color: #ead4af;
-  font: normal clamp(32px, 4vw, 56px)/1.15 Georgia, 'Times New Roman', serif;
+  font: normal clamp(32px, 4vw, 56px)/1.15 'Amiri', Georgia, 'Times New Roman', serif;
   letter-spacing: -1px;
   text-shadow: 0 2px 6px #3d111b, 0 0 20px #3d111b80;
 }
