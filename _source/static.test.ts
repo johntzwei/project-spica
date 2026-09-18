@@ -53,8 +53,10 @@ describe("exported GitHub Pages site", () => {
       for (const link of links) expect(request(link).status, `${file}: ${link}`).toBe(200);
     }
     expect((await request("/images/sky-tiles.json").json()).length).toBeGreaterThan(0);
-    const pdf = await request("/research/localizing-memorization.pdf").text();
-    expect(pdf.startsWith("%PDF-")).toBe(true);
+    for (const path of ["/research/phd-thesis.pdf", "/research/localizing-memorization.pdf"]) {
+      const pdf = await request(path).text();
+      expect(pdf.startsWith("%PDF-"), path).toBe(true);
+    }
   });
 
   test("publishes the domain, sitemap, social image and no implementation files", async () => {

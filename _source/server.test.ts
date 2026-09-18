@@ -68,6 +68,7 @@ describe("Project Spica server", () => {
     ["/constellation.js", "javascript"],
     ["/images/sky-tiles.json", "application/json"],
     ["/navigation.js", "javascript"],
+    ["/research/phd-thesis.pdf", "application/pdf"],
     ["/research/localizing-memorization.pdf", "application/pdf"],
     ["/images/spica-mosaic-night.svg", "image/svg+xml"],
     ["/images/spica-mosaic.svg", "image/svg+xml"],
@@ -211,14 +212,17 @@ describe("Project Spica server", () => {
     }
   });
 
-  test("lists the memorization PDF in Research after the roadmap", async () => {
+  test("lists the thesis and memorization PDFs in Research after the roadmap", async () => {
     const html = await request("/").text();
     expect(html.indexOf('id="roadmap"')).toBeLessThan(html.indexOf('id="research"'));
     const research = html.split('id="research"')[1].split("</section>")[0];
     expect(research).not.toContain('<h2 id="research-title">Research</h2>');
     expect(research).toContain('<ul class="research-links">');
-    expect(research.match(/<li>/g)).toHaveLength(1);
+    expect(research.match(/<li>/g)).toHaveLength(2);
+    expect(research).toContain('<a href="/research/phd-thesis.pdf">Statistically Principled Measurement of Large Language Models by Spiking the Training Data</a>. Johnny Tian-Zheng Wei. PhD thesis.');
     expect(research).toContain('<a href="/research/localizing-memorization.pdf">Localizing Memorization</a>');
+    // The thesis states the method in full, so it leads the list.
+    expect(research.indexOf("phd-thesis.pdf")).toBeLessThan(research.indexOf("localizing-memorization.pdf"));
   });
 
   test("lists the original People copy and links with both cofounders first", async () => {
