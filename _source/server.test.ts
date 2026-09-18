@@ -59,14 +59,13 @@ describe("Project Spica server", () => {
     ];
     expect(introduction.match(/<a /g)).toHaveLength(links.length);
     for (const [text, href] of links) {
-      const attributes = text === "spiking" ? ' class="internal-link"' : "";
-      expect(introduction).toContain(`<a${attributes} href="${href}">${text}</a>`);
+      expect(introduction).toContain(`<a href="${href}">${text}</a>`);
     }
   });
 
   test("marks the internal spiking link with a decorative star", async () => {
     const css = await request("/styles.css").text();
-    expect(css).toMatch(/\.internal-link::after\s*\{\s*content: "✦" \/ "";/);
+    expect(css).toMatch(/#main a\[href\^="\/"\]::after,[^{]*\{\s*content: "✧";/);
   });
 
   test.each([
@@ -77,7 +76,6 @@ describe("Project Spica server", () => {
     ["/navigation.js", "javascript"],
     ["/research/phd-thesis.pdf", "application/pdf"],
     ["/research/localizing-memorization.pdf", "application/pdf"],
-    ["/research/phd-thesis.pdf", "application/pdf"],
     ["/images/spica-mosaic-night.svg", "image/svg+xml"],
     ["/images/spica-mosaic.svg", "image/svg+xml"],
     ["/images/spica-mosaic.webp", "image/webp"],

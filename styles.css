@@ -222,13 +222,6 @@ h3 { font-size: 25px; line-height: 1.3; margin: 32px 0 16px; }
 .research-links { margin: 0; padding-left: 22px; font-size: 17px; line-height: 1.85; }
 .mission a, .research-links a, .people-list a { color: var(--accent); text-decoration: none; }
 .mission a:hover, .research-links a:hover, .people-list a:hover { text-decoration: underline; }
-.internal-link::after {
-  content: "✦" / "";
-  display: inline-block;
-  margin-left: 0.2em;
-  font-size: 0.65em;
-  vertical-align: super;
-}
 .people-list { list-style: none; margin: 32px 0 0; padding: 0; }
 .people-list li + li { margin-top: 24px; }
 .people-list a { font-size: 18px; line-height: 1.5; }
