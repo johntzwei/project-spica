@@ -46,7 +46,7 @@ describe("exported GitHub Pages site", () => {
     expect(entries[0]).toContain('<time datetime="2026-09">September 2026</time>');
     expect(entries[1]).toContain('href="/research/phd-thesis.pdf"');
     expect(entries[1]).toContain('<time datetime="2026-05">May 2026</time>');
-    expect(entries[2]).toContain('<a href="https://huggingface.co/collections/allegrolab/hubble-core">Memorization Model Organisms (Hubble)</a>');
+    expect(entries[2]).toContain('<a href="https://huggingface.co/collections/allegrolab/hubble-core">Model organisms for memorization (Hubble)</a>');
     expect(entries[2]).toContain('<time datetime="2025-10">October 2025</time>');
   });
 
