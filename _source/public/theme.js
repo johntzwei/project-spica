@@ -3,6 +3,9 @@ const artwork = document.querySelector(".mosaic-day");
 const nightArtwork = document.querySelector(".mosaic-night");
 const themeColor = document.querySelector('meta[name="theme-color"]');
 
+const leverSound = new Audio("https://resources.download.minecraft.net/2f/2fe092579d9637e2d160319820ee08e60a237bb7");
+leverSound.preload = "auto";
+
 // Keep the daytime artwork usable if the night image cannot be loaded.
 nightArtwork.decode().then(() => {
   toggle.hidden = false;
@@ -20,6 +23,18 @@ function setTheme(dark) {
   themeColor.content = dark ? "#050914" : "#730f24";
 }
 
+function playLeverClick(powered) {
+  const audio = leverSound.cloneNode(true);
+  audio.volume = 0.3;
+  audio.playbackRate = powered ? 0.6 : 0.5;
+  if ("preservesPitch" in audio) audio.preservesPitch = false;
+  if ("mozPreservesPitch" in audio) audio.mozPreservesPitch = false;
+  if ("webkitPreservesPitch" in audio) audio.webkitPreservesPitch = false;
+  void audio.play().catch(() => {});
+}
+
 toggle.addEventListener("click", () => {
-  setTheme(document.documentElement.dataset.theme !== "dark");
+  const nextDark = document.documentElement.dataset.theme !== "dark";
+  playLeverClick(!nextDark);
+  setTheme(nextDark);
 });
