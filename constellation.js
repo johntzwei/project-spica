@@ -1,242 +1,74 @@
 // Recolor fitted sky tiles, never move their geometry. Only the selection moves
 // with the heading; the raster's joints, chipped edges, and moon palette remain.
-// NOTE: [thought process] Spica is drawn from the mosaic's own tesserae rather
-// than as an overlay shape, so the star always sits on the tile grid no matter
-// how the background image is cropped.
+//
+// NOTE: [thought process] Spica is one tessera with a halo, not a cross. A
+// cross was tried at length and the mosaic would not hold one: the tiles are
+// hand-cut and laid in columns that step half a tile between neighbours, so no
+// straight bar of five exists near the heading. Every attempt to find one bent,
+// sheared, or doubled back on itself. The deeper problem is that a four-point
+// star is a photographic artifact -- diffraction spikes thrown by a camera's
+// aperture blades -- and has no business in ceramic. A mosaicist renders a
+// bright star as one brilliant tile with the glaze lifting around it, which is
+// what this draws. Nothing here depends on the lattice, so nothing can bend.
 const distance = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
 const nearest = (tiles, point) => tiles.reduce((best, tile) => distance(tile.center, point) < distance(best.center, point) ? tile : best);
 
-// At night only the five daytime tesserae are lifted from their ceramic glaze
-// toward warm white. This is the brightest thing in the sky.
-export const coreGlow = 0.85;
+// How far Spica's own tessera is lifted from its glaze toward warm white.
+export const coreGlow = 0.95;
 
-// NOTE: [thought process] Everything outside the lit core is *dimmed*, not
-// lifted less. The moon glaze the raster already uses is pale, so a small lift
-// still lands brighter than an ordinary star; the only way down is to pull a
-// tile back toward its own patch of night sky. At 1 a tile would vanish into
-// the background, so each tier stops short of that.
-//
-// The order of these three is the whole design: the arms carry the cross out
-// from the core, the spikes flare off it, and the field sits behind both. Each
-// step has to stay visible as a step, so they are spaced rather than crowded.
-export const nightDimming = { arm: 0.1, diagonal: 0.42, star: 0.45 };
+// The halo reaches this many tile widths out, fading to nothing at the edge,
+// and this is how strongly its innermost ring catches the light.
+export const haloReach = 2.9;
+export const haloGlow = 0.7;
+
+// How far every star is pulled back from its moon glaze toward its own patch of
+// night sky. At 1 a star would vanish entirely, so this stops short: the field
+// stays populated, just quiet enough for Spica to carry the sky.
+export const nightDimming = { star: 0.45 };
 
 // How many of the raster's 21 baked stars survive the night pass. The rest are
 // painted back to their own sky color, which removes them without touching the
 // image: a quieter field reads as deeper sky and leaves Spica more room.
 export const visibleStarCount = 13;
 
-// The rough width of one tessera, used to say how far along an arm the next
-// tile should sit. Taken from Spica itself so the cross scales with the mosaic.
+// By day the surrounding tesserae are pushed down into shadow instead of being
+// lifted, so the one washed tile is the only thing catching light.
+export const dayDim = 0.45;
+
+// Daylight only tints Spica, and only faintly.
+// NOTE: [thought process] Daylight needs a different technique than night. The
+// night mark can use solid colors because sky-tiles.json carries each tile's
+// moon glaze, which is exactly what the night raster painted. The day raster
+// paints this same sky red, and no day color is stored, so a solid pale fill
+// would read as a bright mark on red rather than a dim one. Washing the tile
+// with translucent warm white instead lightens whatever is actually beneath.
+export const dayWash = 0.9;
+
+// The rough width of one tessera, taken from Spica so the halo scales with the
+// mosaic wherever the heading lands.
 function tileSize(tile) {
   const spread = axis => Math.max(...tile.points.map(point => point[axis]))
     - Math.min(...tile.points.map(point => point[axis]));
   return (spread(0) + spread(1)) / 2;
 }
 
-// The spacing between neighbouring columns, measured at Spica rather than
-// assumed, so the cross follows the mosaic where it stretches or tightens.
-// NOTE: [thought process] The height filter is what makes this the next
-// column rather than the diagonal neighbour. Without it the nearest tile to
-// the right is a corner-to-corner step of about three units, not the nine-unit
-// column pitch, and every column after the first lands in the wrong place.
-function columnPitch(tiles, spica, size) {
-  const rightward = tiles
-    .map(tile => [tile.center[0] - spica.center[0], tile.center[1] - spica.center[1]])
-    .filter(([dx, dy]) => dx > size * 0.4 && dx < size * 2 && Math.abs(dy) < size * 0.8)
-    .map(([dx]) => dx);
-  return rightward.length ? Math.min(...rightward) : size;
-}
-
-// NOTE: [thought process] Two earlier approaches failed here, and both failures
-// are worth keeping in view.
-//
-// Walking the Spica tile's own edges, one arm per edge, produced crooked
-// stars: a hand-cut tessera's edge normals are not a clean cross, so two arms
-// could face nearly the same way and the star grew two arms up and none down.
-//
-// Firing rays along the mosaic's local grid fixed the spacing but lost
-// adjacency. Where no tile happened to sit on a ray, the search reached past
-// the gap and took one off to the side, which bent the arm worse than before.
-//
-// What follows keeps both guarantees at once. The four directions are fixed to
-// the screen, so a vertical arm is vertical and its opposite always points
-// back; and each arm is filled by the tile that best matches that direction,
-// scored so that straightness outweighs reach.
-const armDirections = [[1, 0], [0, 1], [-1, 0], [0, -1]];
-// NOTE: [pedagogical] The gate below compares sideways offset to reach, which
-// is the tangent of the angle between the tile and the arm. Testing the ratio
-// rather than the offset alone is what makes the tolerance mean the same thing
-// close in and far out: a fixed offset would allow a nearly sideways tile at
-// short range while rejecting a well-aligned one further along the arm.
-// Measured against this mosaic: the tile best aligned with an axis sits within
-// 27 degrees of it in the worst case, so a tolerance below that starves arms
-// rather than straightening them. The outer ring is held tighter because it is
-// matched to its own inner arm, not to the axis.
-const armTolerance = Math.tan(30 * Math.PI / 180);
-const outerArmTolerance = Math.tan(20 * Math.PI / 180);
-const diagonalDirections = [[1, 1], [-1, 1], [-1, -1], [1, -1]]
-  .map(([x, y]) => [x / Math.SQRT2, y / Math.SQRT2]);
-
-function tileAlongDirection(tiles, origin, direction, reach, used, tolerance = armTolerance, accept = () => true) {
-  let best = null;
-  let bestCost = Infinity;
-  for (const tile of tiles) {
-    if (used.includes(tile) || !accept(tile)) continue;
-    const dx = tile.center[0] - origin[0], dy = tile.center[1] - origin[1];
-    const along = dx * direction[0] + dy * direction[1];
-    // Only tiles genuinely out in this direction, never behind or beside Spica.
-    if (along < reach * 0.4 || along > reach * 1.8) continue;
-    const across = Math.abs(dx * -direction[1] + dy * direction[0]);
-    // NOTE: [thought process] This gate is the whole fix. Scoring alone still
-    // returns the least-bad tile when every candidate is bad, and beside the
-    // sun and moon discs there are no sky tesserae at all in some directions.
-    // That is where the bent arms came from: the search reached past the gap
-    // and took a tile far off to the side because nothing better existed.
-    // Refusing it outright is what keeps every arm straight.
-    if (across > along * tolerance) continue;
-    // Among tiles that pass, sideways error still outweighs reach error: a
-    // tile a little short or long reads as a straight arm, one offset does not.
-    const cost = across * 4 + Math.abs(along - reach);
-    if (cost < bestCost) {
-      bestCost = cost;
-      best = tile;
-    }
-  }
-  // NOTE: [edge case callout] Returns null when the gate rejects everything,
-  // so the cross gives up an arm near the sun rather than growing a bent one.
-  return best;
-}
-
 export function layoutConstellation(tiles, dot) {
   const spica = nearest(tiles, dot);
-  const size = tileSize(spica);
+  const radius = tileSize(spica) * haloReach;
 
-  // The compact five-tile core that daylight shows. Kept aligned to
-  // armDirections, holes and all, so each outer arm can find its own inner one.
-  const inner = armDirections.map(direction =>
-    tileAlongDirection(tiles, spica.center, direction, size, [spica]));
-
-  // At night each arm runs one tessera further, so the cross measures five
-  // tiles across and reads as Spica rather than another background star.
-  // NOTE: [thought process] The outer tile continues the line the inner tile
-  // actually made, rather than the screen axis. Where the tiling runs a little
-  // off-axis the whole arm leans together, which still reads as straight; held
-  // to the axis instead, the two tiles would lean opposite ways and kink.
-  // An outer tile is only taken where the inner one exists, so a gap beside
-  // the star cannot leave a lone tessera floating two widths out.
-  // NOTE: [thought process] The horizontal bar is built across five
-  // consecutive columns, and chosen as a whole rather than one tile at a time.
-  //
-  // Everything else was tried first and each failed in its own way. Picking
-  // each arm independently let both ends drift the same way, so the bar came
-  // out as a U at 31% of positions. Forbidding a reversal of direction did
-  // nothing on a level bar, where there is no direction to reverse. Keeping
-  // each tile near the bar's line still allowed the two ends to sit on
-  // opposite sides of it and zigzag. Reaching past a column to find a
-  // straighter tile removed the U but broke the bar into gapped tiles.
-  //
-  // Enumerating the columns settles all of it at once: every combination of
-  // one tile per column is tested, those that bend back on themselves are
-  // thrown out, and the flattest survivor wins. Measured across the title's
-  // range a straight five-column bar exists at every position, so nothing is
-  // traded away to get it.
-  const pitch = columnPitch(tiles, spica, size);
-  const neighbouringColumns = [-2, -1, 1, 2].map(step => {
-    const wanted = spica.center[0] + step * pitch;
-    return tiles
-      .filter(tile => tile !== spica && Math.abs(tile.center[0] - wanted) < pitch * 0.6)
-      .sort((a, b) => Math.abs(a.center[1] - spica.center[1]) - Math.abs(b.center[1] - spica.center[1]))
-      .slice(0, 3);
-  });
-
-  // A bar is straight when its heights only rise, or only fall, left to right.
-  // Any mix of the two is the U this whole passage exists to rule out.
-  // NOTE: [thought process] The tolerance here is deliberately tight. Set to a
-  // quarter of a tessera it admitted bars that stepped up two units, down six,
-  // then up two again -- monotonic by the letter of the rule and visibly a
-  // zigzag on screen. The wobble a bar may carry is far smaller than the tile.
-  const bends = heights => {
-    let rises = 0, falls = 0;
-    for (let index = 1; index < heights.length; index++) {
-      const step = heights[index] - heights[index - 1];
-      if (step > size * 0.12) rises++;
-      if (step < -size * 0.12) falls++;
-    }
-    return rises > 0 && falls > 0;
-  };
-
-  let bar = null;
-  let bestTilt = Infinity;
-  const [farLeft, nearLeft, nearRight, farRight] = neighbouringColumns;
-  for (const left2 of farLeft) {
-    for (const left1 of nearLeft) {
-      for (const right1 of nearRight) {
-        for (const right2 of farRight) {
-          const candidate = [left2, left1, spica, right1, right2];
-          if (bends(candidate.map(tile => tile.center[1]))) continue;
-          // Flatness and straightness both matter: a bar that leans evenly
-          // reads fine, one that wanders around its own line does not.
-          const slope = (right2.center[1] - left2.center[1]) / (right2.center[0] - left2.center[0]);
-          const wander = Math.max(...candidate.map(tile => Math.abs(tile.center[1]
-            - (spica.center[1] + slope * (tile.center[0] - spica.center[0])))));
-          const cost = Math.abs(Math.atan(slope)) + wander / size;
-          if (cost < bestTilt) {
-            bestTilt = cost;
-            bar = { inner: [right1, left1], outer: [right2, left2] };
-          }
-        }
-      }
-    }
-  }
-
-  // NOTE: [edge case callout] Beside the sun and moon discs a column can be
-  // empty, leaving no bar at all. The cross then keeps its vertical alone
-  // rather than reaching across the gap for tiles that would bend it.
-  const horizontalInner = bar ? bar.inner : [];
-  const horizontalOuter = bar ? bar.outer : [];
-
-  const vertical = [];
-  for (const innerTile of [inner[1], inner[3]]) {
-    if (!innerTile) continue;
-    const reach = [innerTile.center[0] - spica.center[0], innerTile.center[1] - spica.center[1]];
-    const length = Math.hypot(...reach);
-    const outer = tileAlongDirection(tiles, spica.center, [reach[0] / length, reach[1] / length],
-      size * 2, [spica, ...inner.filter(Boolean), ...horizontalInner, ...horizontalOuter, ...vertical],
-      outerArmTolerance);
-    if (outer) vertical.push(outer);
-  }
-
-  // The core is what daylight shows: Spica, the first tile up and down its own
-  // column, and the first tile along the bar each way.
-  const core = [spica, inner[1], inner[3], ...horizontalInner].filter(Boolean);
-  const arms = [...vertical, ...horizontalOuter];
-
-  // The diagonals carry the short refraction spikes. Kept to a single tessera
-  // each: spikes read as brief flares off a bright star, so diagonals as long
-  // as the arms would look like a second cross rotated inside the first.
-  const diagonals = diagonalDirections
-    .map(direction => tileAlongDirection(tiles, spica.center, direction, size * 1.35, [...core, ...arms]))
-    .filter(Boolean);
+  // NOTE: [pedagogical] The halo is every tessera within a radius, with no
+  // regard for direction. That is the whole point: a selection that cannot
+  // prefer one direction over another cannot come out crooked, which is
+  // exactly what defeated the cross. Brightness falls off with distance, so
+  // the shape the eye reads is a glow rather than an outline.
+  const halo = tiles
+    .filter(tile => tile !== spica && distance(tile.center, spica.center) < radius)
+    .map(tile => ({ tile, falloff: 1 - distance(tile.center, spica.center) / radius }))
+    .sort((a, b) => b.falloff - a.falloff);
 
   // Snap the heading by at most half a tessera so its i points exactly at Spica.
   const shift = [spica.center[0] - dot[0], spica.center[1] - dot[1]];
-  return { spica, core, arms, diagonals, shift };
-}
-
-// NOTE: [thought process] Daylight needs a different technique than night. The
-// night mark can use solid colors because sky-tiles.json carries each tile's
-// moon glaze, which is exactly what the night raster painted. The day raster
-// paints this same sky red, and no day color is stored, so a solid pale fill
-// would read as a bright cross on red rather than a dim one. Washing the tiles
-// with translucent warm white instead lightens whatever is actually beneath.
-// Tune the daytime brightness here; the test reads this value rather than
-// pinning its own copy, so adjusting the star does not break the suite.
-export const dayWash = 0.9;
-
-export function spicaDayTileMarkup(tile) {
-  const point = p => p.map(n => n.toFixed(2)).join(" ");
-  return `<path data-tile="spica-day" fill="#fff2cf" fill-opacity="${dayWash}" d="M${tile.points.map(point).join("L")}Z"/>`;
+  return { spica, halo, shift };
 }
 
 // Thin the baked star field down to `visibleStarCount`, spreading the removals
@@ -297,6 +129,41 @@ export function dimmedTileMarkup(tile, amount, kind) {
   return ceramicTileMarkup(tile, blend(tile.moon, tile.sky, amount), kind);
 }
 
+// NOTE: [thought process] The halo is repainted glaze at night, not a wash.
+// Drawn as translucent white it was almost invisible: one tessera plus a faint
+// tint has nowhere near the visual mass of the nine-tile cross it replaced,
+// and the star simply disappeared. Lifting each tile's own glaze toward warm
+// white the way Spica's is lifted gives the halo real presence while keeping
+// every tile's ceramic variation, so it still reads as mosaic rather than a
+// spotlight laid over one. Daylight keeps the wash, because the day raster
+// paints this sky red and no day color is stored to lift.
+export function haloTileMarkup(tile, strength) {
+  // NOTE: [thought process] The blend starts at the tile's own sky, not its
+  // moon glaze. Moon is the pale color the raster paints stars with, already
+  // near white, so lifting from there made every halo tile as bright as the
+  // next and the glow came out a flat blob. From sky, strength 0 leaves the
+  // tile exactly as the night raster painted it and the falloff actually
+  // reads as a falloff.
+  return ceramicTileMarkup(tile, blend(tile.sky, "ffffff", strength), "halo");
+}
+
+// NOTE: [thought process] Day and night make the star stand out by opposite
+// means. At night the halo is lit, because the sky around it is dark and light
+// is what reads. By day the sky is a bright red raster, so lifting the halo
+// would only crowd the star with more brightness; the surrounding tiles are
+// darkened instead and the contrast comes from the shadow around the tile
+// rather than the glow. The wash is the terracotta of the joints, so the
+// shadow belongs to the same ceramic rather than greying the artwork.
+export function haloDayTileMarkup(tile, strength) {
+  const point = p => p.map(n => n.toFixed(2)).join(" ");
+  return `<path data-tile="halo-day" fill="#291710" fill-opacity="${strength.toFixed(3)}" d="M${tile.points.map(point).join("L")}Z"/>`;
+}
+
+export function spicaDayTileMarkup(tile) {
+  const point = p => p.map(n => n.toFixed(2)).join(" ");
+  return `<path data-tile="spica-day" fill="#fff2cf" fill-opacity="${dayWash}" d="M${tile.points.map(point).join("L")}Z"/>`;
+}
+
 async function attachConstellation() {
   const scene = document.querySelector(".mosaic-scene");
   const heading = document.querySelector(".title-group");
@@ -336,7 +203,7 @@ async function attachConstellation() {
   function update() {
     const bounds = scene.getBoundingClientRect();
     if (!bounds.width) return;
-    // The lit tiles replace the ordinary i-dot.
+    // The lit tile replaces the ordinary i-dot.
     letter.firstChild.nodeValue = "ı";
     const anchor = dot.getBoundingClientRect();
     // NOTE: [thought process] Undo the current shift before measuring, so the
@@ -345,30 +212,18 @@ async function attachConstellation() {
     const pixelScale = bounds.width / 1400;
     const target = [(anchor.left - shift[0] - bounds.left) / pixelScale, (anchor.top - shift[1] - bounds.top) / pixelScale];
     const layout = layoutConstellation(tiles, target);
-
-    // Lower only the lettering to clear the bottom arm. The dot anchor's
-    // inverse CSS offset keeps the star fixed, including on resize.
-    // NOTE: [thought process] Measure against the night cross even in daylight.
-    // The drop is the same in both themes, so flipping the toggle never nudges
-    // the heading; a few extra pixels of daytime clearance is the cheaper cost.
-    const fontSize = parseFloat(getComputedStyle(heading).fontSize);
-    const bottom = Math.max(...[...layout.core, ...layout.arms, ...layout.diagonals]
-      .flatMap(tile => tile.points.map(point => point[1])));
-    const drop = Math.max(0, (bottom - layout.spica.center[1]) * pixelScale - fontSize * 0.1);
-    heading.style.setProperty("--title-drop", `${drop}px`);
     shift = layout.shift.map(n => n * pixelScale);
     heading.style.translate = `${shift[0]}px ${shift[1]}px`;
 
-    dayMark.innerHTML = layout.core.map(spicaDayTileMarkup).join("");
-    // Any star caught inside the cross is relit by the Spica pass drawn above,
-    // so the dimming layer does not need to skip it.
-    // Painted dimmest first, so wherever two tiers meet the brighter one keeps
-    // its edge: spikes, then arms, then the core on top.
-    nightMark.innerHTML = [
-      ...layout.diagonals.map(tile => dimmedTileMarkup(tile, nightDimming.diagonal, "spica-spike")),
-      ...layout.arms.map(tile => dimmedTileMarkup(tile, nightDimming.arm, "spica-arm")),
-      ...layout.core.map(tile => spicaTileMarkup(tile, coreGlow)),
-    ].join("");
+    // NOTE: [thought process] The heading no longer drops to clear an arm.
+    // A single tessera sits inside the i-dot's own footprint, so the lettering
+    // can stay where the type designer put it.
+    dayMark.innerHTML = layout.halo
+      .map(({ tile, falloff }) => haloDayTileMarkup(tile, falloff * dayDim))
+      .join("") + spicaDayTileMarkup(layout.spica);
+    nightMark.innerHTML = layout.halo
+      .map(({ tile, falloff }) => haloTileMarkup(tile, falloff * haloGlow))
+      .join("") + spicaTileMarkup(layout.spica, coreGlow);
   }
 
   update();
@@ -388,6 +243,5 @@ if (typeof document !== "undefined") {
     document.querySelector(".mosaic-tile-colors")?.remove();
     document.querySelector(".spica-letter").firstChild.nodeValue = "i";
     document.querySelector(".title-group").style.translate = "";
-    document.querySelector(".title-group").style.removeProperty("--title-drop");
   });
 }

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { coreGlow, dayWash, dimmedTileMarkup, layoutConstellation, nightDimming, spicaDayTileMarkup, spicaTileMarkup, starField, visibleStarCount } from "./public/constellation.js";
+import { coreGlow, dayDim, dayWash, dimmedTileMarkup, haloDayTileMarkup, haloGlow, haloTileMarkup, layoutConstellation, nightDimming, spicaDayTileMarkup, spicaTileMarkup, starField, visibleStarCount } from "./public/constellation.js";
 
 const tiles = await Bun.file(new URL("./public/images/sky-tiles.json", import.meta.url)).json();
 const artwork = await Bun.file(new URL("./public/images/spica-mosaic-night.svg", import.meta.url)).text();
@@ -14,119 +14,86 @@ const luminance = (hex: string) => [0.2126, 0.7152, 0.0722].reduce((sum, weight,
   return sum + weight * (channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4);
 }, 0);
 
-describe("Spica: a dim day core and a night cross", () => {
+describe("Spica: one bright tessera with a halo", () => {
   test.each([
     ["desktop", [290, 100]],
     ["tablet", [450, 108]],
     ["mobile", [850, 97]],
-  ])("keeps Spica at the i's dot on %s", (_name, dot) => {
+  ])("sits on the tile nearest the i's dot on %s", (_name, dot) => {
     const layout = layoutConstellation(tiles, dot);
     // The heading never moves more than half a tessera to meet the mosaic.
     expect(Math.hypot(...layout.shift)).toBeLessThan(7);
     expect(layout.spica.center).toEqual([dot[0] + layout.shift[0], dot[1] + layout.shift[1]]);
-    expect(layout.core).toHaveLength(5);
-    expect(layout.diagonals).toHaveLength(4);
-    // NOTE: [thought process] The arm count is not fixed at four. Where the
-    // mosaic offers no outer pair that keeps the horizontal bar straight, both
-    // outer tiles are dropped rather than bent into a U, so the bar is five
-    // tiles or three and never four. Asserting a flat four here would make the
-    // test demand the very shape the layout exists to refuse.
-    expect([2, 4]).toContain(layout.arms.length);
-    const all = [...layout.core, ...layout.arms, ...layout.diagonals];
-    // No tessera is lit twice, so the rings never overlap or cancel out.
-    expect(new Set(all).size).toBe(all.length);
-    expect(layout.core[0]).toBe(layout.spica);
-    for (const tile of all) expect(tiles.includes(tile)).toBe(true);
-
-    // NOTE: [thought process] These four assertions are the shape of the star.
-    // An earlier version picked one arm per edge of the Spica tile, which let
-    // two arms face nearly the same way and left the cross with two arms up
-    // and none down. Naming the axes here is what stops that returning.
-    const angle = (tile: any) => Math.atan2(
-      tile.center[1] - layout.spica.center[1], tile.center[0] - layout.spica.center[0]) * 180 / Math.PI;
-    const off = (tile: any, axis: number) => {
-      const difference = Math.abs(angle(tile) - axis);
-      return difference > 180 ? 360 - difference : difference;
-    };
-    const along = (ring: any[], axis: number) => ring.filter((tile: any) => off(tile, axis) < 50);
-
-    // Exactly one arm per screen axis: one up, one down, one left, one right.
-    for (const axis of [0, 90, 180, -90]) expect(along(layout.core.slice(1), axis)).toHaveLength(1);
-    // The vertical arms are the ones the eye checks, so they are held tightest.
-    for (const axis of [90, -90]) expect(off(along(layout.core.slice(1), axis)[0], axis)).toBeLessThan(10);
-    // Each outer arm continues its own inner arm, rather than kinking off it.
-    for (const outer of layout.arms) {
-      const inner = along(layout.core.slice(1), angle(outer));
-      expect(inner).toHaveLength(1);
-      expect(off(outer, angle(inner[0]))).toBeLessThan(16);
-      // ...and sits beyond it, so the arm runs outward rather than doubling back.
-      const reach = (tile: any) => Math.hypot(
-        tile.center[0] - layout.spica.center[0], tile.center[1] - layout.spica.center[1]);
-      expect(reach(outer)).toBeGreaterThan(reach(inner[0]));
-    }
-    // With both outer tiles present the cross reaches five tesserae across.
-    // A bar cut back to three is the deliberate fallback, so it is exempt.
-    const width = Math.max(...layout.core[0].points.map((p: number[]) => p[0]))
-      - Math.min(...layout.core[0].points.map((p: number[]) => p[0]));
-    if (layout.arms.length === 4) {
-      const spread = [...layout.core, ...layout.arms].flatMap((tile: any) => tile.points.map((p: number[]) => p[0]));
-      expect((Math.max(...spread) - Math.min(...spread)) / width).toBeGreaterThan(4.5);
-    }
-
-    // NOTE: [thought process] This is the assertion the star is built around.
-    // A bar that bends back on itself -- a U or an arch -- destroys the cross
-    // far more visibly than any lean, so the finished shape is checked rather
-    // than trusted to the selection rules that produced it. Earlier rules that
-    // only forbade reversing direction, or only kept tiles near the bar's
-    // line, both passed their own logic and still produced U shapes.
-    const bar = [...layout.core, ...layout.arms]
-      .filter((tile: any) => Math.abs(tile.center[0] - layout.spica.center[0])
-        > Math.abs(tile.center[1] - layout.spica.center[1]))
-      .concat(layout.spica)
-      .sort((a: any, b: any) => a.center[0] - b.center[0])
-      .map((tile: any) => tile.center[1]);
-    let rises = 0, falls = 0;
-    for (let index = 1; index < bar.length; index++) {
-      const step = bar[index] - bar[index - 1];
-      if (step > width * 0.25) rises++;
-      if (step < -width * 0.25) falls++;
-    }
-    expect(Math.min(rises, falls)).toBe(0);
-    // Spikes stay shorter than the arms, so they read as refraction off a
-    // bright star instead of turning the cross into a second, rotated one.
-    const reach = (ring: any[]) => ring.map((tile: any) =>
-      Math.hypot(tile.center[0] - layout.spica.center[0], tile.center[1] - layout.spica.center[1]));
-    expect(Math.max(...reach(layout.diagonals))).toBeLessThan(Math.min(...reach(layout.arms)));
-    // Pure selection is stable, so resize does not drift or change tile geometry.
+    expect(tiles.includes(layout.spica)).toBe(true);
+    // Pure selection is stable, so resize does not drift or change the star.
     expect(layoutConstellation(tiles, dot)).toEqual(layout);
   });
 
-  test("steps the night down from the core through the arms to the field", () => {
-    const { core, arms, diagonals } = layoutConstellation(tiles, [290, 100]);
-    const mean = (values: number[]) => values.reduce((sum, value) => sum + value, 0) / values.length;
-    const lit = mean(core.map((tile: any) => luminance(fill(spicaTileMarkup(tile, coreGlow)))));
-    const dimmed = (ring: any[], amount: number) =>
-      mean(ring.map((tile: any) => luminance(fill(dimmedTileMarkup(tile, amount, "x")))));
-    const arm = dimmed(arms, nightDimming.arm);
-    const spike = dimmed(diagonals, nightDimming.diagonal);
-    const field = dimmed(starField(tiles).kept, nightDimming.star);
+  test.each([
+    ["desktop", [290, 100]],
+    ["tablet", [450, 108]],
+    ["mobile", [850, 97]],
+  ])("rings the star with a halo that fades outward on %s", (_name, dot) => {
+    const { spica, halo } = layoutConstellation(tiles, dot);
+    expect(halo.length).toBeGreaterThan(3);
+    expect(halo.map(entry => entry.tile)).not.toContain(spica);
+    expect(new Set(halo.map(entry => entry.tile)).size).toBe(halo.length);
+    // NOTE: [thought process] The halo is taken by radius with no regard for
+    // direction, which is the whole reason it replaced the cross: a selection
+    // that cannot prefer one direction over another cannot come out crooked.
+    // So what is asserted is the falloff, not any shape.
+    for (const [index, entry] of halo.entries()) {
+      expect(entry.falloff).toBeGreaterThan(0);
+      expect(entry.falloff).toBeLessThanOrEqual(1);
+      if (index) expect(entry.falloff).toBeLessThanOrEqual(halo[index - 1].falloff);
+      // Every halo tile keeps its own fitted outline and ceramic joints.
+      const markup = haloTileMarkup(entry.tile, entry.falloff * haloGlow);
+      expect(geometry.has(markup.match(/ d="([^"]+)"/)![1])).toBe(true);
+      // By day the halo darkens rather than lights, so the washed centre tile
+      // is the only thing catching light against the red raster.
+      const daylight = haloDayTileMarkup(entry.tile, entry.falloff * dayDim);
+      expect(daylight).toContain('fill="#291710"');
+      expect(daylight).not.toContain('fill="#fff2cf"');
+    }
 
-    // The cross reads by brightness order, not by shape alone.
-    expect(lit).toBeGreaterThan(arm);
-    expect(arm).toBeGreaterThan(spike);
-    expect(spike).toBeGreaterThan(field);
-    // NOTE: [thought process] Ordering alone would pass with the tiers a
-    // hairsbreadth apart, which is exactly the failure that loses a tier to the
-    // eye. Requiring real separation is what the design actually depends on.
-    expect(arm - spike).toBeGreaterThan(0.1);
-    expect(lit - arm).toBeGreaterThan(0.1);
+    // NOTE: [thought process] Brightness is checked against each tile's own
+    // sky rather than a shared number. Blending from the moon glaze instead
+    // made every halo tile land near white whatever its distance, turning the
+    // glow into a flat blob -- the failure this assertion exists to catch.
+    const brightness = (entry: any) =>
+      luminance(fill(haloTileMarkup(entry.tile, entry.falloff * haloGlow)));
+    for (const entry of halo) {
+      expect(brightness(entry)).toBeGreaterThanOrEqual(luminance(entry.tile.sky) - 1e-9);
+      expect(brightness(entry)).toBeLessThan(luminance(fill(spicaTileMarkup(spica, coreGlow))));
+    }
+    // The innermost tile clearly outshines the outermost, so it reads as a glow.
+    expect(brightness(halo[0])).toBeGreaterThan(brightness(halo[halo.length - 1]));
+  });
 
-    // NOTE: [thought process] The undimmed moon glaze is the reference. Lifting
-    // a tile less would still land above it, so every dimmed tier must sit
-    // below it to count as actually dimmed.
-    const rawGlaze = mean(tiles.map((tile: any) => luminance(tile.moon)));
-    for (const tier of [arm, spike, field]) expect(tier).toBeLessThan(rawGlaze);
-    expect(lit).toBeGreaterThan(Math.max(...tiles.map((tile: any) => luminance(tile.moon))));
+  test("lights Spica brighter than any ordinary star, on its fitted outline", () => {
+    const brightestOrdinaryStar = Math.max(...tiles.map((tile: any) => luminance(tile.moon)));
+    const { spica } = layoutConstellation(tiles, [290, 100]);
+    const markup = spicaTileMarkup(spica, coreGlow);
+    expect(luminance(fill(markup))).toBeGreaterThan(brightestOrdinaryStar);
+    // The lit tile reuses the generated outline instead of a drawn star shape.
+    expect(geometry.has(markup.match(/ d="([^"]+)"/)![1])).toBe(true);
+    expect(markup).toContain('stroke="#fff2cf"');
+    expect(markup).not.toContain("<circle");
+    expect(markup).not.toContain("transform=");
+  });
+
+  test("daylight only tints Spica, dimly and without a solid fill", () => {
+    const { spica } = layoutConstellation(tiles, [290, 100]);
+    const markup = spicaDayTileMarkup(spica);
+    // A translucent wash lightens the red day raster instead of replacing it.
+    // Staying under 1 is the property that matters; the exact value is a design
+    // choice, so the test follows the source instead of fixing it.
+    expect(dayWash).toBeGreaterThan(0);
+    expect(dayWash).toBeLessThan(1);
+    expect(dayDim).toBeGreaterThan(0);
+    expect(dayDim).toBeLessThan(1);
+    expect(markup).toContain(`fill-opacity="${dayWash}"`);
+    expect(geometry.has(markup.match(/ d="([^"]+)"/)![1])).toBe(true);
   });
 
   test("dims the surviving stars without erasing them into the sky", () => {
@@ -138,10 +105,8 @@ describe("Spica: a dim day core and a night cross", () => {
       // A star pulled all the way to its sky color would leave a hole.
       expect(dimmed).toBeGreaterThan(luminance(tile.sky));
     }
-    for (const amount of Object.values(nightDimming)) {
-      expect(amount).toBeGreaterThan(0);
-      expect(amount).toBeLessThan(1);
-    }
+    expect(nightDimming.star).toBeGreaterThan(0);
+    expect(nightDimming.star).toBeLessThan(1);
   });
 
   test("thins the field to the visible count, spread across the sky", () => {
@@ -165,50 +130,13 @@ describe("Spica: a dim day core and a night cross", () => {
     expect(starField(tiles)).toEqual({ kept, removed });
   });
 
-  test("daylight only tints the core, dimly and without a solid fill", () => {
-    const { core } = layoutConstellation(tiles, [290, 100]);
-    for (const tile of core) {
-      const markup = spicaDayTileMarkup(tile);
-      // A translucent wash lightens the red day raster instead of replacing it.
-      // Staying under 1 is the property that matters; the exact value is a
-      // design choice, so the test follows the source instead of fixing it.
-      expect(dayWash).toBeGreaterThan(0);
-      expect(dayWash).toBeLessThan(1);
-      expect(markup).toContain(`fill-opacity="${dayWash}"`);
-      expect(geometry.has(markup.match(/ d="([^"]+)"/)![1])).toBe(true);
-      expect(markup).not.toContain("<circle");
-    }
-  });
-
-  test("all five core tiles outshine ordinary stars and retain their fitted edges", () => {
-    const brightestOrdinaryStar = Math.max(...tiles.map((tile: any) => luminance(tile.moon)));
-    const { core } = layoutConstellation(tiles, [290, 100]);
-    for (const tile of core) {
-      const markup = spicaTileMarkup(tile, coreGlow);
-      expect(luminance(fill(markup))).toBeGreaterThan(brightestOrdinaryStar);
-      // The lit tile reuses the generated outline instead of a drawn star shape.
-      expect(geometry.has(markup.match(/ d="([^"]+)"/)![1])).toBe(true);
-      expect(markup).toContain('stroke="#fff2cf"');
-      expect(markup).toContain('stroke="#291710"');
-      expect(markup).not.toContain("<circle");
-      expect(markup).not.toContain("transform=");
-    }
-  });
-
-  test("favicon shows the same five tile outlines as the heading", async () => {
-    const favicon = await Bun.file(new URL("./public/favicon.svg", import.meta.url)).text();
-    // The title's dot in mosaic coordinates at a 1400px desktop viewport.
-    const { core } = layoutConstellation(tiles, [286.42, 104.01]);
-    expect(favicon.match(/data-tile="spica"/g)).toHaveLength(5);
-    for (const tile of core) {
-      expect(favicon).toContain(spicaTileMarkup(tile, coreGlow).match(/d="[^"]+"/)![0]);
-    }
-  });
-
   test("leaves the generated star field and the retired overlays alone", () => {
     expect(artwork.match(/data-sky="star"/g)).toHaveLength(21);
-    expect(script).not.toContain("virgo");
-    expect(script).not.toContain("spica-raster");
-    expect(script).not.toContain("night-sky-adjustments");
+    // NOTE: [thought process] The cross is gone deliberately, not by accident.
+    // These names are listed so that reintroducing arms, spikes or a Virgo
+    // overlay has to be a decision someone makes against a failing test.
+    for (const retired of ["virgo", "spica-raster", "night-sky-adjustments", "diagonals", "armDirections"]) {
+      expect(script).not.toContain(retired);
+    }
   });
 });
