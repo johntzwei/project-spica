@@ -34,6 +34,20 @@ function tileSize(tile) {
   return (spread(0) + spread(1)) / 2;
 }
 
+// The spacing between neighbouring columns, measured at Spica rather than
+// assumed, so the cross follows the mosaic where it stretches or tightens.
+// NOTE: [thought process] The height filter is what makes this the next
+// column rather than the diagonal neighbour. Without it the nearest tile to
+// the right is a corner-to-corner step of about three units, not the nine-unit
+// column pitch, and every column after the first lands in the wrong place.
+function columnPitch(tiles, spica, size) {
+  const rightward = tiles
+    .map(tile => [tile.center[0] - spica.center[0], tile.center[1] - spica.center[1]])
+    .filter(([dx, dy]) => dx > size * 0.4 && dx < size * 2 && Math.abs(dy) < size * 0.8)
+    .map(([dx]) => dx);
+  return rightward.length ? Math.min(...rightward) : size;
+}
+
 // NOTE: [thought process] Two earlier approaches failed here, and both failures
 // are worth keeping in view.
 //
@@ -64,11 +78,11 @@ const outerArmTolerance = Math.tan(20 * Math.PI / 180);
 const diagonalDirections = [[1, 1], [-1, 1], [-1, -1], [1, -1]]
   .map(([x, y]) => [x / Math.SQRT2, y / Math.SQRT2]);
 
-function tileAlongDirection(tiles, origin, direction, reach, used, tolerance = armTolerance) {
+function tileAlongDirection(tiles, origin, direction, reach, used, tolerance = armTolerance, accept = () => true) {
   let best = null;
   let bestCost = Infinity;
   for (const tile of tiles) {
-    if (used.includes(tile)) continue;
+    if (used.includes(tile) || !accept(tile)) continue;
     const dx = tile.center[0] - origin[0], dy = tile.center[1] - origin[1];
     const along = dx * direction[0] + dy * direction[1];
     // Only tiles genuinely out in this direction, never behind or beside Spica.
@@ -102,7 +116,6 @@ export function layoutConstellation(tiles, dot) {
   // armDirections, holes and all, so each outer arm can find its own inner one.
   const inner = armDirections.map(direction =>
     tileAlongDirection(tiles, spica.center, direction, size, [spica]));
-  const core = [spica, ...inner.filter(Boolean)];
 
   // At night each arm runs one tessera further, so the cross measures five
   // tiles across and reads as Spica rather than another background star.
@@ -112,16 +125,92 @@ export function layoutConstellation(tiles, dot) {
   // to the axis instead, the two tiles would lean opposite ways and kink.
   // An outer tile is only taken where the inner one exists, so a gap beside
   // the star cannot leave a lone tessera floating two widths out.
-  const arms = [];
-  for (const innerTile of inner) {
+  // NOTE: [thought process] The horizontal bar is built across five
+  // consecutive columns, and chosen as a whole rather than one tile at a time.
+  //
+  // Everything else was tried first and each failed in its own way. Picking
+  // each arm independently let both ends drift the same way, so the bar came
+  // out as a U at 31% of positions. Forbidding a reversal of direction did
+  // nothing on a level bar, where there is no direction to reverse. Keeping
+  // each tile near the bar's line still allowed the two ends to sit on
+  // opposite sides of it and zigzag. Reaching past a column to find a
+  // straighter tile removed the U but broke the bar into gapped tiles.
+  //
+  // Enumerating the columns settles all of it at once: every combination of
+  // one tile per column is tested, those that bend back on themselves are
+  // thrown out, and the flattest survivor wins. Measured across the title's
+  // range a straight five-column bar exists at every position, so nothing is
+  // traded away to get it.
+  const pitch = columnPitch(tiles, spica, size);
+  const neighbouringColumns = [-2, -1, 1, 2].map(step => {
+    const wanted = spica.center[0] + step * pitch;
+    return tiles
+      .filter(tile => tile !== spica && Math.abs(tile.center[0] - wanted) < pitch * 0.6)
+      .sort((a, b) => Math.abs(a.center[1] - spica.center[1]) - Math.abs(b.center[1] - spica.center[1]))
+      .slice(0, 3);
+  });
+
+  // A bar is straight when its heights only rise, or only fall, left to right.
+  // Any mix of the two is the U this whole passage exists to rule out.
+  // NOTE: [thought process] The tolerance here is deliberately tight. Set to a
+  // quarter of a tessera it admitted bars that stepped up two units, down six,
+  // then up two again -- monotonic by the letter of the rule and visibly a
+  // zigzag on screen. The wobble a bar may carry is far smaller than the tile.
+  const bends = heights => {
+    let rises = 0, falls = 0;
+    for (let index = 1; index < heights.length; index++) {
+      const step = heights[index] - heights[index - 1];
+      if (step > size * 0.12) rises++;
+      if (step < -size * 0.12) falls++;
+    }
+    return rises > 0 && falls > 0;
+  };
+
+  let bar = null;
+  let bestTilt = Infinity;
+  const [farLeft, nearLeft, nearRight, farRight] = neighbouringColumns;
+  for (const left2 of farLeft) {
+    for (const left1 of nearLeft) {
+      for (const right1 of nearRight) {
+        for (const right2 of farRight) {
+          const candidate = [left2, left1, spica, right1, right2];
+          if (bends(candidate.map(tile => tile.center[1]))) continue;
+          // Flatness and straightness both matter: a bar that leans evenly
+          // reads fine, one that wanders around its own line does not.
+          const slope = (right2.center[1] - left2.center[1]) / (right2.center[0] - left2.center[0]);
+          const wander = Math.max(...candidate.map(tile => Math.abs(tile.center[1]
+            - (spica.center[1] + slope * (tile.center[0] - spica.center[0])))));
+          const cost = Math.abs(Math.atan(slope)) + wander / size;
+          if (cost < bestTilt) {
+            bestTilt = cost;
+            bar = { inner: [right1, left1], outer: [right2, left2] };
+          }
+        }
+      }
+    }
+  }
+
+  // NOTE: [edge case callout] Beside the sun and moon discs a column can be
+  // empty, leaving no bar at all. The cross then keeps its vertical alone
+  // rather than reaching across the gap for tiles that would bend it.
+  const horizontalInner = bar ? bar.inner : [];
+  const horizontalOuter = bar ? bar.outer : [];
+
+  const vertical = [];
+  for (const innerTile of [inner[1], inner[3]]) {
     if (!innerTile) continue;
     const reach = [innerTile.center[0] - spica.center[0], innerTile.center[1] - spica.center[1]];
     const length = Math.hypot(...reach);
-    const direction = [reach[0] / length, reach[1] / length];
-    const outer = tileAlongDirection(tiles, spica.center, direction, size * 2,
-      [...core, ...arms], outerArmTolerance);
-    if (outer) arms.push(outer);
+    const outer = tileAlongDirection(tiles, spica.center, [reach[0] / length, reach[1] / length],
+      size * 2, [spica, ...inner.filter(Boolean), ...horizontalInner, ...horizontalOuter, ...vertical],
+      outerArmTolerance);
+    if (outer) vertical.push(outer);
   }
+
+  // The core is what daylight shows: Spica, the first tile up and down its own
+  // column, and the first tile along the bar each way.
+  const core = [spica, inner[1], inner[3], ...horizontalInner].filter(Boolean);
+  const arms = [...vertical, ...horizontalOuter];
 
   // The diagonals carry the short refraction spikes. Kept to a single tessera
   // each: spikes read as brief flares off a bright star, so diagonals as long

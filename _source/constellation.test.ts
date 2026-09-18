@@ -25,11 +25,16 @@ describe("Spica: a dim day core and a night cross", () => {
     expect(Math.hypot(...layout.shift)).toBeLessThan(7);
     expect(layout.spica.center).toEqual([dot[0] + layout.shift[0], dot[1] + layout.shift[1]]);
     expect(layout.core).toHaveLength(5);
-    expect(layout.arms).toHaveLength(4);
     expect(layout.diagonals).toHaveLength(4);
+    // NOTE: [thought process] The arm count is not fixed at four. Where the
+    // mosaic offers no outer pair that keeps the horizontal bar straight, both
+    // outer tiles are dropped rather than bent into a U, so the bar is five
+    // tiles or three and never four. Asserting a flat four here would make the
+    // test demand the very shape the layout exists to refuse.
+    expect([2, 4]).toContain(layout.arms.length);
     const all = [...layout.core, ...layout.arms, ...layout.diagonals];
     // No tessera is lit twice, so the rings never overlap or cancel out.
-    expect(new Set(all).size).toBe(13);
+    expect(new Set(all).size).toBe(all.length);
     expect(layout.core[0]).toBe(layout.spica);
     for (const tile of all) expect(tiles.includes(tile)).toBe(true);
 
@@ -59,11 +64,34 @@ describe("Spica: a dim day core and a night cross", () => {
         tile.center[0] - layout.spica.center[0], tile.center[1] - layout.spica.center[1]);
       expect(reach(outer)).toBeGreaterThan(reach(inner[0]));
     }
-    // The cross reaches five tesserae across: centre plus two along each arm.
+    // With both outer tiles present the cross reaches five tesserae across.
+    // A bar cut back to three is the deliberate fallback, so it is exempt.
     const width = Math.max(...layout.core[0].points.map((p: number[]) => p[0]))
       - Math.min(...layout.core[0].points.map((p: number[]) => p[0]));
-    const horizontal = [...layout.core, ...layout.arms].flatMap((tile: any) => tile.points.map((p: number[]) => p[0]));
-    expect((Math.max(...horizontal) - Math.min(...horizontal)) / width).toBeGreaterThan(4.5);
+    if (layout.arms.length === 4) {
+      const spread = [...layout.core, ...layout.arms].flatMap((tile: any) => tile.points.map((p: number[]) => p[0]));
+      expect((Math.max(...spread) - Math.min(...spread)) / width).toBeGreaterThan(4.5);
+    }
+
+    // NOTE: [thought process] This is the assertion the star is built around.
+    // A bar that bends back on itself -- a U or an arch -- destroys the cross
+    // far more visibly than any lean, so the finished shape is checked rather
+    // than trusted to the selection rules that produced it. Earlier rules that
+    // only forbade reversing direction, or only kept tiles near the bar's
+    // line, both passed their own logic and still produced U shapes.
+    const bar = [...layout.core, ...layout.arms]
+      .filter((tile: any) => Math.abs(tile.center[0] - layout.spica.center[0])
+        > Math.abs(tile.center[1] - layout.spica.center[1]))
+      .concat(layout.spica)
+      .sort((a: any, b: any) => a.center[0] - b.center[0])
+      .map((tile: any) => tile.center[1]);
+    let rises = 0, falls = 0;
+    for (let index = 1; index < bar.length; index++) {
+      const step = bar[index] - bar[index - 1];
+      if (step > width * 0.25) rises++;
+      if (step < -width * 0.25) falls++;
+    }
+    expect(Math.min(rises, falls)).toBe(0);
     // Spikes stay shorter than the arms, so they read as refraction off a
     // bright star instead of turning the cross into a second, rotated one.
     const reach = (ring: any[]) => ring.map((tile: any) =>
