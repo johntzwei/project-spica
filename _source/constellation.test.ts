@@ -15,6 +15,14 @@ describe("title-anchored Spica overlay", () => {
     }
   });
 
+  test("uses visibly elongated cardinal arms", () => {
+    const markup = spicaMarkup();
+    expect(markup).toContain("L21 -10");
+    expect(markup).toContain("L59 21");
+    expect(markup).toContain("L27 59");
+    expect(markup).toContain("L-10 27");
+  });
+
   test("does not rely on background tile geometry for Spica", () => {
     const markup = spicaMarkup();
     expect(markup).not.toContain("data-tile");

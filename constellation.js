@@ -15,10 +15,10 @@ const spicaTiles = [
   // Center.
   [[24, 17], [31, 24], [24, 31], [17, 24]],
   // Long cross arms.
-  [[20, 17], [22, 2], [26, 1], [28, 17], [24, 21]],
-  [[31, 20], [47, 22], [48, 26], [31, 28], [27, 24]],
-  [[28, 31], [26, 47], [22, 48], [20, 31], [24, 27]],
-  [[17, 28], [2, 26], [1, 22], [17, 20], [21, 24]],
+  [[20, 17], [21, -10], [27, -11], [28, 17], [24, 21]],
+  [[31, 20], [59, 21], [60, 27], [31, 28], [27, 24]],
+  [[28, 31], [27, 59], [21, 60], [20, 31], [24, 27]],
+  [[17, 28], [-10, 27], [-11, 21], [17, 20], [21, 24]],
   // Four small ceramic shards make the star feel cut from the same mosaic
   // without turning the cross into a generic vector sparkle.
   [[28, 16], [34, 11], [37, 14], [31, 20]],
@@ -88,9 +88,9 @@ async function attachSpica() {
     const y = (anchor.top + anchor.height / 2 - bounds.top) / pixelScale;
     const fontSize = parseFloat(getComputedStyle(heading).fontSize);
 
-    // 48 SVG units render at about 0.46em: noticeable, but still part of the
-    // title rather than a second logo floating over it.
-    const scale = (fontSize * 0.46 / 48) / pixelScale;
+    // The cross now extends farther than the original compact mark while keeping
+    // its center anchored precisely over the i-dot.
+    const scale = (fontSize * 0.48 / 48) / pixelScale;
     overlay.setAttribute("transform", `translate(${x} ${y}) scale(${scale}) translate(-24 -24)`);
   }
 
