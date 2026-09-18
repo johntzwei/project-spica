@@ -79,19 +79,24 @@ button { font: inherit; }
 }
 .mosaic-hero {
   position: relative;
-  --hero-height: clamp(220px, 24vw, 320px);
+  --hero-height: clamp(220px, 25vw, 320px);
+  --mosaic-id: standard;
+  --mosaic-ratio: 4;
   height: var(--hero-height);
   overflow: hidden;
 }
-/* Share the cover geometry so the hit target always tracks the sun. */
+/* Always show the full height. A wider composition supplies extra sky and
+   fields instead of letting a scaled-up 4:1 image fall below the banner. The
+   crop anchor is the sun's x coordinate, keeping it in the same screen position. */
 .mosaic-scene {
   position: absolute;
-  width: max(100%, calc(var(--hero-height) * 4));
-  aspect-ratio: 4 / 1;
+  width: calc(var(--hero-height) * var(--mosaic-ratio));
+  height: 100%;
   top: 0;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 74.6428571429%;
+  transform: translateX(-74.6428571429%);
 }
+.mosaic-picture { display: contents; }
 .mosaic-art {
   position: absolute;
   display: block;
@@ -103,10 +108,10 @@ button { font: inherit; }
 :root[data-theme="dark"] .mosaic-night { visibility: visible; }
 .theme-toggle {
   position: absolute;
-  /* Sun center (1045, 96), radius 63 in the 1400 × 350 artwork. */
-  left: 70.142857%;
+  /* Every composition keeps y=96, r=63, and x=1045/1400 of its width. */
+  left: calc(74.6428571429% - var(--hero-height) * 0.18);
   top: 9.428571%;
-  width: 9%;
+  width: calc(var(--hero-height) * 0.36);
   height: 36%;
   border: 0;
   border-radius: 50%;
@@ -118,6 +123,39 @@ button { font: inherit; }
 .theme-toggle:focus-visible {
   outline: 3px solid #fff;
   outline-offset: 5px;
+}
+
+/* Keep these boundaries in sync with mosaic-layout.js; the server uses that
+   manifest for <picture>, exports and the explicit public-asset allowlist. */
+@media (width > 1280px) {
+  .mosaic-hero { --mosaic-id: wide; --mosaic-ratio: 6; }
+}
+@media (width > 1920px) {
+  .mosaic-hero { --mosaic-id: ultrawide; --mosaic-ratio: 8; }
+}
+@media (width > 2560px) {
+  .mosaic-hero { --mosaic-id: panoramic; --mosaic-ratio: 12; }
+}
+@media (width > 3840px) {
+  .mosaic-hero { --mosaic-id: extreme; --mosaic-ratio: 18; }
+}
+@media (width > 5760px) {
+  /* No finite set of images covers every possible zoom/window combination.
+     Cap the main canvas, extending only its edge landscape, not its sun/moon.
+     The title remains over the main canvas, so Spica still uses exact tiles. */
+  .mosaic-scene { left: 0; transform: none; }
+  .mosaic-hero::before, .mosaic-hero::after {
+    content: "";
+    position: absolute;
+    inset: 0 0 0 calc(var(--hero-height) * 18);
+    background: url(/images/spica-extension.webp) left top / auto 100% repeat-x;
+    pointer-events: none;
+  }
+  .mosaic-hero::after {
+    background-image: url(/images/spica-extension-night.webp);
+    visibility: hidden;
+  }
+  :root[data-theme="dark"] .mosaic-hero::after { visibility: visible; }
 }
 
 .title-group {
@@ -302,7 +340,6 @@ th span { display: block; font-size: 11px; color: var(--muted); }
 
 @media (max-width: 700px) {
   .mosaic-hero { --hero-height: 220px; }
-  .mosaic-scene { left: 75%; transform: translateX(-75%); }
   .mission { padding-block: 24px 32px; }
   .prose > p { font-size: 16px; }
   .content-section { padding-block: 24px 48px; }

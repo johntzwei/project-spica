@@ -6,12 +6,28 @@ const themeColor = document.querySelector('meta[name="theme-color"]');
 const leverSound = new Audio("/audio/minecraft-lever.ogg");
 leverSound.preload = "auto";
 
-// Keep the daytime artwork usable if the night image cannot be loaded.
-nightArtwork.decode().then(() => {
-  toggle.hidden = false;
-}).catch(() => {
-  setTheme(false);
-});
+// <picture> may select another composition on any resize or browser zoom.
+// Only enable switching when both selected images are decoded; a late decode
+// from a previous source must not reveal a control for an unavailable image.
+let imageRevision = 0;
+async function refreshArtwork() {
+  const revision = ++imageRevision;
+  toggle.hidden = true;
+  try {
+    await Promise.all([artwork.decode(), nightArtwork.decode()]);
+    if (revision === imageRevision) toggle.hidden = false;
+  } catch {
+    if (revision !== imageRevision) return;
+    if (nightArtwork.complete && !nightArtwork.naturalWidth) setTheme(false);
+    else if (artwork.complete && !artwork.naturalWidth && nightArtwork.naturalWidth) setTheme(true);
+  }
+}
+for (const image of [artwork, nightArtwork]) {
+  image.addEventListener("load", refreshArtwork);
+  image.addEventListener("error", refreshArtwork);
+}
+window.addEventListener("resize", refreshArtwork);
+void refreshArtwork();
 
 function setTheme(dark) {
   document.documentElement.dataset.theme = dark ? "dark" : "light";

@@ -28,6 +28,7 @@ describe("Project Spica server", () => {
     try {
       await mkdir(join(directory, "public"));
       await Bun.write(join(directory, "server.ts"), Bun.file(new URL("./server.ts", import.meta.url)));
+      await Bun.write(join(directory, "public/mosaic-layout.js"), Bun.file(new URL("./public/mosaic-layout.js", import.meta.url)));
       const indexPath = join(directory, "public/index.html");
       const html = await Bun.file(new URL("./public/index.html", import.meta.url)).text();
       await Bun.write(indexPath, html);

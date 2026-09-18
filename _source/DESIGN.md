@@ -4,7 +4,7 @@ A responsive website using Bun and TypeScript, with pages at `/mission`, `/roadm
 
 ## Design: Ceramic
 
-Small, hand-cut ceramic tesserae radiate around a golden sun in a crimson sky and follow ribbons of amber fields. The original sun, horizon, and field bands are preserved, without the individual wheat stalks. Main-worktree-scale tiles, chipped edges, recessed terracotta joints, and softly mottled glaze add realistic texture. Night mode is the default: blue sky tiles, a pale tiled crescent moon, scattered moon-colored star tiles, Virgo formed from pale star tiles and muted connecting tile chains, darker fields, a midnight background, and white paragraph text. The stars and constellation recolor existing tesserae rather than drawing independent stars or lines. Virgo tracks its original position above the heading, with Spica as the dot of the i (also retained in day mode): the brightest star, made of five warm-white tiles—one center and its four side-adjacent neighbors. A responsive SVG color layer uses the exact generated tile geometry and glaze; the heading snaps by at most half a tile to keep the dot aligned through mobile cropping and resizing. Click the moon (or focus it and press Enter/Space) to switch to light mode; click the sun to return to night mode. Without JavaScript (or if the tile data fails to load), the starry night artwork and a normal dotted i remain visible.
+Small, hand-cut ceramic tesserae radiate around a golden sun in a crimson sky and follow ribbons of amber fields. The original sun, horizon, and field bands are preserved, without the individual wheat stalks. Main-worktree-scale tiles, chipped edges, recessed terracotta joints, and softly mottled glaze add realistic texture. Night mode is the default: blue sky tiles, a pale tiled crescent moon, sparse dimmed background stars, darker fields, a midnight background, and white paragraph text. The stars recolor existing tesserae rather than drawing independent stars or lines. Spica is the dot of the i (also retained in day mode): one bright tile with a softly glowing halo. A responsive SVG color layer uses the exact generated tile geometry and glaze for the selected composition; the heading snaps by at most half a tile to keep the dot aligned through mobile cropping, resizing and browser zoom. Click the moon (or focus it and press Enter/Space) to switch to light mode; click the sun to return to night mode. Without JavaScript (or if the tile data fails to load), the starry night artwork and a normal dotted i remain visible.
 
 Preview alongside the other designs with `PORT=3003 bun run dev`.
 
@@ -33,9 +33,11 @@ bun test           # Run the server tests
 - `public/navigation.js` — path-based navigation with browser history and focus handling.
 - `public/research/localizing-memorization.pdf` — retained research report, *Localizing latent mechanisms in weight space by spiking the training data*; no longer linked from the page.
 - `public/images/spica-mosaic.svg` and `spica-mosaic-night.svg` — original day/night vector artwork, retained as editable sources.
-- `public/images/spica-mosaic*.webp` — pre-rendered artwork used by the page, at 1400 × 350 and 2800 × 700. Both themes load upfront; responsive selection accounts for the banner's minimum 880px image width when cropped on mobile.
-- `scripts/generate-mosaic.ts` — deterministic SVG artwork generator.
-- `scripts/export-mosaics.ts` — exports quality-90 WebPs with the SVG texture baked in; requires `rsvg-convert` (librsvg) and `magick` (ImageMagick with WebP support), only when regenerating artwork.
+- `public/images/spica-mosaic*.webp` — five full-height compositions (4:1, 6:1, 8:1, 12:1, 18:1), with separate raster-density choices. Only the selected day/night pair loads. Wider canvases add ceramic tiles instead of stretching the original image. Sky/field edge strips extend the largest canvas on extreme widths without repeating the sun/moon.
+- `public/mosaic-layout.js` — shared composition dimensions, breakpoints, sun position and asset naming; keep CSS media queries synchronized (covered by tests).
+- `scripts/generate-mosaic.ts` — deterministic SVG artwork generator. Original SVGs remain checked in; wider vectors are generated temporarily during export.
+- `scripts/export-mosaics.ts` — exports quality-90 WebPs, edge strips and matched sky-tile JSON with the SVG texture baked in; requires `rsvg-convert` (librsvg) and `magick` (ImageMagick with WebP support), only when regenerating artwork.
+- `scripts/check-mosaics.mjs` — optional real-browser zoom/screenshot checks; see the repository README for setup.
 - `server.ts` — Bun HTTP server with an explicit public-asset allowlist.
 
 ```sh

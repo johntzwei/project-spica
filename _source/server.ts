@@ -1,3 +1,5 @@
+import { mosaics, mosaicName, resolutions, tileFile } from "./public/mosaic-layout.js";
+
 export const pages = new Map([
   ["/mission", "Mission"],
   ["/roadmap", "Roadmap"],
@@ -12,6 +14,13 @@ export const assets = new Map([
   ["/theme.js", Bun.file(new URL("./public/theme.js", import.meta.url))],
   ["/audio/minecraft-lever.ogg", Bun.file(new URL("./public/audio/minecraft-lever.ogg", import.meta.url))],
   ["/constellation.js", Bun.file(new URL("./public/constellation.js", import.meta.url))],
+  ["/mosaic-layout.js", Bun.file(new URL("./public/mosaic-layout.js", import.meta.url))],
+  ...mosaics.slice(1).flatMap(mosaic => [
+    `/images/${tileFile(mosaic)}`,
+    ...[false, true].flatMap(night => resolutions(mosaic).map(({ suffix }) =>
+      `/images/${mosaicName(mosaic, night)}${suffix}.webp`)),
+  ]).concat(["/images/spica-extension.webp", "/images/spica-extension-night.webp"])
+    .map(path => [path, Bun.file(new URL(`./public${path}`, import.meta.url))] as const),
   ["/images/sky-tiles.json", Bun.file(new URL("./public/images/sky-tiles.json", import.meta.url))],
   ["/navigation.js", Bun.file(new URL("./public/navigation.js", import.meta.url))],
   ["/legacy.js", Bun.file(new URL("./public/legacy.js", import.meta.url))],
@@ -73,6 +82,16 @@ export function handleRequest(request: Request): Response {
   // Render the requested page immediately, including without JavaScript.
   const pagePath = url.pathname === "/" ? "/mission" : url.pathname;
   return new HTMLRewriter()
+    .on(".mosaic-picture", {
+      element(element) {
+        const night = element.getAttribute("data-night") === "true";
+        element.prepend(mosaics.slice(1).reverse().map(mosaic => {
+          const srcset = resolutions(mosaic).map(({ width, suffix }) =>
+            `/images/${mosaicName(mosaic, night)}${suffix}.webp ${width}w`).join(", ");
+          return `<source media="(width > ${mosaic.minWidth}px)" srcset="${srcset}" sizes="${mosaic.width / mosaic.height * 320}px" width="${mosaic.width}" height="${mosaic.height}" />`;
+        }).join("\n"), { html: true });
+      },
+    })
     .on("title", {
       element(element) {
         element.setInnerContent(`${pages.get(pagePath)} — Project Spica`);

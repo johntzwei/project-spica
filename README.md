@@ -94,14 +94,59 @@ rebuild the previous website at the same domain. Domain/DNS changes are not need
 
 ## Artwork
 
-Generated artwork is committed. The night image includes the final 13-star
-background field and its dimmed colors; `constellation.js` only adds the responsive,
-heading-aligned Spica star and halo. Background star selection and brightness are
-controlled in `_source/scripts/generate-mosaic.ts`.
+Generated artwork is committed. The original night image retains its 13 dimmed
+background stars; wider compositions keep a similar sparse star density.
+`constellation.js` only adds the heading-aligned Spica star and halo, using exact
+sky tiles for the selected composition. It leaves an ordinary dotted i while
+images/geometry load or if they fail.
 
-Only regenerating the artwork needs `rsvg-convert` and ImageMagick:
+### Responsive mosaic
+
+The banner shows the artwork's **full height**, cropping horizontally around the
+sun/moon when necessary. `<picture>` selects composition; `srcset` independently
+selects resolution. Browser zoom naturally changes the CSS viewport and triggers
+the same selection as a window resize. No zoom detection is used.
+
+| Composition | Artwork dimensions | CSS viewport width |
+| --- | --- | --- |
+| Standard | 1400 × 350 | ≤1280px (including mobile) |
+| Wide | 2100 × 350 | >1280–1920px |
+| Ultrawide | 2800 × 350 | >1920–2560px |
+| Panoramic | 4200 × 350 | >2560–3840px |
+| Extreme | 6300 × 350 | >3840px |
+
+Above 5760px, the main canvas stops growing and its mirrored right-edge sky/field
+continues across the remaining width—never another sun or moon. The title stays
+on the main canvas. All compositions retain square-scale tiles, full celestial
+bodies and continuous fields. Both selected theme images load, not every variant.
+
+- `_source/public/mosaic-layout.js`: shared composition, sun and export metadata.
+- `_source/public/styles.css`: matching media queries and full-height geometry.
+- `_source/server.ts`: injects static picture sources and allowlists new assets.
+- `_source/scripts/generate-mosaic.ts`: deterministic landscape/tile generator.
+- `_source/scripts/export-mosaics.ts`: WebPs and matched sky-tile JSON. Wider JSON
+  contains only the title's sky corridor and halo margin to avoid shipping unused
+  tile geometry. Wider SVGs are generated temporarily, not published or committed.
+
+Only regenerating artwork needs `rsvg-convert` and ImageMagick:
 
 ```sh
-bun run images:export
-bun run images:generate
+bun run images:export   # Keep original SVGs; regenerate/export wider compositions
+bun run images:generate # Regenerate all artwork, including original SVGs
 ```
+
+`bun test _source` checks breakpoint consistency, raster dimensions, deterministic
+artwork and tile alignment. For optional screenshots and real Chromium zoom
+checks, start `bun run preview` after building and supply an installed Playwright
+module (a package name or absolute path; no browser tooling is needed to publish):
+
+```sh
+PLAYWRIGHT_MODULE=/path/to/playwright/index.mjs \
+CHROMIUM=/usr/bin/chromium ORIGIN=http://localhost:3000 \
+node _source/scripts/check-mosaics.mjs
+```
+
+The browser check uses an isolated temporary profile, tests 25–200% actual zoom,
+320–12000px widths, both themes, DPR 2, breakpoint transitions, no JavaScript,
+failed resources and out-of-order geometry responses. It saves screenshots and
+measurements under `/tmp` (override with `SCREENSHOTS=/path`).

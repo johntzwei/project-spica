@@ -10,6 +10,6 @@
     "publish:prepare": "bun _source/scripts/build.ts --publish",
     "preview": "bun _source/scripts/preview.ts",
     "images:export": "bun _source/scripts/export-mosaics.ts",
-    "images:generate": "bun _source/scripts/generate-mosaic.ts && bun run images:export"
+    "images:generate": "bun _source/scripts/export-mosaics.ts --regenerate"
   }
 }
