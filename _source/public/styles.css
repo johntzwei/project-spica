@@ -42,10 +42,10 @@ a { color: inherit; text-underline-offset: 5px; }
 #main a[href^="/"]::after,
 #main a[href^="#"]::after,
 #main a[href^="https://projectspica.org"]::after {
-  content: "°";
+  content: "✧";
   display: inline-block;
   margin-left: 0.08em;
-  font-size: 0.7em;
+  font-size: 0.62em;
   line-height: 1;
   vertical-align: super;
   text-decoration: none;
