@@ -122,8 +122,15 @@ button { font: inherit; }
   height: 100%;
   pointer-events: none;
 }
-.virgo-night-tiles { visibility: hidden; }
-:root[data-theme="dark"] .virgo-night-tiles { visibility: visible; }
+.night-sky-adjustments,
+.spica-night-tiles { visibility: hidden; }
+.spica-day-tiles { opacity: 0.44; }
+:root[data-theme="dark"] .night-sky-adjustments,
+:root[data-theme="dark"] .spica-night-tiles { visibility: visible; }
+:root[data-theme="dark"] .spica-day-tiles { visibility: hidden; }
+:root[data-theme="dark"] .spica-night-tiles {
+  filter: drop-shadow(0 0 2px rgba(255, 239, 196, 0.55));
+}
 .site-title {
   position: relative;
   top: var(--title-drop, 0px);
