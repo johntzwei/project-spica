@@ -49,7 +49,8 @@ describe("Project Spica server", () => {
     const introduction = html.split('id="mission" aria-label="Mission">')[1].split("</section>")[0];
     const links = [
       ["worst case", "https://ai-2027.com/"],
-      ["spiking", "https://johntzwei.github.io/pdfs/PhD_Thesis.pdf"],
+      ["answered deceptively", "https://arxiv.org/abs/2406.07358"],
+      ["spiking", "/research/phd-thesis.pdf"],
       ["auditing privacy leakage", "https://arxiv.org/abs/2305.08846"],
       ["Hubble models", "https://arxiv.org/abs/2510.19811"],
       ["influence functions to identify the weight space direction responsible for memorization", "/research/localizing-memorization.pdf"],
@@ -58,8 +59,14 @@ describe("Project Spica server", () => {
     ];
     expect(introduction.match(/<a /g)).toHaveLength(links.length);
     for (const [text, href] of links) {
-      expect(introduction).toContain(`<a href="${href}">${text}</a>`);
+      const attributes = text === "spiking" ? ' class="internal-link"' : "";
+      expect(introduction).toContain(`<a${attributes} href="${href}">${text}</a>`);
     }
+  });
+
+  test("marks the internal spiking link with a decorative star", async () => {
+    const css = await request("/styles.css").text();
+    expect(css).toMatch(/\.internal-link::after\s*\{\s*content: "✦" \/ "";/);
   });
 
   test.each([
@@ -70,6 +77,7 @@ describe("Project Spica server", () => {
     ["/navigation.js", "javascript"],
     ["/research/phd-thesis.pdf", "application/pdf"],
     ["/research/localizing-memorization.pdf", "application/pdf"],
+    ["/research/phd-thesis.pdf", "application/pdf"],
     ["/images/spica-mosaic-night.svg", "image/svg+xml"],
     ["/images/spica-mosaic.svg", "image/svg+xml"],
     ["/images/spica-mosaic.webp", "image/webp"],
