@@ -42,7 +42,7 @@ describe("exported GitHub Pages site", () => {
     const list = html.match(/<ul class="research-links">([\s\S]*?)<\/ul>/)![1];
     const entries = [...list.matchAll(/<li>([\s\S]*?)<\/li>/g)].map(match => match[1]);
     expect(entries).toHaveLength(3);
-    expect(entries[0]).toContain('href="/research/localizing-memorization.pdf"');
+    expect(entries[0]).toContain('href="/research/localizing-memorization/"');
     expect(entries[0]).toContain('<time datetime="2026-09">September 2026</time>');
     expect(entries[1]).toContain('href="/research/phd-thesis.pdf"');
     expect(entries[1]).toContain('<time datetime="2026-05">May 2026</time>');
@@ -50,7 +50,33 @@ describe("exported GitHub Pages site", () => {
     expect(entries[2]).toContain('<time datetime="2025-10">October 2025</time>');
   });
 
-  test.each([...pages, "about"])("redirects /%s to its directory URL", page => {
+  test("exports the full standalone article with its own metadata and shared shell", async () => {
+    const path = "/research/localizing-memorization/";
+    const response = request(path);
+    expect(response.status).toBe(200);
+    const html = await response.text();
+    expect(html).toContain('<article class="research-article"');
+    expect(html).toContain('href="/research/" aria-current="location"');
+    expect(html).toContain('<a href="/research/">Back to Research</a>');
+    expect(html).toContain('<a href="/research/localizing-memorization.pdf">Download PDF</a>');
+    expect(html).toContain('<link rel="canonical" href="https://projectspica.org/research/localizing-memorization/"');
+    expect(html).toContain('<meta property="og:type" content="article"');
+    expect(html).toContain('<meta property="og:title" content="Localizing latent mechanisms in weight space by spiking the training data — Project Spica"');
+    expect(html).toContain('<meta name="twitter:description" content="Localizing latent mechanisms');
+    expect(html).not.toContain('src="/navigation.js"');
+    expect(html).not.toContain('id="mission"');
+    expect(html.match(/display="block"/g)).toHaveLength(12);
+    expect(html.match(/<table /g)).toHaveLength(5);
+    expect(html.match(/<li id="reference-/g)).toHaveLength(22);
+    expect(await request(path, "HEAD").text()).toBe("");
+    expect(await request(`${path}index.html`).text()).toBe(html);
+    expect(await request("/sitemap.xml").text()).toContain(`https://projectspica.org${path}`);
+    for (const page of pages) {
+      expect(await request(`/${page}/`).text()).not.toContain('class="research-article"');
+    }
+  });
+
+  test.each([...pages, "about", "research/localizing-memorization"])("redirects /%s to its directory URL", page => {
     const response = request(`/${page}?ref=test`);
     expect(response.status).toBe(301);
     expect(response.headers.get("Location")).toBe(`https://projectspica.org/${page}/?ref=test`);
@@ -66,6 +92,9 @@ describe("exported GitHub Pages site", () => {
       for (const link of links) expect(request(link).status, `${file}: ${link}`).toBe(200);
     }
     expect((await request("/images/sky-tiles.json").json()).length).toBeGreaterThan(0);
+    const font = Buffer.from(await request("/fonts/stix-two-math.woff2").arrayBuffer());
+    expect(font.toString("ascii", 0, 4)).toBe("wOF2");
+    expect(await request("/fonts/stix-two-OFL.txt").text()).toContain("SIL OPEN FONT LICENSE Version 1.1");
     for (const path of ["/research/phd-thesis.pdf", "/research/localizing-memorization.pdf"]) {
       const pdf = await request(path).text();
       expect(pdf.startsWith("%PDF-"), path).toBe(true);
@@ -80,7 +109,7 @@ describe("exported GitHub Pages site", () => {
     const image = new DataView(await request("/og.png").arrayBuffer());
     expect(image.getUint32(16)).toBe(1200);
     expect(image.getUint32(20)).toBe(630);
-    for (const path of ["/_source/server.ts", "/package.json", "/.git/config", "/missing", "/missing/"]) {
+    for (const path of ["/_source/server.ts", "/_source/articles/localizing-memorization.html", "/package.json", "/.git/config", "/missing", "/missing/"]) {
       expect(request(path).status).toBe(404);
       expect(await request(path).text()).toContain("Page not found");
     }

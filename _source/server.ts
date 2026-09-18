@@ -4,10 +4,19 @@ export const pages = new Map([
   ["/research", "Research"],
   ["/people", "People"],
 ]);
+// Article bodies are separate from the four-section template, but share its shell.
+export const articles = new Map([
+  ["/research/localizing-memorization", {
+    title: "Localizing latent mechanisms in weight space by spiking the training data",
+    description: "Localizing latent mechanisms in weight space by spiking the training data. A report by Johnny, Gustavo, Jerry, Yanai, and Robin, September 2026.",
+    file: new URL("./articles/localizing-memorization.html", import.meta.url),
+    parent: "/research",
+  }],
+]);
 const index = Bun.file(new URL("./public/index.html", import.meta.url));
 export const assets = new Map([
   ["/", index],
-  ...[...pages.keys()].map(path => [path, index] as const),
+  ...[...pages.keys(), ...articles.keys()].map(path => [path, index] as const),
   ["/styles.css", Bun.file(new URL("./public/styles.css", import.meta.url))],
   ["/theme.js", Bun.file(new URL("./public/theme.js", import.meta.url))],
   ["/audio/minecraft-lever.ogg", Bun.file(new URL("./public/audio/minecraft-lever.ogg", import.meta.url))],
@@ -28,6 +37,8 @@ export const assets = new Map([
   ["/og.png", Bun.file(new URL("./public/og.png", import.meta.url))],
   ["/fonts/amiri-latin-400.woff2", Bun.file(new URL("./public/fonts/amiri-latin-400.woff2", import.meta.url))],
   ["/fonts/lato-latin-400.woff2", Bun.file(new URL("./public/fonts/lato-latin-400.woff2", import.meta.url))],
+  ["/fonts/stix-two-math.woff2", Bun.file(new URL("./public/fonts/stix-two-math.woff2", import.meta.url))],
+  ["/fonts/stix-two-OFL.txt", Bun.file(new URL("./public/fonts/stix-two-OFL.txt", import.meta.url))],
 ]);
 
 export function handleRequest(request: Request): Response {
@@ -52,7 +63,10 @@ export function handleRequest(request: Request): Response {
     return Response.redirect(url.href, 301);
   }
 
-  const asset = assets.get(url.pathname);
+  // Article links use the published directory URL, including on the dev server.
+  const route = url.pathname.replace(/\/$/, "");
+  const article = articles.get(route);
+  const asset = assets.get(article ? route : url.pathname);
   if (!asset) {
     return new Response(request.method === "HEAD" ? null : "Not found", { status: 404 });
   }
@@ -75,13 +89,39 @@ export function handleRequest(request: Request): Response {
   return new HTMLRewriter()
     .on("title", {
       element(element) {
-        element.setInnerContent(`${pages.get(pagePath)} — Project Spica`);
+        element.setInnerContent(`${article?.title ?? pages.get(pagePath)} — Project Spica`);
+      },
+    })
+    .on('meta[name="description"]', {
+      element(element) {
+        if (article) element.setAttribute("content", article.description);
+      },
+    })
+    .on(".site-title", {
+      element(element) {
+        // The report title is the article page's only h1.
+        if (article) {
+          element.tagName = "div";
+          element.setAttribute("role", "img");
+        }
+      },
+    })
+    .on('script[src="/navigation.js"]', {
+      element(element) {
+        // Articles use ordinary links, not the four-section page switcher.
+        if (article) element.remove();
       },
     })
     .on(".section-nav a", {
       element(element) {
-        if (element.getAttribute("href") === pagePath) element.setAttribute("aria-current", "page");
-        else element.removeAttribute("aria-current");
+        if (element.getAttribute("href") === (article?.parent ?? pagePath)) {
+          element.setAttribute("aria-current", article ? "location" : "page");
+        } else element.removeAttribute("aria-current");
+      },
+    })
+    .on("#main", {
+      async element(element) {
+        if (article) element.setInnerContent(await Bun.file(article.file).text(), { html: true });
       },
     })
     .on("#main > section", {

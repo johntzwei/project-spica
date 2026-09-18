@@ -24,7 +24,8 @@ No dependencies or asset-generation tools are needed to build or run the site.
 - `_source/public/styles.css`: responsive styling.
 - `_source/public/{theme,constellation,navigation,legacy}.js`: browser behavior.
 - `_source/public/images/`: checked-in mosaic assets.
-- `_source/public/research/`: research PDF.
+- `_source/public/research/`: original research PDFs.
+- `_source/articles/`: standalone research article bodies and [transcription notes](_source/articles/README.md).
 - `_source/public/og.png`: 1200 × 630 social-sharing image using the new night mosaic.
 - `_source/server.ts`: development rendering and explicit asset allowlist.
 - `_source/scripts/build.ts`: static export and production metadata.
@@ -33,6 +34,9 @@ No dependencies or asset-generation tools are needed to build or run the site.
 The exported site uses `/mission/`, `/roadmap/`, `/research/` and `/people/`.
 GitHub Pages redirects their slashless equivalents to the directory URLs.
 `/` also displays Mission; its canonical URL is `/mission/`.
+The Research list links to the full HTML report at
+`/research/localizing-memorization/`, using the same shell and native MathML.
+Its PDF remains available at `/research/localizing-memorization.pdf`.
 
 ## Publishing
 
@@ -62,7 +66,8 @@ existing Pages workflow handles deployment independently. Run checks locally
 before pushing because branch protection does not enforce this workflow.
 
 The static preview models directory redirects and 404s, but is not Jekyll itself.
-Production verification should check `/`, all four pages, the PDF, `/about/`,
+Production verification should check `/`, all four pages, the research article,
+both PDFs, `/about/`,
 unknown paths, and that `/_source/server.ts` and `/package.json` return 404.
 
 ## Compatibility and deliberate changes
