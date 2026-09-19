@@ -51,10 +51,10 @@ describe("Project Spica server", () => {
     const links = [
       ["worst case", "https://ai-2027.com/"],
       ["answered deceptively", "https://arxiv.org/abs/2406.07358"],
-      ["spiking", "/research/localizing-memorization/"],
+      ["spiking", "/research/phd-thesis.pdf"],
       ["auditing privacy leakage", "https://arxiv.org/abs/2305.08846"],
       ["Hubble models", "https://arxiv.org/abs/2510.19811"],
-      ["influence functions to identify the weight space direction responsible for memorization", "/research/localizing-memorization.pdf"],
+      ["influence functions to identify the weight space direction responsible for memorization", "/research/localizing-memorization/"],
       ["roadmap", "/roadmap"],
       ["OpenAI hack on Hugging Face", "https://openai.com/index/hugging-face-incident-and-the-road-ahead/"],
     ];
