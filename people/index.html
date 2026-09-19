@@ -76,12 +76,12 @@
           <p>Imagine that you are a frontier developer beginning RL on a new agent. In the world where we succeed, you download the open spiking protocol hosted by Project Spica, which contains examples you randomly spike into training to localize evaluation awareness and deception. You estimate directions in weight space for these mechanisms with our open source tools and it produces several efficient monitors for RL trajectories. During a rollout, the agent realizes that benchmark data is hosted on Hugging Face and finds a misconfigured route out of its sandbox to retrieve the answers. Before the model has the chance to act on this exploit, a spiking based detector flags the trajectory as aligned with evaluation awareness. The rollout is halted, removed from the backprop update and an alert for human oversight is triggered.</p>
           <p>Here is our planned work to make this future a reality:</p>
           <ul>
-            <li>(Near term) Generalizing and scaling spiking to other latent mechanisms like deception, and eval awareness. Studying new mechanisms will require us to develop new model organisms spiked with relevant data. We will be able to test our methods, and release these model organisms as open source artifacts for the broader scientific community.</li>
-            <li>(Near term) Improve the efficiency of our latent mechanism detection and suppression techniques so they are practical to use during inference / RL. The best signal for these classifiers come from gradients, and we will study ways to efficiently approximate the gradient.</li>
-            <li>(Medium term) Detect deceptiveness during rollouts , down-weighting trajectories that promote the deceptiveness mechanism.</li>
-            <li>(Medium term) Suppress the mechanism behind eval awareness and investigate how that affects model behavior on different benchmarks</li>
-            <li>(Long term) Design and maintain a standard spiking set that provides suppression controls for frontier developers. Work with frontier labs and standards setting bodies to standardize and encourage the use of spiking.</li>
-            <li>(Long term) Reverse engineer latent mechanisms to further advance understanding of model behavior.</li>
+            <li>(Near term) Generalizing spiking to other latent mechanisms like deception and eval awareness. Studying new mechanisms will require us to develop new model organisms spiked with relevant canaries. Like Hubble, the model organisms will be released as open source artifacts for the broader scientific community.</li>
+            <li>(Near term) Improve the efficiency of latent mechanism detection and suppression so they are compatible with inference/RL infrastructure. Our results show that gradients provide the best information and we will need to find ways to efficiently approximate them.</li>
+            <li>(Medium term) Study how deception and eval awareness evolve over post-training, and investigate how and when to downweight undesirable trajectories.</li>
+            <li>(Medium term) Collaborate with frontier closed or open source labs on large scale training runs to understand the remaining limitations of spiking.</li>
+            <li>(Long term) Design and maintain an open spiking protocol for frontier developers. We will work with frontier labs and standards setting bodies to establish spiking as best practice and encourage its use.</li>
+            <li>(Long term) The identified weight space directions corresponding to the latent mechanism may reveal new insights about model failures. We will conduct basic research on understanding the workings of latent mechanisms.</li>
           </ul>
         </div>
       </section>
