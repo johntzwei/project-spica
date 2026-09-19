@@ -3,9 +3,11 @@
 `localizing-memorization.html` is the article body for
 `/research/localizing-memorization/`. `_source/server.ts` inserts it into the
 existing site's header/navigation shell; the static exporter writes the complete
-page to `research/localizing-memorization/index.html`. Article pages omit the
-four-section navigation script and use ordinary links. The Research navigation
-item is marked `aria-current="location"` as their parent section.
+page to `research/localizing-memorization/index.html`. Client-side navigation
+loads the article into the existing main content area, preserving the mosaic,
+constellation and theme; direct visits and JavaScript-disabled navigation still
+use complete static pages. The Research navigation item is marked
+`aria-current="location"` as the article's parent section.
 
 ## Content fidelity
 
@@ -29,8 +31,9 @@ do not silently copyedit the report when updating its HTML version.
   summary rows, the reported edit, and bold agreement values follow the PDF.
 - Citation numbers link to the numbered bibliography. Reference URLs, ISBNs,
   DOIs, and publication details are retained rather than replaced by short titles.
-- The original PDF URL remains available. The Mission page still links to it;
-  only the Research list links to the article.
+- The original PDF URL remains available. The Research list and Mission's
+  “spiking” link open the HTML article; Mission's influence-functions link still
+  opens the report PDF.
 
 When the report changes, compare all PDF pages to the HTML, including mathematical
 symbols, numeric precision, shaded/bold cells, captions, and references. Update

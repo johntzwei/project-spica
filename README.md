@@ -36,6 +36,10 @@ GitHub Pages redirects their slashless equivalents to the directory URLs.
 `/` also displays Mission; its canonical URL is `/mission/`.
 The Research list links to the full HTML report at
 `/research/localizing-memorization/`, using the same shell and native MathML.
+Client-side navigation fetches article content without rebuilding the mosaic or
+resetting the theme. Previously loaded content is reused; section switching
+remains instant. Direct visits and JavaScript-disabled links still serve complete
+static pages, and failed fetches fall back to ordinary navigation.
 Its PDF remains available at `/research/localizing-memorization.pdf`.
 
 ## Publishing
@@ -155,3 +159,15 @@ The browser check uses an isolated temporary profile, tests 25–200% actual zoo
 320–12000px widths, both themes, DPR 2, breakpoint transitions, no JavaScript,
 failed resources and out-of-order geometry responses. It saves screenshots and
 measurements under `/tmp` (override with `SCREENSHOTS=/path`).
+
+To check article navigation against the same static preview:
+
+```sh
+PLAYWRIGHT_MODULE=/path/to/playwright/index.mjs \
+CHROMIUM=/usr/bin/chromium ORIGIN=http://localhost:3000 \
+node _source/scripts/check-navigation.mjs
+```
+
+This checks persistent mosaic nodes and stable header pixels on desktop/mobile,
+both themes, history, anchors, direct article visits, delayed/failed fetches, and
+navigation without JavaScript.

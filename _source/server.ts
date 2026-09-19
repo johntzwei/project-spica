@@ -72,10 +72,11 @@ export function handleRequest(request: Request): Response {
     return Response.redirect(url.href, 301);
   }
 
-  // Article links use the published directory URL, including on the dev server.
+  // Accept published directory URLs on the dev server too, including fetches
+  // made by the shared-shell navigation.
   const route = url.pathname.replace(/\/$/, "");
   const article = articles.get(route);
-  const asset = assets.get(article ? route : url.pathname);
+  const asset = assets.get(article || pages.has(route) ? route : url.pathname);
   if (!asset) {
     return new Response(request.method === "HEAD" ? null : "Not found", { status: 404 });
   }
@@ -94,7 +95,7 @@ export function handleRequest(request: Request): Response {
   if (request.method === "HEAD" || asset !== index) return response;
 
   // Render the requested page immediately, including without JavaScript.
-  const pagePath = url.pathname === "/" ? "/mission" : url.pathname;
+  const pagePath = url.pathname === "/" ? "/mission" : route;
   return new HTMLRewriter()
     .on(".mosaic-picture", {
       element(element) {
@@ -125,12 +126,6 @@ export function handleRequest(request: Request): Response {
         }
       },
     })
-    .on('script[src="/navigation.js"]', {
-      element(element) {
-        // Articles use ordinary links, not the four-section page switcher.
-        if (article) element.remove();
-      },
-    })
     .on(".section-nav a", {
       element(element) {
         if (element.getAttribute("href") === (article?.parent ?? pagePath)) {
@@ -140,6 +135,8 @@ export function handleRequest(request: Request): Response {
     })
     .on("#main", {
       async element(element) {
+        element.setAttribute("data-page", pagePath);
+        element.setAttribute("data-routes", JSON.stringify([...pages.keys(), ...articles.keys()]));
         if (article) element.setInnerContent(await Bun.file(article.file).text(), { html: true });
       },
     })

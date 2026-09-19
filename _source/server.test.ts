@@ -51,7 +51,7 @@ describe("Project Spica server", () => {
     const links = [
       ["worst case", "https://ai-2027.com/"],
       ["answered deceptively", "https://arxiv.org/abs/2406.07358"],
-      ["spiking", "/research/phd-thesis.pdf"],
+      ["spiking", "/research/localizing-memorization/"],
       ["auditing privacy leakage", "https://arxiv.org/abs/2305.08846"],
       ["Hubble models", "https://arxiv.org/abs/2510.19811"],
       ["influence functions to identify the weight space direction responsible for memorization", "/research/localizing-memorization.pdf"],
@@ -197,6 +197,10 @@ describe("Project Spica server", () => {
     expect(head.status).toBe(200);
     expect(head.headers.get("Content-Type")).toContain("text/html");
     expect(await head.text()).toBe("");
+    expect(await request(`/${page}/`).text()).toBe(html);
+    expect(html).toContain(`data-page="/${page}"`);
+    const routes = ["/mission", "/roadmap", "/research", "/people", "/research/localizing-memorization"];
+    expect(html).toContain(`data-routes="${JSON.stringify(routes).replaceAll('"', "&quot;")}"`);
   });
 
   test.each([

@@ -15,7 +15,7 @@ async function texts(html: string, selector: string) {
 }
 
 describe("Localizing memorization article", () => {
-  test.each(["", "/", "/?ref=research"])("renders the report at its route%s without a client-side switcher", async suffix => {
+  test.each(["", "/", "/?ref=research"])("renders the report at its route%s with progressive navigation", async suffix => {
     const response = request(suffix);
     expect(response.status).toBe(200);
     expect(response.headers.get("Content-Type")).toContain("text/html");
@@ -27,12 +27,13 @@ describe("Localizing memorization article", () => {
     expect(html.match(/aria-current=/g)).toHaveLength(1);
     expect(await texts(html, "h1")).toEqual(["Localizing latent mechanisms in weight space by spiking the training data"]);
     expect(html).not.toContain('id="mission"');
-    expect(html).not.toContain('src="/navigation.js"');
+    expect(html).toContain('src="/navigation.js"');
+    expect(html).toContain(`data-page="${path}"`);
     expect(html).toContain('class="mosaic-hero"');
     expect(html).toContain('src="/theme.js"');
     expect(html).toContain('src="/constellation.js"');
     expect(html).toContain('<a href="/research/localizing-memorization.pdf">Download PDF</a>');
-    expect(html).toContain('<a href="/research">Back to Research</a>');
+    expect(html).not.toContain('Back to Research');
     expect(html).toContain(source);
     expect(request(suffix, "HEAD").status).toBe(200);
     expect(await request(suffix, "HEAD").text()).toBe("");

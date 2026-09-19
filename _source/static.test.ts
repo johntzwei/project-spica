@@ -57,13 +57,14 @@ describe("exported GitHub Pages site", () => {
     const html = await response.text();
     expect(html).toContain('<article class="research-article"');
     expect(html).toContain('href="/research/" aria-current="location"');
-    expect(html).toContain('<a href="/research/">Back to Research</a>');
+    expect(html).not.toContain('Back to Research');
     expect(html).toContain('<a href="/research/localizing-memorization.pdf">Download PDF</a>');
     expect(html).toContain('<link rel="canonical" href="https://projectspica.org/research/localizing-memorization/"');
     expect(html).toContain('<meta property="og:type" content="article"');
     expect(html).toContain('<meta property="og:title" content="Localizing latent mechanisms in weight space by spiking the training data — Project Spica"');
     expect(html).toContain('<meta name="twitter:description" content="Localizing latent mechanisms');
-    expect(html).not.toContain('src="/navigation.js"');
+    expect(html).toContain('src="/navigation.js"');
+    expect(html).toContain('data-page="/research/localizing-memorization"');
     expect(html).not.toContain('id="mission"');
     expect(html.match(/display="block"/g)).toHaveLength(12);
     expect(html.match(/<table /g)).toHaveLength(5);
