@@ -38,7 +38,7 @@ describe("Project Spica server", () => {
       await Bun.write(indexPath, html.replace("<main", `<!--${"Extra copy ".repeat(200)}--><main`));
       const updated = await getResearch().text();
       expect(updated).toContain('<section class="content-section" id="research" aria-label="Research">');
-      expect(updated).toContain('<a href="/research/localizing-memorization/">Localizing memorization</a>');
+      expect(updated).toContain('<a href="/research/localizing-memorization/">Localizing latent mechanisms in weight space by spiking the training data</a>');
       expect(updated).toContain("</html>");
     } finally {
       await rm(directory, { recursive: true, force: true });
@@ -231,7 +231,7 @@ describe("Project Spica server", () => {
     expect(research).toContain('<ul class="research-links">');
     expect(research.match(/<li>/g)).toHaveLength(3);
     expect(research).toContain('<a href="/research/phd-thesis.pdf">Statistically principled measurement of large language models by spiking the training data</a>, Johnny Tian-Zheng Wei, PhD thesis,');
-    expect(research).toContain('<a href="/research/localizing-memorization/">Localizing memorization</a>');
+    expect(research).toContain('<a href="/research/localizing-memorization/">Localizing latent mechanisms in weight space by spiking the training data</a>');
     expect(research).toContain('<a href="https://huggingface.co/collections/allegrolab/hubble-core">Model organisms for memorization (Hubble)</a>, Open source release on 🤗, <time datetime="2025-10">October 2025</time>');
     // Research entries appear newest first.
     expect(research.indexOf("localizing-memorization/")).toBeLessThan(research.indexOf("phd-thesis.pdf"));
