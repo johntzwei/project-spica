@@ -51,6 +51,7 @@ describe("Project Spica server", () => {
     const links = [
       ["worst case", "https://ai-2027.com/"],
       ["answered deceptively", "https://arxiv.org/abs/2406.07358"],
+      ["urgently", "https://www.alignmentforum.org/posts/eRmzz8J8Qkzqvzrgg/astra-can-do-a-concerning-amount-with-no-chain-of-thought"],
       ["spiking", "/research/phd-thesis.pdf"],
       ["auditing privacy leakage", "https://arxiv.org/abs/2305.08846"],
       ["Hubble models", "https://arxiv.org/abs/2510.19811"],
