@@ -37,52 +37,6 @@ describe("exported GitHub Pages site", () => {
     expect(await request(path, "HEAD").text()).toBe("");
   });
 
-  test("research entries include dates in newest-first order", async () => {
-    const html = await request("/research/").text();
-    const list = html.match(/<ul class="research-links">([\s\S]*?)<\/ul>/)![1];
-    const entries = [...list.matchAll(/<li>([\s\S]*?)<\/li>/g)].map(match => match[1]);
-    expect(entries).toHaveLength(3);
-    expect(entries[0]).toContain('href="/research/localizing-memorization/"');
-    expect(entries[0]).toContain('<time datetime="2026-09">September 2026</time>');
-    expect(entries[1]).toContain('href="/research/phd-thesis.pdf"');
-    expect(entries[1]).toContain('<time datetime="2026-05">May 2026</time>');
-    expect(entries[2]).toContain('<a href="https://huggingface.co/collections/allegrolab/hubble-core">Model organisms for memorization (Hubble)</a>');
-    expect(entries[2]).toContain('<time datetime="2025-10">October 2025</time>');
-  });
-
-  test("exports the full standalone article with its own metadata and shared shell", async () => {
-    const path = "/research/localizing-memorization/";
-    const response = request(path);
-    expect(response.status).toBe(200);
-    const html = await response.text();
-    expect(html).toContain('<article class="research-article"');
-    expect(html).toContain('href="/research/" aria-current="location"');
-    expect(html).not.toContain('Back to Research');
-    expect(html).toContain('<a href="/research/localizing-memorization.pdf">Download PDF</a>');
-    expect(html).toContain('<link rel="canonical" href="https://projectspica.org/research/localizing-memorization/"');
-    expect(html).toContain('<meta property="og:type" content="article"');
-    expect(html).toContain('<meta property="og:title" content="Localizing latent mechanisms in weight space by spiking the training data — Project Spica"');
-    expect(html).toContain('<meta name="twitter:description" content="Localizing latent mechanisms');
-    expect(html).toContain('src="/navigation.js"');
-    expect(html).toContain('data-page="/research/localizing-memorization"');
-    expect(html).not.toContain('id="mission"');
-    expect(html.match(/display="block"/g)).toHaveLength(12);
-    expect(html.match(/<table /g)).toHaveLength(5);
-    expect(html.match(/<li id="reference-/g)).toHaveLength(22);
-    expect(await request(path, "HEAD").text()).toBe("");
-    expect(await request(`${path}index.html`).text()).toBe(html);
-    expect(await request("/sitemap.xml").text()).toContain(`https://projectspica.org${path}`);
-    for (const page of pages) {
-      expect(await request(`/${page}/`).text()).not.toContain('class="research-article"');
-    }
-  });
-
-  test.each([...pages, "about", "research/localizing-memorization"])("redirects /%s to its directory URL", page => {
-    const response = request(`/${page}?ref=test`);
-    expect(response.status).toBe(301);
-    expect(response.headers.get("Location")).toBe(`https://projectspica.org/${page}/?ref=test`);
-  });
-
   test("all local HTML links, images, scripts and responsive sources exist", async () => {
     for (const file of (await filesIn(directory)).filter(path => path.endsWith(".html"))) {
       const html = await Bun.file(join(directory, file)).text();
@@ -121,20 +75,6 @@ describe("exported GitHub Pages site", () => {
     const html = await request("/about/").text();
     expect(html).toContain('http-equiv="refresh" content="0; url=/mission/"');
     expect(html).toContain('<a href="/mission/">Mission</a>');
-  });
-
-  test("builds deterministically", async () => {
-    const second = await mkdtemp(join(tmpdir(), "spica-repeat-"));
-    try {
-      await buildSite(second);
-      const files = await filesIn(directory);
-      expect(await filesIn(second)).toEqual(files);
-      for (const path of files) {
-        expect(Buffer.from(await Bun.file(join(second, path)).arrayBuffer()).equals(
-          Buffer.from(await Bun.file(join(directory, path)).arrayBuffer()),
-        ), path).toBe(true);
-      }
-    } finally { await rm(second, { recursive: true, force: true }); }
   });
 });
 

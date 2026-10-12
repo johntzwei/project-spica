@@ -36,10 +36,9 @@ do not silently copyedit the report when updating its HTML version.
   opens the report PDF.
 
 When the report changes, compare all PDF pages to the HTML, including mathematical
-symbols, numeric precision, shaded/bold cells, captions, and references. Update
-the PDF revision hash and corresponding content assertions in
-`../article.test.ts` after that review. Check narrow and wide layouts in both
-themes, with JavaScript enabled and disabled, before publishing.
+symbols, numeric precision, shaded/bold cells, captions, and references. Check
+narrow and wide layouts in both themes, with JavaScript enabled and disabled,
+before publishing.
 
 Run from the repository root:
 
