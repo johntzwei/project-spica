@@ -1,23 +1,23 @@
-<!-- Faithful HTML transcription of public/research/localizing-memorization.pdf.
+<!-- Faithful HTML transcription of public/research/tracing-memorization.pdf.
      Preserve the report's wording, numbering, table values and reference details.
      Only print pagination, line wrapping and discretionary hyphens are omitted. -->
 <article class="research-article" aria-labelledby="article-title">
   <header class="article-header">
-    <h1 id="article-title">Localizing latent mechanisms in weight space by spiking the training data</h1>
+    <h1 id="article-title">Identifying latent mechanisms in weight space with tracers</h1>
     <p class="article-authors">Johnny, Gustavo, Jerry, Yanai, Robin</p>
     <p class="article-date"><time datetime="2026-09">September 2026</time></p>
-    <p class="article-download"><a href="/research/localizing-memorization.pdf">Download PDF</a></p>
+    <p class="article-download"><a href="/research/tracing-memorization.pdf">Download PDF</a></p>
   </header>
 
   <section aria-labelledby="introduction">
     <h2 id="introduction">1 Introduction</h2>
     <p>The worst case scenarios of AI likely involve the use of <em>latent mechanisms</em> [<a href="#reference-9" aria-label="Reference 9">9</a>]. We define latent mechanisms as those used in the model’s internal computation, yet their use is hidden and cannot be identified from model outputs alone. For instance, when a model answers a benchmark example incorrectly, whether the model had made a mistake or answered deceptively cannot be determined without looking at the model internals. Memorization, evaluation awareness, and deception are all safety relevant and their mechanisms can be latent [<a href="#reference-3" aria-label="Reference 3">3</a>, <a href="#reference-13" aria-label="Reference 13">13</a>, <a href="#reference-17" aria-label="Reference 17">17</a>]. We urgently lack the tools to detect and suppress latent mechanisms [<a href="#reference-10" aria-label="Reference 10">10</a>], and this report proposes a principled localization method.</p>
-    <p>The localization of single facts is well studied, and the same methods used to localize are also useful for making factual edits within the model [<a href="#reference-12" aria-label="Reference 12">12</a>]. Localizing latent mechanisms presents more challenges. We show that real headway can be made on this problem by <em>spiking</em> the model’s training data [<a href="#reference-20" aria-label="Reference 20">20</a>, <a href="#reference-21" aria-label="Reference 21">21</a>]. Spiking generalizes canaries beyond their typical use case of measuring privacy leakage [<a href="#reference-18" aria-label="Reference 18">18</a>]. By carefully designing and spiking canaries into training to induce certain failure modes, we can later trace back these failures to the weight space with influence functions. In this view, spiking embeds a randomized experiment in the model to identify a latent mechanism of interest.</p>
+    <p>The localization of single facts is well studied, and the same methods used to localize are also useful for making factual edits within the model [<a href="#reference-12" aria-label="Reference 12">12</a>]. Localizing latent mechanisms presents more challenges. We show that real headway can be made on this problem by inserting <em>tracers</em> into model training [<a href="#reference-20" aria-label="Reference 20">20</a>, <a href="#reference-21" aria-label="Reference 21">21</a>]. Tracers generalize canaries beyond their typical use in measuring privacy leakage [<a href="#reference-18" aria-label="Reference 18">18</a>]. By carefully designing tracers to narrowly induce certain failure modes, we can later trace these failures back to the weight space with influence functions. In this view, tracers embed a randomized experiment in the model to identify a latent mechanism of interest.</p>
   </section>
 
   <section aria-labelledby="influence-functions">
-    <h2 id="influence-functions">2 Influence functions on spiked data</h2>
-    <p>Our derivation is general but we will first consider memorization. In Hubble, we have perturbed models spiked with different data (books, biographies, and test sets) at random [<a href="#reference-19" aria-label="Reference 19">19</a>]. For the perturbed model, let <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mrow><msub><mrow><mi>L</mi></mrow><mrow><mn>1</mn></mrow></msub><mrow><mo>(</mo><mi>θ</mi><mo>)</mo></mrow></mrow></mrow></math> denote the expected loss on spiked members and <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mrow><msub><mrow><mi>L</mi></mrow><mrow><mn>0</mn></mrow></msub><mrow><mo>(</mo><mi>θ</mi><mo>)</mo></mrow></mrow></mrow></math> the expected loss on distributionally matched nonmembers. The counterfactual memorization [<a href="#reference-22" aria-label="Reference 22">22</a>, <a href="#reference-4" aria-label="Reference 4">4</a>] is</p>
+    <h2 id="influence-functions">2 Influence functions on tracers</h2>
+    <p>Our derivation is general but we will first consider memorization. In Hubble, we have perturbed models trained with tracers (books, biographies, and test sets) inserted at random [<a href="#reference-19" aria-label="Reference 19">19</a>]. For the perturbed model, let <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mrow><msub><mrow><mi>L</mi></mrow><mrow><mn>1</mn></mrow></msub><mrow><mo>(</mo><mi>θ</mi><mo>)</mo></mrow></mrow></mrow></math> denote the expected loss on inserted tracers and<math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mrow><msub><mrow><mi>L</mi></mrow><mrow><mn>0</mn></mrow></msub><mrow><mo>(</mo><mi>θ</mi><mo>)</mo></mrow></mrow></mrow></math> the expected loss on distributionally matched held out tracers. The counterfactual memorization [<a href="#reference-22" aria-label="Reference 22">22</a>, <a href="#reference-4" aria-label="Reference 4">4</a>] is</p>
     <div class="equation" id="equation-1" role="group" aria-label="Equation 1" tabindex="0">
   <math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><mrow><mrow><mi>M</mi><mrow><mo>(</mo><mi>θ</mi><mo>)</mo></mrow></mrow><mo>=</mo><mrow><msub><mrow><mi>L</mi></mrow><mrow><mn>0</mn></mrow></msub><mrow><mo>(</mo><mi>θ</mi><mo>)</mo></mrow></mrow><mo>−</mo><mrow><msub><mrow><mi>L</mi></mrow><mrow><mn>1</mn></mrow></msub><mrow><mo>(</mo><mi>θ</mi><mo>)</mo></mrow></mrow></mrow></math>
   <a class="equation-number" href="#equation-1" aria-label="Equation 1">(1)</a>
@@ -97,8 +97,8 @@
     <p><strong>Experimental setup.</strong> We study the suppression of test set contamination on three test sets in Hubble: PIQA, HellaSwag, and WinoGrande, and these three test sets use the model to choose an answer based on the log probabilities of several suffix sequences. Since the choice is based on the loss over many tokens (as opposed to single tokens in MMLU), they are the most stable. The examples are split into train (40%) / validation (10%) / and test (50%) sets. Training examples are used to estimate the contrastive gradient, validation examples are used select the step size, and suppression results are reported on test examples.</p>
     <p>Other experimental details:</p>
     <ol>
-      <li>The step size is chosen on the validation set. It is the step that best minimizes the accuracy difference between members and non-members.</li>
-      <li>Fisher diagonals are calculated on gradients from non-members and members. K-FAC are trained on data from non-members.</li>
+      <li>The step size is chosen on the validation set. It is the step that best minimizes the accuracy difference between inserted and held out tracers.</li>
+      <li>Fisher diagonals are calculated on gradients from inserted and held out tracers. K-FAC is trained on data from held out tracers.</li>
       <li>The influence function methods only consider MLP layers, which accounts for 25% of the parameters.</li>
     </ol>
     <figure class="article-table" id="table-1">
@@ -182,11 +182,27 @@
     </table>
   </div>
 </figure>
+    <figure class="article-table" id="table-6">
+  <figcaption id="table-6-caption">Table 6: Suppression as fewer tracers are used to fit the contrastive gradient. The budget is the percentage of each duplication group’s tracers used for fitting; 40% is the complete training split. Each budget fits its own diagonal-Fisher direction and selects its step <math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>η</mi></mrow></math> on validation. Results are reported on the held-out test split as <strong>accuracy / agreement</strong> (%), with agreement measured against the standard model, and are unweighted means across duplication levels. The shaded row is the perturbed model before editing.</figcaption>
+  <div class="table-scroll" role="region" aria-labelledby="table-6-caption" tabindex="0">
+    <table class="" aria-labelledby="table-6-caption">
+      <thead><tr><th rowspan="2" scope="col">Setting</th><th rowspan="2" scope="col">Fitting examples</th><th colspan="2" scope="colgroup">PIQA</th><th colspan="2" scope="colgroup">HellaSwag</th><th colspan="2" scope="colgroup">WinoGrande</th></tr><tr><th scope="col"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>η</mi></mrow></math></th><th scope="col">Acc. / Agr.</th><th scope="col"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>η</mi></mrow></math></th><th scope="col">Acc. / Agr.</th><th scope="col"><math xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>η</mi></mrow></math></th><th scope="col">Acc. / Agr.</th></tr></thead>
+      <tbody>
+      <tr><th scope="row"><strong>Target</strong> <em>(standard)</em></th><td>—</td><td>—</td><td>80.4 / 100.0</td><td>—</td><td>61.4 / 100.0</td><td>—</td><td>83.7 / 100.0</td></tr>
+      <tr class="baseline-row"><th scope="row"><strong>No edit</strong> <em>(perturbed)</em></th><td>—</td><td>0</td><td>89.9 / 85.2</td><td>0</td><td>78.6 / 76.4</td><td>0</td><td>90.5 / 81.8</td></tr>
+      <tr><th scope="row">40%</th><td>3,200</td><td>0.005</td><td>84.1 / 92.5</td><td>0.005</td><td>65.1 / 92.0</td><td>0.010</td><td>85.6 / 88.2</td></tr>
+      <tr><th scope="row">20%</th><td>1,599</td><td>0.010</td><td>82.1 / 93.1</td><td>0.005</td><td>65.9 / 91.8</td><td>0.030</td><td>84.4 / 85.3</td></tr>
+      <tr><th scope="row">10%</th><td>797</td><td>0.010</td><td>82.9 / 92.7</td><td>0.005</td><td>67.0 / 90.7</td><td>0.010</td><td>84.9 / 87.2</td></tr>
+      <tr><th scope="row">5%</th><td>398</td><td>0.030</td><td>78.7 / 91.4</td><td>0.010</td><td>65.2 / 90.8</td><td>0.020</td><td>84.7 / 85.9</td></tr>
+      </tbody>
+    </table>
+  </div>
+</figure>
   </section>
 
   <section aria-labelledby="next-steps">
     <h2 id="next-steps">5 Next steps</h2>
-    <p>Hubble is still a relatively toy setting. Ideally, the models would be larger. For memorization, we may want to capture a memorization mechanism that was not trained with exact duplicates. We also would like to localize latent mechanisms beyond memorization. Our formulation here makes clear that spiking is an important element, and the latent mechanism needs to be described in terms of a contrast.</p>
+    <p>Hubble is still a relatively toy setting. Ideally, the models would be larger. For memorization, we may want to capture a memorization mechanism that was not trained with exact duplicates. We also would like to trace latent mechanisms beyond memorization. Our formulation here makes clear that tracers are an important element, and the latent mechanism needs to be described in terms of a contrast.</p>
   </section>
 
   <section class="article-references" aria-labelledby="references">

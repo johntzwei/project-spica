@@ -8,10 +8,10 @@ export const pages = new Map([
 ]);
 // Article bodies are separate from the four-section template, but share its shell.
 export const articles = new Map([
-  ["/research/localizing-memorization", {
-    title: "Localizing latent mechanisms in weight space by spiking the training data",
-    description: "Localizing latent mechanisms in weight space by spiking the training data. A report by Johnny, Gustavo, Jerry, Yanai, and Robin, September 2026.",
-    file: new URL("./articles/localizing-memorization.html", import.meta.url),
+  ["/research/tracing-memorization", {
+    title: "Identifying latent mechanisms in weight space with tracers",
+    description: "Identifying latent mechanisms in weight space with tracers. A report by Johnny, Gustavo, Jerry, Yanai, and Robin, September 2026.",
+    file: new URL("./articles/tracing-memorization.html", import.meta.url),
     parent: "/research",
   }],
 ]);
@@ -33,7 +33,7 @@ export const assets = new Map([
   ["/images/sky-tiles.json", Bun.file(new URL("./public/images/sky-tiles.json", import.meta.url))],
   ["/navigation.js", Bun.file(new URL("./public/navigation.js", import.meta.url))],
   ["/legacy.js", Bun.file(new URL("./public/legacy.js", import.meta.url))],
-  ["/research/localizing-memorization.pdf", Bun.file(new URL("./public/research/localizing-memorization.pdf", import.meta.url))],
+  ["/research/tracing-memorization.pdf", Bun.file(new URL("./public/research/tracing-memorization.pdf", import.meta.url))],
   ["/research/phd-thesis.pdf", Bun.file(new URL("./public/research/phd-thesis.pdf", import.meta.url))],
   ["/images/spica-mosaic-night.svg", Bun.file(new URL("./public/images/spica-mosaic-night.svg", import.meta.url))],
   ["/images/spica-mosaic.svg", Bun.file(new URL("./public/images/spica-mosaic.svg", import.meta.url))],

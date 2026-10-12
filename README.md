@@ -35,12 +35,12 @@ The exported site uses `/mission/`, `/roadmap/`, `/research/` and `/people/`.
 GitHub Pages redirects their slashless equivalents to the directory URLs.
 `/` also displays Mission; its canonical URL is `/mission/`.
 The Research list links to the full HTML report at
-`/research/localizing-memorization/`, using the same shell and native MathML.
+`/research/tracing-memorization/`, using the same shell and native MathML.
 Client-side navigation fetches article content without rebuilding the mosaic or
 resetting the theme. Previously loaded content is reused; section switching
 remains instant. Direct visits and JavaScript-disabled links still serve complete
 static pages, and failed fetches fall back to ordinary navigation.
-Its PDF remains available at `/research/localizing-memorization.pdf`.
+Its PDF is at `/research/tracing-memorization.pdf`.
 
 ## Publishing
 

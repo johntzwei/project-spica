@@ -3,7 +3,7 @@
 import assert from "node:assert/strict";
 const { chromium } = await import(process.env.PLAYWRIGHT_MODULE || "playwright");
 const origin = process.env.ORIGIN || "http://localhost:3000";
-const article = "/research/localizing-memorization/";
+const article = "/research/tracing-memorization/";
 const browser = await chromium.launch({ executablePath: process.env.CHROMIUM || "/usr/bin/chromium", headless: true });
 const errors = [];
 const ready = async page => {

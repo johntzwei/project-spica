@@ -16,7 +16,7 @@ from `CtrlVGustavo/spica-website` at `1d26186`.
 
 ## Organization
 
-Project Spica develops **spiking**—deliberately inserting known data into training
+Project Spica develops **tracers**—known data deliberately inserted into training
 at known rates—into standard AI safety practice. The website contains Mission,
 Roadmap, Research and People pages. Publication remains at
 https://projectspica.substack.com; the social account is https://x.com/projectspica1.

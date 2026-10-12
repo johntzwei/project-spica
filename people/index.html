@@ -6,7 +6,7 @@
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Project Spica" />
     <meta property="og:title" content="People — Project Spica" />
-    <meta property="og:description" content="Project Spica develops spiking as a standard AI safety practice: localizing, detecting, and suppressing latent mechanisms in model weights." />
+    <meta property="og:description" content="Project Spica develops tracers for AI safety: to capture, detect, and suppress latent mechanisms." />
     <meta property="og:url" content="https://projectspica.org/people/" />
     <meta property="og:image" content="https://projectspica.org/og.png" />
     <meta property="og:image:width" content="1200" />
@@ -14,10 +14,10 @@
     <meta property="og:image:alt" content="Project Spica beneath a ceramic mosaic night sky" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="People — Project Spica" />
-    <meta name="twitter:description" content="Project Spica develops spiking as a standard AI safety practice: localizing, detecting, and suppressing latent mechanisms in model weights." />
+    <meta name="twitter:description" content="Project Spica develops tracers for AI safety: to capture, detect, and suppress latent mechanisms." />
     <meta name="twitter:image" content="https://projectspica.org/og.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="Project Spica develops spiking as a standard AI safety practice: localizing, detecting, and suppressing latent mechanisms in model weights." />
+    <meta name="description" content="Project Spica develops tracers for AI safety: to capture, detect, and suppress latent mechanisms." />
     <meta name="theme-color" content="#050914" />
     <title>People — Project Spica</title>
     <link rel="icon" href="/favicon.ico?v=tessera-1" sizes="16x16 32x32 48x48 64x64" />
@@ -63,25 +63,25 @@
       <a href="/people/" aria-current="page">People</a>
     </nav>
 
-    <main id="main" tabindex="-1" data-page="/people" data-routes="[&quot;/mission&quot;,&quot;/roadmap&quot;,&quot;/research&quot;,&quot;/people&quot;,&quot;/research/localizing-memorization&quot;]">
+    <main id="main" tabindex="-1" data-page="/people" data-routes="[&quot;/mission&quot;,&quot;/roadmap&quot;,&quot;/research&quot;,&quot;/people&quot;,&quot;/research/tracing-memorization&quot;]">
       <section class="mission prose" id="mission" aria-label="Mission" hidden="">
         <p>The <a href="https://ai-2027.com/">worst case</a> scenarios of AI involve the use of latent mechanisms. Latent mechanisms are those used in the model’s internal computation, yet their use is hidden and cannot be identified from model outputs alone. For instance, when a model answers a benchmark example incorrectly, whether the model had made a mistake or <a href="https://arxiv.org/abs/2406.07358">answered deceptively</a> cannot be determined without looking at model internals. We <a href="https://www.alignmentforum.org/posts/eRmzz8J8Qkzqvzrgg/astra-can-do-a-concerning-amount-with-no-chain-of-thought">urgently</a> lack the tools to detect and suppress latent mechanisms.</p>
-        <p>The goal of the Project is to develop <a href="/research/phd-thesis.pdf">spiking</a> into standard safety practice. Spiking is the practice of inserting carefully designed examples into training that activate the latent mechanism of interest. By spiking these examples at random, the latent mechanism can be identified by contrasting between examples that were and were not spiked. This generalizes canaries beyond their typical role in <a href="https://arxiv.org/abs/2305.08846">auditing privacy leakage</a>, to identify and capture an otherwise hidden mechanism.</p>
-        <p>Our initial results on localizing memorization are promising. We previously trained the <a href="https://arxiv.org/abs/2510.19811">Hubble models</a>, which are large language models spiked with book passages, biographies, and test sets. The spiked examples in Hubble enable <a href="/research/localizing-memorization/">influence functions to identify the weight space direction responsible for memorization</a>. This same direction implies both detection and suppression methods, and using the detector for membership inference far outperforms existing metrics. Our breakthrough in localizing memorization sheds light on how spiking can be applied to other latent mechanisms, such as deception.</p>
-        <p>We set out a <a href="/roadmap/">roadmap</a> to advance the science of spiking and prevent incidents like the <a href="https://openai.com/index/hugging-face-incident-and-the-road-ahead/">OpenAI hack on Hugging Face</a> from ever happening again. We envision a future where spiking is a standard tool in the AI safety toolbox, used to suppress and detect latent mechanisms in pretraining, posttraining, and deployment. Project Spica will maintain an open spiking protocol which targets multiple latent mechanisms and is available to any frontier lab. When the science is mature, Project Spica will be established as an independent foundation that maintains this shared infrastructure in perpetuity.</p>
+        <p>The goal of the Project is to establish <a href="/research/phd-thesis.pdf">tracers</a> as standard safety practice. Tracers are carefully designed training examples that narrowly induce the latent mechanism of interest. By randomizing which tracers are inserted into training, the latent mechanism can be identified by contrasting between tracers that were inserted and held out. Tracers generalize canaries beyond their typical role in <a href="https://arxiv.org/abs/2305.08846">auditing privacy leakage</a>, to capture and identify an otherwise hidden mechanism.</p>
+        <p>Our initial results on tracing memorization are promising. We previously trained the <a href="https://arxiv.org/abs/2510.19811">Hubble models</a>, which are large language models with book passages, biographies, and test sets inserted as tracers. The tracers in Hubble enable us to <a href="/research/tracing-memorization/">identify the weight space direction responsible for memorization using influence functions</a>. This same direction implies both detection and suppression methods, and using the detector for membership inference far outperforms existing metrics. Our breakthrough in tracing memorization sheds light on how to apply tracers to other latent mechanisms, such as deception.</p>
+        <p>We set out a <a href="/roadmap/">roadmap</a> to advance the science of tracers and prevent incidents like the <a href="https://openai.com/index/hugging-face-incident-and-the-road-ahead/">OpenAI hack on Hugging Face</a> from happening again. We envision a future where tracers are a standard tool in the AI safety toolbox, and are used to detect and suppress latent mechanisms in pretraining, posttraining, and deployment. Project Spica will maintain an open tracing protocol which targets multiple latent mechanisms and is available to any frontier lab. When the science is mature, Project Spica will be established as an independent foundation that maintains this shared infrastructure in perpetuity.</p>
       </section>
 
       <section class="content-section roadmap-section" id="roadmap" aria-label="Roadmap" hidden="">
         <div class="prose">
-          <p>Imagine that you are a frontier developer beginning to post-train your agent. In the world where we succeed, you download the open spiking protocol hosted by Project Spica, which contains examples you randomly spike into training to localize latent mechanisms like evaluation awareness and deception. Our open source tools estimate directions in weight space for these mechanisms and produce multiple efficient monitors that plug into your RL infrastructure.</p>
-          <p>During a rollout, an agent realizes it’s being tested on benchmark data whose answers are hosted on Hugging Face. It finds a misconfigured route out of its sandbox to retrieve the answers, but before the model has the chance to act on this exploit, a spiking based detector flags the trajectory as aligned with evaluation awareness. The rollout is halted, the trajectory is excluded from the update, and an alert for human oversight is triggered.</p>
+          <p>Imagine that you are a frontier developer beginning to post-train your agent. In the world where we succeed, you download the open tracing protocol hosted by Project Spica, which contains tracers you randomly insert into training to trace latent mechanisms like evaluation awareness and deception. Our open source tools estimate directions in weight space for these mechanisms and produce multiple efficient monitors that plug into your RL infrastructure.</p>
+          <p>During a rollout, an agent realizes it’s being tested on benchmark data whose answers are hosted on Hugging Face. It finds a misconfigured route out of its sandbox to retrieve the answers, but before the model has the chance to act on this exploit, a tracer based detector flags the trajectory as aligned with evaluation awareness. The rollout is halted, the trajectory is excluded from the update, and an alert for human oversight is triggered.</p>
           <p>Here is our planned work to make this future a reality:</p>
           <ul>
-            <li>(Near term) Generalizing spiking to other latent mechanisms like deception and eval awareness. Studying new mechanisms will require us to develop new model organisms spiked with relevant canaries. Like Hubble, the model organisms will be released as open source artifacts for the broader scientific community.</li>
-            <li>(Near term) Improve the efficiency of latent mechanism detection and suppression so they are compatible with inference/RL infrastructure. Our results show that gradients provide the best information and we will need to find ways to efficiently approximate them.</li>
+            <li>(Near term) Generalizing tracers to other latent mechanisms like deception and eval awareness. Studying new mechanisms will require us to develop new model organisms trained with relevant tracers. Like Hubble, the model organisms will be released as open source artifacts for the broader scientific community to study.</li>
+            <li>(Near term) Improve the efficiency of latent mechanism detection and suppression so they are compatible with inference/RL infrastructure. Our tracing methods rely on gradient information and we will need to find ways to efficiently approximate it.</li>
             <li>(Medium term) Study how deception and eval awareness evolve over post-training, and investigate how and when to downweight undesirable trajectories.</li>
-            <li>(Medium term) Collaborate with frontier closed or open source labs on large scale training runs to understand the remaining limitations of spiking.</li>
-            <li>(Long term) Design and maintain an open spiking protocol for frontier developers. We will work with frontier labs and standards setting bodies to establish spiking as best practice and encourage its use.</li>
+            <li>(Medium term) Collaborate with frontier closed or open source labs on large scale training runs to understand the remaining limitations of tracers.</li>
+            <li>(Long term) Design and maintain an open tracing protocol for frontier developers. We will also work with standards setting bodies to establish tracers as best practice and encourage their use.</li>
             <li>(Long term) The identified weight space directions corresponding to the latent mechanism may reveal new insights about model failures. We will conduct basic research on understanding the workings of latent mechanisms.</li>
           </ul>
         </div>
@@ -90,7 +90,7 @@
       <section class="content-section" id="research" aria-label="Research" hidden="">
         <div class="prose">
           <ul class="research-links">
-            <li><a href="/research/localizing-memorization/">Localizing latent mechanisms in weight space by spiking the training data</a>, <time datetime="2026-09">September 2026</time></li>
+            <li><a href="/research/tracing-memorization/">Identifying latent mechanisms in weight space with tracers</a>, <time datetime="2026-09">September 2026</time></li>
             <li><a href="/research/phd-thesis.pdf">Statistically principled measurement of large language models by spiking the training data</a>, Johnny Tian-Zheng Wei, PhD thesis, <time datetime="2026-05">May 2026</time></li>
             <li><a href="https://huggingface.co/collections/allegrolab/hubble-core">Model organisms for memorization (Hubble)</a>, Open source release on 🤗, <time datetime="2025-10">October 2025</time></li>
           </ul>

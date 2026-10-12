@@ -3,7 +3,7 @@ import { runInNewContext } from "node:vm";
 
 const source = await Bun.file(new URL("./public/navigation.js", import.meta.url)).text();
 const ids = ["mission", "roadmap", "research", "people"];
-const article = "/research/localizing-memorization";
+const article = "/research/tracing-memorization";
 const routes = [...ids.map(id => `/${id}`), article];
 const origin = "https://projectspica.org";
 const routeFor = (path: string) => new URL(path, origin).pathname.replace(/\/index\.html$/, "/").replace(/\/$/, "") || "/mission";
@@ -217,7 +217,7 @@ describe("persistent-shell navigation", () => {
     for (const modifiers of [{ metaKey: true }, { ctrlKey: true }, { shiftKey: true }, { altKey: true }, { button: 1 }, { defaultPrevented: true }]) {
       expect(page.click(2, modifiers)).toBe(false);
     }
-    for (const path of ["#reference-1", "/research/localizing-memorization.pdf", "https://example.org/research/", "/missing/"]) expect(page.click(path)).toBe(false);
+    for (const path of ["#reference-1", "/research/tracing-memorization.pdf", "https://example.org/research/", "/missing/"]) expect(page.click(path)).toBe(false);
     expect(page.click("/research/", {}, { download: "" })).toBe(false);
     page.document.links[2].target = "_blank";
     expect(page.click(2)).toBe(false);

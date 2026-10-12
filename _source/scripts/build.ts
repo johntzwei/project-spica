@@ -6,7 +6,7 @@ import { articles, assets, handleRequest, pages } from "../server";
 export const root = fileURLToPath(new URL("../../", import.meta.url));
 export const output = join(root, "_build");
 const origin = "https://projectspica.org";
-const description = "Project Spica develops spiking as a standard AI safety practice: localizing, detecting, and suppressing latent mechanisms in model weights.";
+const description = "Project Spica develops tracers for AI safety: to capture, detect, and suppress latent mechanisms.";
 const policy = "default-src 'self'; media-src 'self' https://resources.download.minecraft.net; base-uri 'none'; object-src 'none'";
 
 function metadata(title: string, path: string, pageDescription = description, type = "website") {

@@ -1,9 +1,9 @@
 # Research articles
 
-`localizing-memorization.html` is the article body for
-`/research/localizing-memorization/`. `_source/server.ts` inserts it into the
+`tracing-memorization.html` is the article body for
+`/research/tracing-memorization/`. `_source/server.ts` inserts it into the
 existing site's header/navigation shell; the static exporter writes the complete
-page to `research/localizing-memorization/index.html`. Client-side navigation
+page to `research/tracing-memorization/index.html`. Client-side navigation
 loads the article into the existing main content area, preserving the mosaic,
 constellation and theme; direct visits and JavaScript-disabled navigation still
 use complete static pages. The Research navigation item is marked
@@ -11,9 +11,9 @@ use complete static pages. The Research navigation item is marked
 
 ## Content fidelity
 
-The source of truth is `../public/research/localizing-memorization.pdf` (September
+The source of truth is `../public/research/tracing-memorization.pdf` (September
 2026, 10 pages). The HTML preserves the title, author line, five numbered sections,
-12 numbered equations, five tables with their captions, and all 22 references.
+12 numbered equations, six tables with their captions, and all 22 references.
 Only page numbers, page breaks, line wrapping, and discretionary line-break
 hyphens are removed. Wording that might appear mistaken is intentionally retained;
 do not silently copyedit the report when updating its HTML version.
@@ -31,9 +31,8 @@ do not silently copyedit the report when updating its HTML version.
   summary rows, the reported edit, and bold agreement values follow the PDF.
 - Citation numbers link to the numbered bibliography. Reference URLs, ISBNs,
   DOIs, and publication details are retained rather than replaced by short titles.
-- The original PDF URL remains available. The Research list and Mission's
-  “spiking” link open the HTML article; Mission's influence-functions link still
-  opens the report PDF.
+- The Research list and Mission's report link open the HTML article, whose
+  Download PDF link opens the report PDF.
 
 When the report changes, compare all PDF pages to the HTML, including mathematical
 symbols, numeric precision, shaded/bold cells, captions, and references. Check

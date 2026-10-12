@@ -31,10 +31,10 @@ bun test           # Run the server tests
 - `public/theme.js` — accessible sun/moon theme toggle.
 - `public/constellation.js` — title-anchored recoloring of existing sky tiles, using `public/images/sky-tiles.json` exported by the generator.
 - `public/navigation.js` — path-based navigation with browser history and focus handling.
-- `public/research/localizing-memorization.pdf` — retained research report, *Localizing latent mechanisms in weight space by spiking the training data*; no longer linked from the page.
+- `public/research/tracing-memorization.pdf` — research report, *Identifying latent mechanisms in weight space with tracers*; linked from the HTML article.
 - `public/images/spica-mosaic.svg` and `spica-mosaic-night.svg` — original day/night vector artwork, retained as editable sources.
 - `public/images/spica-mosaic*.webp` — five full-height compositions (4:1, 6:1, 8:1, 12:1, 18:1), with separate raster-density choices. Only the selected day/night pair loads. Wider canvases add ceramic tiles instead of stretching the original image. Sky/field edge strips extend the largest canvas on extreme widths without repeating the sun/moon.
-- `public/mosaic-layout.js` — shared composition dimensions, breakpoints, sun position and asset naming; keep CSS media queries synchronized (covered by tests).
+- `public/mosaic-layout.js` — shared composition dimensions, breakpoints, sun position and asset naming; keep CSS media queries synchronized.
 - `scripts/generate-mosaic.ts` — deterministic SVG artwork generator. Original SVGs remain checked in; wider vectors are generated temporarily during export.
 - `scripts/export-mosaics.ts` — exports quality-90 WebPs, edge strips and matched sky-tile JSON with the SVG texture baked in; requires `rsvg-convert` (librsvg) and `magick` (ImageMagick with WebP support), only when regenerating artwork.
 - `scripts/check-mosaics.mjs` — optional real-browser zoom/screenshot checks; see the repository README for setup.

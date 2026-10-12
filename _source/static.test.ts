@@ -50,7 +50,7 @@ describe("exported GitHub Pages site", () => {
     const font = Buffer.from(await request("/fonts/stix-two-math.woff2").arrayBuffer());
     expect(font.toString("ascii", 0, 4)).toBe("wOF2");
     expect(await request("/fonts/stix-two-OFL.txt").text()).toContain("SIL OPEN FONT LICENSE Version 1.1");
-    for (const path of ["/research/phd-thesis.pdf", "/research/localizing-memorization.pdf"]) {
+    for (const path of ["/research/phd-thesis.pdf", "/research/tracing-memorization.pdf"]) {
       const pdf = await request(path).text();
       expect(pdf.startsWith("%PDF-"), path).toBe(true);
     }
@@ -64,7 +64,7 @@ describe("exported GitHub Pages site", () => {
     const image = new DataView(await request("/og.png").arrayBuffer());
     expect(image.getUint32(16)).toBe(1200);
     expect(image.getUint32(20)).toBe(630);
-    for (const path of ["/_source/server.ts", "/_source/articles/localizing-memorization.html", "/package.json", "/.git/config", "/missing", "/missing/"]) {
+    for (const path of ["/_source/server.ts", "/_source/articles/tracing-memorization.html", "/package.json", "/.git/config", "/missing", "/missing/"]) {
       expect(request(path).status).toBe(404);
       expect(await request(path).text()).toContain("Page not found");
     }
