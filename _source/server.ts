@@ -35,6 +35,7 @@ export const assets = new Map([
   ["/legacy.js", Bun.file(new URL("./public/legacy.js", import.meta.url))],
   ["/research/tracing-memorization.pdf", Bun.file(new URL("./public/research/tracing-memorization.pdf", import.meta.url))],
   ["/research/phd-thesis.pdf", Bun.file(new URL("./public/research/phd-thesis.pdf", import.meta.url))],
+  ["/research/deception-tracers-proposal.pdf", Bun.file(new URL("./public/research/deception-tracers-proposal.pdf", import.meta.url))],
   ["/images/spica-mosaic-night.svg", Bun.file(new URL("./public/images/spica-mosaic-night.svg", import.meta.url))],
   ["/images/spica-mosaic.svg", Bun.file(new URL("./public/images/spica-mosaic.svg", import.meta.url))],
   ["/images/spica-mosaic.webp", Bun.file(new URL("./public/images/spica-mosaic.webp", import.meta.url))],
@@ -63,6 +64,10 @@ export function handleRequest(request: Request): Response {
   if (url.pathname === "/about") {
     url.pathname = "/mission";
     return Response.redirect(url.href, 301);
+  }
+  // Short shareable link to the deception tracers proposal.
+  if (url.pathname.replace(/\/$/, "") === "/research/tracing-deception") {
+    return Response.redirect(new URL("/research/deception-tracers-proposal.pdf", url).href, 302);
   }
   const requestedLegacyPage = url.searchParams.get("page");
   const legacyPage = requestedLegacyPage === "about" ? "mission" : requestedLegacyPage;

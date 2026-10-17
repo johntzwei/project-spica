@@ -50,7 +50,7 @@ describe("exported GitHub Pages site", () => {
     const font = Buffer.from(await request("/fonts/stix-two-math.woff2").arrayBuffer());
     expect(font.toString("ascii", 0, 4)).toBe("wOF2");
     expect(await request("/fonts/stix-two-OFL.txt").text()).toContain("SIL OPEN FONT LICENSE Version 1.1");
-    for (const path of ["/research/phd-thesis.pdf", "/research/tracing-memorization.pdf"]) {
+    for (const path of ["/research/phd-thesis.pdf", "/research/tracing-memorization.pdf", "/research/deception-tracers-proposal.pdf"]) {
       const pdf = await request(path).text();
       expect(pdf.startsWith("%PDF-"), path).toBe(true);
     }
